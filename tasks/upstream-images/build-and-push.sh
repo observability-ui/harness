@@ -30,6 +30,8 @@ build_and_push() {
     sed -i.bak 's/-f Dockerfile\.[a-zA-Z_-]*/-f Dockerfile/g' Makefile && rm -f Makefile.bak
     sed -i.bak 's/npm ci --ignore-scripts/npm ci/g' Makefile && rm -f Makefile.bak
 
+    make install
+
     if [[ "$repo" == "monitoring-plugin" ]]; then
         make podman-cross-build-push VERSION="$version" PLUGIN_NAME=monitoring-console-plugin
     else
