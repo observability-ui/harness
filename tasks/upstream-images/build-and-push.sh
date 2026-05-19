@@ -26,9 +26,10 @@ build_and_push() {
     echo "=========================================="
     cd "$PROJECTS_DIR/$repo"
     git checkout "$branch"
+    git checkout -- .
 
     local dockerfile
-    dockerfile=$(grep -A2 'podman-cross-build:' Makefile | grep -oE '\-f [^ ]+' | head -1 | sed 's/-f //' || true)
+    dockerfile=$(grep -A10 'podman-cross-build:' Makefile | grep -oE '\-f [^ ]+' | head -1 | sed 's/-f //' || true)
     dockerfile="${dockerfile:-Dockerfile}"
 
     sed -i.bak '/nodejs/{/--platform/!s/^FROM /FROM --platform=linux\/amd64 /;}' "$dockerfile" && rm -f "${dockerfile}.bak"
