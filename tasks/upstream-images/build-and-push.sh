@@ -28,7 +28,7 @@ build_and_push() {
     git checkout "$branch"
 
     local dockerfile
-    dockerfile=$(grep -A2 'podman-cross-build:' Makefile | grep -oE '\-f [^ ]+' | head -1 | sed 's/-f //')
+    dockerfile=$(grep -A2 'podman-cross-build:' Makefile | grep -oE '\-f [^ ]+' | head -1 | sed 's/-f //' || true)
     dockerfile="${dockerfile:-Dockerfile}"
 
     sed -i.bak 's/npm ci --ignore-scripts/npm ci/g' Makefile && rm -f Makefile.bak
