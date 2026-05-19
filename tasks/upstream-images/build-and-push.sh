@@ -31,10 +31,7 @@ build_and_push() {
     dockerfile=$(grep -A2 'podman-cross-build:' Makefile | grep -oE '\-f [^ ]+' | head -1 | sed 's/-f //' || true)
     dockerfile="${dockerfile:-Dockerfile}"
 
-    sed -i.bak 's/npm ci --ignore-scripts/npm ci/g' Makefile && rm -f Makefile.bak
     sed -i.bak '/nodejs/{/--platform/!s/^FROM /FROM --platform=linux\/amd64 /;}' "$dockerfile" && rm -f "${dockerfile}.bak"
-
-    make install
 
     if [[ "$repo" == "monitoring-plugin" ]]; then
         make podman-cross-build-push VERSION="$version" PLUGIN_NAME=monitoring-console-plugin
