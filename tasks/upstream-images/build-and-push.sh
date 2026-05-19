@@ -27,9 +27,12 @@ build_and_push() {
     cd "$PROJECTS_DIR/$repo"
     git checkout "$branch"
 
-    sed -i.bak 's/-f Dockerfile\.[a-zA-Z_-]*/-f Dockerfile/g' Makefile && rm -f Makefile.bak
+    local dockerfile
+    dockerfile=$(grep -A2 'podman-cross-build:' Makefile | grep -oE '\-f [^ ]+' | head -1 | sed 's/-f //')
+    dockerfile="${dockerfile:-Dockerfile}"
+
     sed -i.bak 's/npm ci --ignore-scripts/npm ci/g' Makefile && rm -f Makefile.bak
-    sed -i.bak '/nodejs/s/^FROM /FROM --platform=linux\/amd64 /' Dockerfile && rm -f Dockerfile.bak
+    sed -i.bak '/nodejs/{/--platform/!s/^FROM /FROM --platform=linux\/amd64 /;}' "$dockerfile" && rm -f "${dockerfile}.bak"
 
     make install
 
