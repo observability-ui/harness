@@ -27,6 +27,8 @@ build_and_push() {
     cd "$PROJECTS_DIR/$repo"
     git checkout "$branch"
 
+    sed -i '' 's/-f Dockerfile\.[a-zA-Z_-]*/-f Dockerfile/g' Makefile
+
     if [[ "$repo" == "monitoring-plugin" ]]; then
         make podman-cross-build-push VERSION="$version" PLUGIN_NAME=monitoring-console-plugin
     else
