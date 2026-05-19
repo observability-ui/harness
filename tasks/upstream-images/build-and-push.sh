@@ -3,6 +3,21 @@ set -euo pipefail
 
 PROJECTS_DIR="$(cd "$(dirname "$0")/../../projects" && pwd)"
 
+REPOS=(
+    console-dashboards-plugin
+    distributed-tracing-console-plugin
+    logging-view-plugin
+    monitoring-plugin
+    troubleshooting-panel-console-plugin
+)
+
+echo "Fetching all branches for each repo..."
+for repo in "${REPOS[@]}"; do
+    echo "  Fetching $repo..."
+    (cd "$PROJECTS_DIR/$repo" && git fetch --all --prune)
+done
+echo "Fetch complete."
+
 build_and_push() {
     local repo="$1" branch="$2" version="$3"
 
