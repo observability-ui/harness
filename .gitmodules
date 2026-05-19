@@ -38,3 +38,12 @@
 	path = projects/perses-spec
 	url = https://github.com/perses/spec
 	branch = main
+[submodule "projects/console-dashboards-plugin"]
+	path = projects/console-dashboards-plugin
+	url = https://github.com/openshift/console-dashboards-plugin.git
+[submodule "projects/troubleshooting-panel-console-plugin"]
+	path = projects/troubleshooting-panel-console-plugin
+	url = https://github.com/openshift/troubleshooting-panel-console-plugin
+[submodule "projects/distributed-tracing-console-plugin"]
+	path = projects/distributed-tracing-console-plugin
+	url = https://github.com/openshift/distributed-tracing-console-plugin
