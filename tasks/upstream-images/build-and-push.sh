@@ -26,20 +26,6 @@ build_and_push() {
     echo "=========================================="
     cd "$PROJECTS_DIR/$repo"
     git checkout "$branch"
-    git checkout -- .
-
-    local dockerfile
-    dockerfile=$(grep -A10 'podman-cross-build:' Makefile | grep -oE '\-f [^ ]+' | head -1 | sed 's/-f //' || true)
-    dockerfile="${dockerfile:-Dockerfile}"
-
-    # Force all builder stages to run on amd64 (avoid QEMU segfaults)
-    sed -i.bak '/ [Aa][Ss] .*builder/{/--platform/!s/^FROM /FROM --platform=linux\/amd64 /;}' "$dockerfile" && rm -f "${dockerfile}.bak"
-    # Cross-compile Go for the target architecture instead of emulating
-    sed -i.bak '/ [Aa][Ss] go-builder/a\
-ARG TARGETARCH\
-ENV GOARCH=${TARGETARCH:-amd64}' "$dockerfile" && rm -f "${dockerfile}.bak"
-    # Let Go auto-disable CGO for cross-compilation (defaults to 1 native, 0 cross)
-    sed -i.bak '/ENV CGO_ENABLED=1/d' "$dockerfile" && rm -f "${dockerfile}.bak"
 
     if [[ "$repo" == "monitoring-plugin" ]]; then
         make podman-cross-build-push VERSION="$version" PLUGIN_NAME=monitoring-console-plugin
