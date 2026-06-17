@@ -3,14 +3,18 @@ package cli
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/spf13/cobra"
+	"obsui/internal/output"
 	"obsui/internal/process"
 	"obsui/internal/recipe"
 	"obsui/internal/runner"
+	"obsui/internal/state"
 )
 
 func newRecipeCmd(command, shortDesc string) *cobra.Command {
@@ -98,6 +102,55 @@ func runRecipes(command string, args []string) error {
 	defer mgr.StopAll()
 
 	updates := make(chan runner.StepUpdate, 100)
+
+	// JSON output mode
+	if outputJSON {
+		emitter := output.NewJSONEmitter(os.Stdout)
+		go func() {
+			for u := range updates {
+				ev := output.Event{Type: "step_status", Step: u.StepName, Status: u.Status.String()}
+				if u.Err != nil {
+					ev.Error = u.Err.Error()
+				}
+				emitter.Emit(ev)
+			}
+		}()
+	}
+
+	// Detach mode
+	if detach {
+		store := state.NewStore(state.DefaultStateDir())
+		lock := state.NewLock(state.DefaultStateDir())
+		if err := lock.Acquire(); err != nil {
+			return err
+		}
+		// Don't release lock — background processes need it
+
+		r := runner.NewNonInteractive(io.Discard)
+		go r.Run(ctx, mgr, ordered, updates)
+
+		// Wait briefly for processes to start, then save state and exit
+		time.Sleep(500 * time.Millisecond)
+
+		var procs []state.ProcessState
+		for _, p := range mgr.All() {
+			procs = append(procs, state.ProcessState{
+				Name:   p.Spec.Name,
+				PID:    p.PID(),
+				Status: "running",
+			})
+			store.WritePID(p.Spec.Name, p.PID())
+		}
+		var recipeNames []string
+		for _, seg := range segments {
+			recipeNames = append(recipeNames, seg.Recipe.Name())
+		}
+		store.Save(&state.RunState{Recipes: recipeNames, Processes: procs})
+
+		fmt.Println("Processes started in background:")
+		state.PrintStatus(&state.RunState{Processes: procs})
+		return nil
+	}
 
 	// Select runner
 	var r runner.Runner

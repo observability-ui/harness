@@ -10,6 +10,7 @@ var (
 	nonInteractive bool
 	outputJSON     bool
 	dryRun         bool
+	detach         bool
 )
 
 func NewRootCmd(version string) *cobra.Command {
@@ -23,6 +24,7 @@ func NewRootCmd(version string) *cobra.Command {
 	root.PersistentFlags().BoolVar(&nonInteractive, "non-interactive", false, "force non-interactive mode")
 	root.PersistentFlags().BoolVar(&outputJSON, "output-json", false, "emit JSON events instead of terminal output")
 	root.PersistentFlags().BoolVar(&dryRun, "dry-run", false, "show what would run without executing")
+	root.PersistentFlags().BoolVar(&detach, "detach", false, "start processes in background and exit")
 
 	root.AddCommand(newVersionCmd(version))
 	root.AddCommand(newListCmd())
