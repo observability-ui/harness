@@ -98,17 +98,25 @@ func runRecipes(command string, args []string) error {
 	defer mgr.StopAll()
 
 	updates := make(chan runner.StepUpdate, 100)
-	r := runner.NewNonInteractive(os.Stdout)
 
-	go func() {
-		for u := range updates {
-			if u.Err != nil {
-				fmt.Fprintf(os.Stderr, "[%s] %s: %v\n", u.Status, u.StepName, u.Err)
-			} else {
-				fmt.Fprintf(os.Stderr, "[%s] %s\n", u.Status, u.StepName)
+	// Select runner
+	var r runner.Runner
+	useInteractive := !nonInteractive && !outputJSON && runner.IsTerminal()
+	if useInteractive {
+		r = runner.NewInteractive()
+	} else {
+		r = runner.NewNonInteractive(os.Stdout)
+		// Only print updates in non-interactive mode
+		go func() {
+			for u := range updates {
+				if u.Err != nil {
+					fmt.Fprintf(os.Stderr, "[%s] %s: %v\n", u.Status, u.StepName, u.Err)
+				} else {
+					fmt.Fprintf(os.Stderr, "[%s] %s\n", u.Status, u.StepName)
+				}
 			}
-		}
-	}()
+		}()
+	}
 
 	return r.Run(ctx, mgr, ordered, updates)
 }
