@@ -10,13 +10,11 @@ import (
 type stubRecipe struct {
 	name    string
 	aliases []string
-	command string
 	flags   *pflag.FlagSet
 }
 
 func (s *stubRecipe) Name() string              { return s.name }
 func (s *stubRecipe) Aliases() []string          { return s.aliases }
-func (s *stubRecipe) Command() string            { return s.command }
 func (s *stubRecipe) Description() string        { return s.name + " recipe" }
 func (s *stubRecipe) Flags() *pflag.FlagSet {
 	if s.flags != nil {
@@ -27,8 +25,8 @@ func (s *stubRecipe) Flags() *pflag.FlagSet {
 func (s *stubRecipe) Requirements() []recipe.Requirement { return nil }
 func (s *stubRecipe) Steps(_ *recipe.Config) ([]*recipe.Step, error) { return nil, nil }
 
-func newStubWithFlags(name string, aliases []string, cmd string, flags func(fs *pflag.FlagSet)) *stubRecipe {
-	s := &stubRecipe{name: name, aliases: aliases, command: cmd}
+func newStubWithFlags(name string, aliases []string, flags func(fs *pflag.FlagSet)) *stubRecipe {
+	s := &stubRecipe{name: name, aliases: aliases}
 	if flags != nil {
 		s.flags = pflag.NewFlagSet(name, pflag.ContinueOnError)
 		flags(s.flags)
@@ -38,9 +36,9 @@ func newStubWithFlags(name string, aliases []string, cmd string, flags func(fs *
 
 func TestRegistryRegisterAndLookup(t *testing.T) {
 	reg := recipe.NewRegistry()
-	r := &stubRecipe{name: "monitoring-plugin", aliases: []string{"mp"}, command: "start"}
+	r := &stubRecipe{name: "monitoring-plugin", aliases: []string{"mp"}}
 
-	if err := reg.Register(r); err != nil {
+	if err := reg.Register("start", r); err != nil {
 		t.Fatalf("Register failed: %v", err)
 	}
 
@@ -62,20 +60,20 @@ func TestRegistryRegisterAndLookup(t *testing.T) {
 
 func TestRegistryDuplicateRegister(t *testing.T) {
 	reg := recipe.NewRegistry()
-	r := &stubRecipe{name: "mp", aliases: nil, command: "start"}
-	if err := reg.Register(r); err != nil {
+	r := &stubRecipe{name: "mp", aliases: nil}
+	if err := reg.Register("start", r); err != nil {
 		t.Fatal(err)
 	}
-	if err := reg.Register(r); err == nil {
+	if err := reg.Register("start", r); err == nil {
 		t.Fatal("duplicate Register should return error")
 	}
 }
 
 func TestRegistryList(t *testing.T) {
 	reg := recipe.NewRegistry()
-	reg.Register(&stubRecipe{name: "a", command: "start"})
-	reg.Register(&stubRecipe{name: "b", command: "deploy"})
-	reg.Register(&stubRecipe{name: "c", command: "start"})
+	reg.Register("start", &stubRecipe{name: "a"})
+	reg.Register("deploy", &stubRecipe{name: "b"})
+	reg.Register("start", &stubRecipe{name: "c"})
 
 	startRecipes := reg.List("start")
 	if len(startRecipes) != 2 {

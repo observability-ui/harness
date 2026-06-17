@@ -6,6 +6,11 @@ import (
 	"sync"
 )
 
+type RecipeEntry struct {
+	Command string
+	Recipe  Recipe
+}
+
 type Registry struct {
 	mu      sync.RWMutex
 	byCmd   map[string]map[string]Recipe // command -> name -> recipe
@@ -19,21 +24,20 @@ func NewRegistry() *Registry {
 	}
 }
 
-func (r *Registry) Register(rec Recipe) error {
+func (r *Registry) Register(command string, rec Recipe) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	cmd := rec.Command()
-	if r.byCmd[cmd] == nil {
-		r.byCmd[cmd] = make(map[string]Recipe)
-		r.aliases[cmd] = make(map[string]string)
+	if r.byCmd[command] == nil {
+		r.byCmd[command] = make(map[string]Recipe)
+		r.aliases[command] = make(map[string]string)
 	}
-	if _, exists := r.byCmd[cmd][rec.Name()]; exists {
-		return fmt.Errorf("recipe %q already registered for command %q", rec.Name(), cmd)
+	if _, exists := r.byCmd[command][rec.Name()]; exists {
+		return fmt.Errorf("recipe %q already registered for command %q", rec.Name(), command)
 	}
-	r.byCmd[cmd][rec.Name()] = rec
+	r.byCmd[command][rec.Name()] = rec
 	for _, alias := range rec.Aliases() {
-		r.aliases[cmd][alias] = rec.Name()
+		r.aliases[command][alias] = rec.Name()
 	}
 	return nil
 }
@@ -68,17 +72,17 @@ func (r *Registry) List(command string) []Recipe {
 	return result
 }
 
-func (r *Registry) ListAll() []Recipe {
+func (r *Registry) ListAll() []RecipeEntry {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	var result []Recipe
-	for _, recipes := range r.byCmd {
+	var result []RecipeEntry
+	for cmd, recipes := range r.byCmd {
 		for _, rec := range recipes {
-			result = append(result, rec)
+			result = append(result, RecipeEntry{Command: cmd, Recipe: rec})
 		}
 	}
-	sort.Slice(result, func(i, j int) bool { return result[i].Name() < result[j].Name() })
+	sort.Slice(result, func(i, j int) bool { return result[i].Recipe.Name() < result[j].Recipe.Name() })
 	return result
 }
 

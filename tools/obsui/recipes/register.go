@@ -6,5 +6,5 @@ import (
 )
 
 func init() {
-	recipe.DefaultRegistry.Register(&startmp.StartMonitoringPlugin{})
+	recipe.DefaultRegistry.Register("start", &startmp.StartMonitoringPlugin{})
 }

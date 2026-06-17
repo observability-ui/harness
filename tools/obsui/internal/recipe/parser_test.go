@@ -9,7 +9,7 @@ import (
 
 func TestParseRecipeArgs_Single(t *testing.T) {
 	reg := recipe.NewRegistry()
-	reg.Register(newStubWithFlags("monitoring-plugin", []string{"mp"}, "start", func(fs *pflag.FlagSet) {
+	reg.Register("start", newStubWithFlags("monitoring-plugin", []string{"mp"}, func(fs *pflag.FlagSet) {
 		fs.String("version", "", "version to use")
 	}))
 
@@ -31,10 +31,10 @@ func TestParseRecipeArgs_Single(t *testing.T) {
 
 func TestParseRecipeArgs_Multiple(t *testing.T) {
 	reg := recipe.NewRegistry()
-	reg.Register(newStubWithFlags("monitoring-plugin", []string{"mp"}, "start", func(fs *pflag.FlagSet) {
+	reg.Register("start", newStubWithFlags("monitoring-plugin", []string{"mp"}, func(fs *pflag.FlagSet) {
 		fs.String("version", "", "")
 	}))
-	reg.Register(newStubWithFlags("console", []string{"con"}, "start", func(fs *pflag.FlagSet) {
+	reg.Register("start", newStubWithFlags("console", []string{"con"}, func(fs *pflag.FlagSet) {
 		fs.String("version", "", "")
 	}))
 

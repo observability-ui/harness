@@ -12,7 +12,6 @@ type StartMonitoringPlugin struct{}
 
 func (r *StartMonitoringPlugin) Name() string        { return "monitoring-plugin" }
 func (r *StartMonitoringPlugin) Aliases() []string    { return []string{"mp"} }
-func (r *StartMonitoringPlugin) Command() string      { return "start" }
 func (r *StartMonitoringPlugin) Description() string  { return "Start monitoring plugin frontend and backend dev servers" }
 
 func (r *StartMonitoringPlugin) Flags() *pflag.FlagSet {
@@ -48,7 +47,7 @@ func (r *StartMonitoringPlugin) Steps(cfg *recipe.Config) ([]*recipe.Step, error
 	version, _ := cfg.Flags.GetString("version")
 	dir := "projects/monitoring-plugin"
 	if version != "" {
-		dir = fmt.Sprintf("projects/monitoring-plugin") // branch checkout would happen separately
+		_ = version // branch checkout would happen separately
 	}
 
 	return []*recipe.Step{

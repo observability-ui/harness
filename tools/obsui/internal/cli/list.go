@@ -13,17 +13,17 @@ func newListCmd() *cobra.Command {
 		Use:   "list",
 		Short: "List available recipes",
 		Run: func(cmd *cobra.Command, args []string) {
-			recipes := recipe.DefaultRegistry.ListAll()
-			if len(recipes) == 0 {
+			entries := recipe.DefaultRegistry.ListAll()
+			if len(entries) == 0 {
 				fmt.Println("No recipes registered.")
 				return
 			}
-			for _, r := range recipes {
+			for _, entry := range entries {
 				aliases := ""
-				if len(r.Aliases()) > 0 {
-					aliases = " (" + strings.Join(r.Aliases(), ", ") + ")"
+				if len(entry.Recipe.Aliases()) > 0 {
+					aliases = " (" + strings.Join(entry.Recipe.Aliases(), ", ") + ")"
 				}
-				fmt.Printf("  %-8s %-25s %s%s\n", r.Command(), r.Name(), r.Description(), aliases)
+				fmt.Printf("  %-8s %-25s %s%s\n", entry.Command, entry.Recipe.Name(), entry.Recipe.Description(), aliases)
 			}
 		},
 	}

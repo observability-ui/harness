@@ -54,10 +54,15 @@ type Config struct {
 	DryRun bool
 }
 
+type StepUpdate struct {
+	StepName string
+	Status   Status
+	Err      error
+}
+
 type Recipe interface {
 	Name() string
 	Aliases() []string
-	Command() string // "start" or "deploy"
 	Description() string
 	Flags() *pflag.FlagSet
 	Requirements() []Requirement
