@@ -23,14 +23,33 @@ func newRecipeCmd(command, shortDesc string) *cobra.Command {
 		Short:              shortDesc,
 		DisableFlagParsing: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return runRecipes(command, args)
+			return runRecipes(cmd, command, args)
 		},
 	}
 	return cmd
 }
 
-func runRecipes(command string, args []string) error {
-	segments, err := recipe.ParseRecipeArgs(recipe.DefaultRegistry, command, args)
+func runRecipes(cmd *cobra.Command, command string, args []string) error {
+	// Parse global flags from args before filtering
+	var filteredArgs []string
+	for _, arg := range args {
+		switch arg {
+		case "--dry-run":
+			dryRun = true
+		case "--non-interactive":
+			nonInteractive = true
+		case "--detach":
+			detach = true
+		case "--output-json":
+			outputJSON = true
+		case "--help", "-h":
+			// Skip help flag - it shouldn't reach here but just in case
+		default:
+			filteredArgs = append(filteredArgs, arg)
+		}
+	}
+
+	segments, err := recipe.ParseRecipeArgs(recipe.DefaultRegistry, command, filteredArgs)
 	if err != nil {
 		return err
 	}
