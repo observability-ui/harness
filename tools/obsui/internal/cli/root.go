@@ -28,6 +28,9 @@ func NewRootCmd(version string) *cobra.Command {
 	root.AddCommand(newListCmd())
 	root.AddCommand(newRecipeCmd("start", "Start development processes"))
 	root.AddCommand(newRecipeCmd("deploy", "Deploy to an OpenShift cluster"))
+	root.AddCommand(newStatusCmd())
+	root.AddCommand(newAttachCmd())
+	root.AddCommand(newCleanupCmd())
 
 	return root
 }
