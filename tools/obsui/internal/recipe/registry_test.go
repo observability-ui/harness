@@ -11,15 +11,30 @@ type stubRecipe struct {
 	name    string
 	aliases []string
 	command string
+	flags   *pflag.FlagSet
 }
 
 func (s *stubRecipe) Name() string              { return s.name }
 func (s *stubRecipe) Aliases() []string          { return s.aliases }
 func (s *stubRecipe) Command() string            { return s.command }
 func (s *stubRecipe) Description() string        { return s.name + " recipe" }
-func (s *stubRecipe) Flags() *pflag.FlagSet      { return pflag.NewFlagSet(s.name, pflag.ContinueOnError) }
+func (s *stubRecipe) Flags() *pflag.FlagSet {
+	if s.flags != nil {
+		return s.flags
+	}
+	return pflag.NewFlagSet(s.name, pflag.ContinueOnError)
+}
 func (s *stubRecipe) Requirements() []recipe.Requirement { return nil }
 func (s *stubRecipe) Steps(_ *recipe.Config) ([]*recipe.Step, error) { return nil, nil }
+
+func newStubWithFlags(name string, aliases []string, cmd string, flags func(fs *pflag.FlagSet)) *stubRecipe {
+	s := &stubRecipe{name: name, aliases: aliases, command: cmd}
+	if flags != nil {
+		s.flags = pflag.NewFlagSet(name, pflag.ContinueOnError)
+		flags(s.flags)
+	}
+	return s
+}
 
 func TestRegistryRegisterAndLookup(t *testing.T) {
 	reg := recipe.NewRegistry()
