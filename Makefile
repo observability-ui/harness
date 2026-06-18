@@ -1,6 +1,7 @@
+# ── Variables ────────────────────────────────────────────────────────
+
 BIN_DIR    := $(CURDIR)/bin
 
-# Platform detection
 UNAME_S    := $(shell uname -s | tr '[:upper:]' '[:lower:]')
 UNAME_M    := $(shell uname -m)
 
@@ -18,21 +19,29 @@ else ifeq ($(UNAME_S),linux)
   DPRINT_TARGET := $(ARCH)-unknown-linux-gnu
 endif
 
-# Tool versions
-DPRINT_VERSION := 0.54.0
+DPRINT_VERSION     := 0.54.0
+DPRINT             := $(BIN_DIR)/dprint
+DPRINT_RELEASE_URL := https://github.com/dprint/dprint/releases/download/$(DPRINT_VERSION)/dprint-$(DPRINT_TARGET).zip
 
-# Tool paths
-DPRINT := $(BIN_DIR)/dprint
+OBS := $(BIN_DIR)/obs
 
-TOOLS := $(DPRINT)
+# ── Setup ────────────────────────────────────────────────────────────
 
-.PHONY: tools setup fmt-md check-md clean reset-projects
+.PHONY: setup clean reset-projects
 
 setup: tools reset-projects
 
-tools: $(TOOLS)
+clean:
+	rm -rf $(BIN_DIR)
 
-DPRINT_RELEASE_URL := https://github.com/dprint/dprint/releases/download/$(DPRINT_VERSION)/dprint-$(DPRINT_TARGET).zip
+reset-projects:
+	@./scripts/reset-projects.sh
+
+# ── Tools ────────────────────────────────────────────────────────────
+
+.PHONY: tools obs
+
+tools: $(DPRINT) obs
 
 $(DPRINT):
 	@mkdir -p $(BIN_DIR)
@@ -43,14 +52,16 @@ $(DPRINT):
 	@chmod +x $(DPRINT)
 	@echo "Installed dprint -> $(DPRINT)"
 
+obs:
+	@mkdir -p $(BIN_DIR)
+	cd tools/obs && go build -o $(OBS) ./cmd/obs
+
+# ── Lint ─────────────────────────────────────────────────────────────
+
+.PHONY: lint check
+
 lint: $(DPRINT)
 	$(DPRINT) fmt
 
 check: $(DPRINT)
 	$(DPRINT) check
-
-clean:
-	rm -rf $(BIN_DIR)
-
-reset-projects:
-	@./scripts/reset-projects.sh
