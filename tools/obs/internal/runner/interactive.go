@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"obs/internal/process"
@@ -43,14 +44,14 @@ func RunInteractive(ctx context.Context, mgr *process.Manager, prepare func() ([
 				}
 			}
 
-			started := make(map[string]chan struct{})
+			ready := make(map[string]chan struct{})
 			for _, step := range steps {
-				started[step.Name] = make(chan struct{})
+				ready[step.Name] = make(chan struct{})
 			}
 
 			for _, step := range steps {
 				for _, dep := range step.DependsOn {
-					if ch, ok := started[dep]; ok {
+					if ch, ok := ready[dep]; ok {
 						select {
 						case <-ch:
 						case <-ctx.Done():
@@ -71,7 +72,29 @@ func RunInteractive(ctx context.Context, mgr *process.Manager, prepare func() ([
 				}
 
 				internalUpdates <- recipe.StepUpdate{StepName: step.Name, Status: recipe.StatusStarted}
-				close(started[step.Name])
+
+				if step.HasPorts() {
+					var allPorts []int
+					for _, spec := range step.Processes {
+						allPorts = append(allPorts, spec.Ports...)
+					}
+					go func(name string, ports []int, ch chan struct{}) {
+						for {
+							if process.ProbePorts(ports) {
+								internalUpdates <- recipe.StepUpdate{StepName: name, Status: recipe.StatusReady}
+								close(ch)
+								return
+							}
+							select {
+							case <-time.After(time.Second):
+							case <-ctx.Done():
+								return
+							}
+						}
+					}(step.Name, allPorts, ready[step.Name])
+				} else {
+					close(ready[step.Name])
+				}
 			}
 
 			// Wait for retry signal or shutdown

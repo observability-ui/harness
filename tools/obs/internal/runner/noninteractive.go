@@ -73,14 +73,14 @@ func (r *NonInteractiveRunner) Run(ctx context.Context, mgr *process.Manager, st
 
 	colorIdx := 0
 	var launched []stepProc
-	started := make(map[string]chan struct{})
+	ready := make(map[string]chan struct{})
 	for _, step := range steps {
-		started[step.Name] = make(chan struct{})
+		ready[step.Name] = make(chan struct{})
 	}
 
 	for _, step := range steps {
 		for _, dep := range step.DependsOn {
-			if ch, ok := started[dep]; ok {
+			if ch, ok := ready[dep]; ok {
 				select {
 				case <-ch:
 				case <-ctx.Done():
@@ -106,7 +106,10 @@ func (r *NonInteractiveRunner) Run(ctx context.Context, mgr *process.Manager, st
 		}
 
 		updates <- recipe.StepUpdate{StepName: step.Name, Status: recipe.StatusStarted}
-		close(started[step.Name])
+
+		if !step.HasPorts() {
+			close(ready[step.Name])
+		}
 	}
 
 	// Monitor with WaitGroup — channel stays open until all goroutines finish
@@ -127,6 +130,13 @@ func (r *NonInteractiveRunner) Run(ctx context.Context, mgr *process.Manager, st
 				for {
 					if process.ProbePorts(ports) {
 						updates <- recipe.StepUpdate{StepName: s.stepName, Status: recipe.StatusReady}
+						if ch, ok := ready[s.stepName]; ok {
+							select {
+							case <-ch:
+							default:
+								close(ch)
+							}
+						}
 						break
 					}
 					select {
@@ -148,6 +158,13 @@ func (r *NonInteractiveRunner) Run(ctx context.Context, mgr *process.Manager, st
 				results <- procResult{s.stepName, nil}
 			default:
 				updates <- recipe.StepUpdate{StepName: s.stepName, Status: recipe.StatusDone}
+				if ch, ok := ready[s.stepName]; ok {
+					select {
+					case <-ch:
+					default:
+						close(ch)
+					}
+				}
 				results <- procResult{s.stepName, nil}
 			}
 		}(sp)

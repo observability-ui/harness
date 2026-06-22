@@ -102,10 +102,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
-		contentHeight := m.height - 4
-		for i := range m.processTabs {
-			m.processTabs[i].SetSize(m.width, contentHeight)
-		}
+		m.resizeAllTabs()
 
 	case tea.KeyMsg:
 		switch {
@@ -272,20 +269,17 @@ func (m Model) View() string {
 		return "initializing…"
 	}
 
-	tabBarView := m.tabBar.View(m.width)
+	icons := m.tabIcons()
+	tabBarView := m.tabBar.ViewWithIcons(m.width, icons)
 
 	m.help.Width = m.width
 	helpBar := m.help.View(keyMapForTab(m.tabBar.Active()))
 
-	bottomHeight := lipgloss.Height(helpBar)
-	if m.statusMsg != "" {
-		bottomHeight++
-	}
-	contentHeight := m.height - lipgloss.Height(tabBarView) - bottomHeight - 1
+	ch := m.contentHeight()
 
 	var content string
 	if m.tabBar.Active() == 0 {
-		content = m.mainTab.ViewWithRequirements(m.width, contentHeight, m.reqStatus, m.reqErr)
+		content = m.mainTab.ViewWithRequirements(m.width, ch, m.reqStatus, m.reqErr)
 	} else {
 		idx := m.tabBar.Active() - 1
 		if idx < len(m.processTabs) {
@@ -301,14 +295,53 @@ func (m Model) View() string {
 	return tabBarView + "\n" + content + "\n" + bottom
 }
 
-func (m *Model) addProcessTab(name string, proc *process.Process) {
-	contentHeight := m.height - 4
-	if contentHeight < 10 {
-		contentHeight = 24
+func (m Model) contentHeight() int {
+	tabBarHeight := lipgloss.Height(m.tabBar.View(m.width))
+	bottomHeight := lipgloss.Height(m.help.View(keyMapForTab(0)))
+	if m.statusMsg != "" {
+		bottomHeight++
 	}
-	pt := NewProcessTab(name, proc, m.width, contentHeight)
-	m.processTabs = append(m.processTabs, pt)
+	h := m.height - tabBarHeight - bottomHeight - 1
+	if h < 1 {
+		h = 1
+	}
+	return h
+}
+
+func (m *Model) resizeAllTabs() {
+	ch := m.contentHeight()
+	for i := range m.processTabs {
+		m.processTabs[i].SetSize(m.width, ch)
+	}
+}
+
+func (m *Model) addProcessTab(name string, proc *process.Process) {
 	m.tabBar.Add(name)
+	ch := m.contentHeight()
+	pt := NewProcessTab(name, proc, m.width, ch)
+	m.processTabs = append(m.processTabs, pt)
+	m.resizeAllTabs()
+}
+
+func (m Model) tabIcons() []string {
+	icons := make([]string, m.tabBar.Count())
+	for i := range m.processTabs {
+		tabIdx := i + 1
+		if tabIdx >= len(icons) {
+			break
+		}
+		name := m.processTabs[i].Name
+		stepName, ok := m.processToStep[name]
+		if !ok {
+			continue
+		}
+		step := m.mainTab.GetStep(stepName)
+		if step == nil {
+			continue
+		}
+		icons[tabIdx] = StatusIcon(step.Status, m.mainTab.spinner.View())
+	}
+	return icons
 }
 
 var statusBarStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("8"))

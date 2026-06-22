@@ -68,6 +68,106 @@ func TestEngine_Prepare_RequirementsFail(t *testing.T) {
 	}
 }
 
+func TestEngine_Prepare_AutoPortRequirements(t *testing.T) {
+	eng := recipe.NewEngine()
+
+	checkedPorts := make(map[int]bool)
+	portChecker := func(ports []int) error {
+		for _, p := range ports {
+			checkedPorts[p] = true
+		}
+		return nil
+	}
+
+	seg := recipe.RecipeSegment{
+		Recipe: &prepareStubRecipe{
+			name: "test",
+			steps: []*recipe.Step{
+				{
+					Name: "s1",
+					Processes: []recipe.ProcessSpec{
+						{Name: "frontend", Ports: []int{9001}},
+					},
+				},
+				{
+					Name: "s2",
+					Processes: []recipe.ProcessSpec{
+						{Name: "backend", Ports: []int{9443}},
+						{Name: "console", Ports: []int{9000}},
+					},
+				},
+			},
+		},
+		Flags: pflag.NewFlagSet("test", pflag.ContinueOnError),
+	}
+
+	_, err := eng.Prepare([]recipe.RecipeSegment{seg}, false, portChecker)
+	if err != nil {
+		t.Fatalf("Prepare failed: %v", err)
+	}
+
+	for _, port := range []int{9001, 9443, 9000} {
+		if !checkedPorts[port] {
+			t.Errorf("port %d was not checked", port)
+		}
+	}
+}
+
+func TestEngine_Prepare_AutoPortRequirements_Dedup(t *testing.T) {
+	eng := recipe.NewEngine()
+
+	callCount := 0
+	portChecker := func(ports []int) error {
+		callCount++
+		return nil
+	}
+
+	seg := recipe.RecipeSegment{
+		Recipe: &prepareStubRecipe{
+			name: "test",
+			steps: []*recipe.Step{
+				{Name: "s1", Processes: []recipe.ProcessSpec{{Name: "a", Ports: []int{9001}}}},
+				{Name: "s2", Processes: []recipe.ProcessSpec{{Name: "b", Ports: []int{9001}}}},
+			},
+		},
+		Flags: pflag.NewFlagSet("test", pflag.ContinueOnError),
+	}
+
+	_, err := eng.Prepare([]recipe.RecipeSegment{seg}, false, portChecker)
+	if err != nil {
+		t.Fatalf("Prepare failed: %v", err)
+	}
+	if callCount != 1 {
+		t.Errorf("expected port 9001 checked once, got %d calls", callCount)
+	}
+}
+
+func TestEngine_Prepare_AutoPortRequirements_Fail(t *testing.T) {
+	eng := recipe.NewEngine()
+
+	portChecker := func(ports []int) error {
+		return fmt.Errorf("port %d is already in use", ports[0])
+	}
+
+	seg := recipe.RecipeSegment{
+		Recipe: &prepareStubRecipe{
+			name: "test",
+			steps: []*recipe.Step{
+				{Name: "s1", Processes: []recipe.ProcessSpec{{Name: "a", Ports: []int{9001}}}},
+			},
+		},
+		Flags: pflag.NewFlagSet("test", pflag.ContinueOnError),
+	}
+
+	_, err := eng.Prepare([]recipe.RecipeSegment{seg}, false, portChecker)
+	if err == nil {
+		t.Fatal("expected error for busy port")
+	}
+	if _, ok := err.(*recipe.RequirementsError); !ok {
+		t.Fatalf("expected RequirementsError, got %T: %v", err, err)
+	}
+}
+
 func TestEngine_Prepare_CircularDeps(t *testing.T) {
 	eng := recipe.NewEngine()
 

@@ -28,6 +28,25 @@ var (
 	}
 )
 
+func StatusIcon(status recipe.Status, spinnerView string) string {
+	switch status {
+	case recipe.StatusWaiting:
+		return waitStyle.Render(statusIcons[status])
+	case recipe.StatusRunning, recipe.StatusStarted:
+		return spinnerView
+	case recipe.StatusReady:
+		return readyStyle.Render(statusIcons[status])
+	case recipe.StatusDone:
+		return doneStyle.Render(statusIcons[status])
+	case recipe.StatusStopped:
+		return stoppedStyle.Render(statusIcons[status])
+	case recipe.StatusFailed:
+		return failStyle.Render(statusIcons[status])
+	default:
+		return statusIcons[status]
+	}
+}
+
 type StepState struct {
 	Name   string
 	Status recipe.Status
@@ -98,26 +117,10 @@ func (mt MainTab) ViewWithRequirements(width, height int, reqStatus reqState, re
 	}
 
 	for _, step := range mt.steps {
-		icon := statusIcons[step.Status]
-		line := ""
-		switch step.Status {
-		case recipe.StatusWaiting:
-			line = fmt.Sprintf("  %s %s", waitStyle.Render(icon), step.Name)
-		case recipe.StatusRunning, recipe.StatusStarted:
-			line = fmt.Sprintf("  %s %s", mt.spinner.View(), step.Name)
-		case recipe.StatusReady:
-			line = fmt.Sprintf("  %s %s", readyStyle.Render(icon), step.Name)
-		case recipe.StatusDone:
-			line = fmt.Sprintf("  %s %s", doneStyle.Render(icon), step.Name)
-		case recipe.StatusStopped:
-			line = fmt.Sprintf("  %s %s", stoppedStyle.Render(icon), step.Name)
-		case recipe.StatusFailed:
-			line = fmt.Sprintf("  %s %s", failStyle.Render(icon), step.Name)
-			if step.Err != nil {
-				line += failStyle.Render(fmt.Sprintf(" — %v", step.Err))
-			}
-		default:
-			line = fmt.Sprintf("  %s %s", icon, step.Name)
+		icon := StatusIcon(step.Status, mt.spinner.View())
+		line := fmt.Sprintf("  %s %s", icon, step.Name)
+		if step.Status == recipe.StatusFailed && step.Err != nil {
+			line += failStyle.Render(fmt.Sprintf(" — %v", step.Err))
 		}
 		lines = append(lines, line)
 	}

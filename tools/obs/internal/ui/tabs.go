@@ -7,15 +7,14 @@ import (
 )
 
 var (
-	activeTabStyle = lipgloss.NewStyle().
-		Bold(true).
-		Foreground(lipgloss.Color("15")).
-		Background(lipgloss.Color("4")).
-		Padding(0, 2)
+	tabPadding = lipgloss.NewStyle().Padding(0, 2)
 
-	inactiveTabStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("7")).
-		Padding(0, 2)
+	activeNameStyle = lipgloss.NewStyle().
+		Bold(true).
+		Underline(true)
+
+	inactiveNameStyle = lipgloss.NewStyle().
+		Foreground(lipgloss.Color("8"))
 
 	tabBarStyle = lipgloss.NewStyle().
 		BorderBottom(true).
@@ -58,13 +57,23 @@ func (tb *TabBar) ActiveName() string {
 }
 
 func (tb TabBar) View(width int) string {
+	return tb.ViewWithIcons(width, nil)
+}
+
+func (tb TabBar) ViewWithIcons(width int, icons []string) string {
 	var rendered []string
 	for i, name := range tb.tabs {
-		style := inactiveTabStyle
+		nameStyle := inactiveNameStyle
 		if i == tb.active {
-			style = activeTabStyle
+			nameStyle = activeNameStyle
 		}
-		rendered = append(rendered, style.Render(name))
+		var display string
+		if i < len(icons) && icons[i] != "" {
+			display = icons[i] + " " + nameStyle.Render(name)
+		} else {
+			display = nameStyle.Render(name)
+		}
+		rendered = append(rendered, tabPadding.Render(display))
 	}
 	row := strings.Join(rendered, " ")
 	return tabBarStyle.Width(width).Render(row)

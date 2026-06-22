@@ -1,10 +1,6 @@
 package mp
 
 import (
-	"fmt"
-	"os/exec"
-
-	"obs/internal/process"
 	"obs/internal/recipe"
 
 	"github.com/spf13/pflag"
@@ -24,58 +20,10 @@ func (r *StartMonitoringPlugin) Flags() *pflag.FlagSet {
 
 func (r *StartMonitoringPlugin) Requirements() []recipe.Requirement {
 	return []recipe.Requirement{
-		{
-			Name: "node",
-			Check: func() error {
-				if _, err := exec.LookPath("node"); err != nil {
-					return fmt.Errorf("node is not installed — install via nvm or brew")
-				}
-				return nil
-			},
-		},
-		{
-			Name: "npm",
-			Check: func() error {
-				if _, err := exec.LookPath("npm"); err != nil {
-					return fmt.Errorf("npm is not installed — install via nvm or brew")
-				}
-				return nil
-			},
-		},
-		{
-			Name: "go",
-			Check: func() error {
-				if _, err := exec.LookPath("go"); err != nil {
-					return fmt.Errorf("go is not installed")
-				}
-				return nil
-			},
-		},
-		{
-			Name: "oc",
-			Check: func() error {
-				if _, err := exec.LookPath("oc"); err != nil {
-					return fmt.Errorf("oc is not installed — install the OpenShift CLI")
-				}
-				out, err := exec.Command("oc", "whoami").CombinedOutput()
-				if err != nil {
-					return fmt.Errorf("not logged in to OpenShift cluster — run 'oc login' first (oc whoami: %s)", out)
-				}
-				return nil
-			},
-		},
-		{
-			Name:  "port 9001 (frontend)",
-			Check: func() error { return process.CheckPort(9001) },
-		},
-		{
-			Name:  "port 9443 (backend)",
-			Check: func() error { return process.CheckPort(9443) },
-		},
-		{
-			Name:  "port 9000 (console)",
-			Check: func() error { return process.CheckPort(9000) },
-		},
+		recipe.RequireNode(),
+		recipe.RequireNPM(),
+		recipe.RequireGo(),
+		recipe.RequireOCLogin(),
 	}
 }
 

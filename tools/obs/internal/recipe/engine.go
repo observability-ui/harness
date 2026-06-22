@@ -26,23 +26,44 @@ func (e *Engine) Prepare(segments []RecipeSegment, dryRun bool, checkPorts func(
 		allSteps = append(allSteps, steps...)
 	}
 
+	if checkPorts != nil {
+		allReqs = append(allReqs, portRequirements(allSteps, checkPorts)...)
+	}
+
 	if !dryRun {
 		if err := e.checkRequirements(allReqs); err != nil {
 			return nil, &RequirementsError{Err: err}
 		}
 	}
 
-	if checkPorts != nil && !dryRun {
-		for _, step := range allSteps {
-			for _, spec := range step.Processes {
-				if err := checkPorts(spec.Ports); err != nil {
-					return nil, err
+	return resolveDependencies(allSteps)
+}
+
+func portRequirements(steps []*Step, checkPorts func([]int) error) []Requirement {
+	seen := make(map[int]bool)
+	var ports []int
+	for _, step := range steps {
+		for _, spec := range step.Processes {
+			for _, p := range spec.Ports {
+				if !seen[p] {
+					seen[p] = true
+					ports = append(ports, p)
 				}
 			}
 		}
 	}
-
-	return resolveDependencies(allSteps)
+	if len(ports) == 0 {
+		return nil
+	}
+	var reqs []Requirement
+	for _, p := range ports {
+		port := p
+		reqs = append(reqs, Requirement{
+			Name:  fmt.Sprintf("port %d", port),
+			Check: func() error { return checkPorts([]int{port}) },
+		})
+	}
+	return reqs
 }
 
 type RequirementsError struct {
