@@ -5,11 +5,16 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/bubbles/spinner"
+	"github.com/charmbracelet/bubbles/viewport"
 	"github.com/charmbracelet/lipgloss"
+	"obs/internal/process"
 	"obs/internal/recipe"
 )
 
-var failStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("1"))
+var (
+	dimStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("8"))
+	failStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("1"))
+)
 
 type statusDef struct {
 	Icon       string
@@ -43,6 +48,19 @@ func StatusIcon(status recipe.Status, spinnerView string) string {
 	return def.Icon
 }
 
+func MapProcessStatus(ps process.ProcessStatus) recipe.Status {
+	switch ps {
+	case process.ProcessFailed:
+		return recipe.StatusFailed
+	case process.ProcessStopped:
+		return recipe.StatusStopped
+	case process.ProcessDone:
+		return recipe.StatusDone
+	default:
+		return recipe.StatusDone
+	}
+}
+
 type ProcessInfo struct {
 	Name   string
 	Status recipe.Status
@@ -56,8 +74,9 @@ type StepState struct {
 }
 
 type MainTab struct {
-	steps   []StepState
-	spinner spinner.Model
+	steps    []StepState
+	spinner  spinner.Model
+	viewport viewport.Model
 }
 
 func NewMainTab() MainTab {
@@ -67,8 +86,9 @@ func NewMainTab() MainTab {
 	return MainTab{spinner: s}
 }
 
-func (mt *MainTab) AddStep(name string) {
-	mt.steps = append(mt.steps, StepState{Name: name, Status: recipe.StatusPending})
+func (mt *MainTab) SetSize(width, height int) {
+	mt.viewport.Width = width
+	mt.viewport.Height = height
 }
 
 func (mt *MainTab) AddStepWithProcesses(name string, processNames []string) {
@@ -106,6 +126,13 @@ func (mt *MainTab) UpdateStep(name string, status recipe.Status, err error) {
 		if mt.steps[i].Name == name {
 			mt.steps[i].Status = status
 			mt.steps[i].Err = err
+			if status == recipe.StatusDone || status == recipe.StatusStopped ||
+				status == recipe.StatusFailed || status == recipe.StatusSkipped ||
+				status == recipe.StatusReady {
+				for j := range mt.steps[i].Processes {
+					mt.steps[i].Processes[j].Status = status
+				}
+			}
 			return
 		}
 	}
@@ -139,19 +166,20 @@ func (mt MainTab) ViewWithRequirements(width, height int, reqStatus reqState, re
 		lines = append(lines, "")
 	}
 
-	treeStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("8"))
+	spinnerView := mt.spinner.View()
 	for _, step := range mt.steps {
-		icon := StatusIcon(step.Status, mt.spinner.View())
+		icon := StatusIcon(step.Status, spinnerView)
 		line := fmt.Sprintf("  %s %s", icon, step.Name)
 		if step.Status == recipe.StatusFailed && step.Err != nil {
 			line += failStyle.Render(fmt.Sprintf(" — %v", step.Err))
 		}
 		lines = append(lines, line)
 		for _, proc := range step.Processes {
-			procIcon := StatusIcon(proc.Status, mt.spinner.View())
-			lines = append(lines, fmt.Sprintf("  %s %s %s", treeStyle.Render("│"), procIcon, proc.Name))
+			procIcon := StatusIcon(proc.Status, spinnerView)
+			lines = append(lines, fmt.Sprintf("  %s %s %s", dimStyle.Render("│"), procIcon, proc.Name))
 		}
 	}
 
-	return strings.Join(lines, "\n")
+	mt.viewport.SetContent(strings.Join(lines, "\n"))
+	return mt.viewport.View()
 }

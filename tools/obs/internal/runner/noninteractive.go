@@ -10,6 +10,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"obs/internal/process"
 	"obs/internal/recipe"
+	"obs/internal/ui"
 )
 
 var prefixColors = []lipgloss.Color{
@@ -88,17 +89,13 @@ func (r *NonInteractiveRunner) Run(ctx context.Context, mgr *process.Manager, st
 			defer wg.Done()
 			<-s.Proc.Wait()
 
-			switch s.Proc.Status {
-			case process.ProcessFailed:
-				updates <- recipe.StepUpdate{StepName: s.StepName, Status: recipe.StatusFailed, Err: s.Proc.Err}
-				results <- procResult{s.StepName, fmt.Errorf("process %q failed: %v", s.Proc.Spec.Name, s.Proc.Err)}
-			case process.ProcessStopped:
-				updates <- recipe.StepUpdate{StepName: s.StepName, Status: recipe.StatusStopped}
-				results <- procResult{s.StepName, nil}
-			default:
-				updates <- recipe.StepUpdate{StepName: s.StepName, Status: recipe.StatusDone}
-				results <- procResult{s.StepName, nil}
+			status := ui.MapProcessStatus(s.Proc.Status)
+			updates <- recipe.StepUpdate{StepName: s.StepName, Status: status, Err: s.Proc.Err}
+			var err error
+			if status == recipe.StatusFailed {
+				err = fmt.Errorf("process %q failed: %v", s.Proc.Spec.Name, s.Proc.Err)
 			}
+			results <- procResult{s.StepName, err}
 		}(sp)
 	}
 

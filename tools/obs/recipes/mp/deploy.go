@@ -36,7 +36,7 @@ func (r *DeployMonitoringPlugin) Steps(cfg *recipe.Config) ([]*recipe.Step, erro
 
 	return []*recipe.Step{
 		{
-			Name:      "build-push-mp-image",
+			Name:      "build-mp-image",
 			DependsOn: []string{},
 			Processes: []recipe.ProcessSpec{
 				{
@@ -45,6 +45,12 @@ func (r *DeployMonitoringPlugin) Steps(cfg *recipe.Config) ([]*recipe.Step, erro
 					Args:    []string{"build", "-f", "Dockerfile.dev", "--platform=linux/amd64", "-t", image},
 					Dir:     dir,
 				},
+			},
+		},
+		{
+			Name:      "push-mp-image",
+			DependsOn: []string{"build-mp-image"},
+			Processes: []recipe.ProcessSpec{
 				{
 					Name:    "push mp image",
 					Command: "podman",
@@ -55,7 +61,7 @@ func (r *DeployMonitoringPlugin) Steps(cfg *recipe.Config) ([]*recipe.Step, erro
 		},
 		{
 			Name:      "set-mco-to-unmanaged",
-			DependsOn: []string{"build-push-mp-image"},
+			DependsOn: []string{"push-mp-image"},
 			Processes: []recipe.ProcessSpec{
 				{
 					Name:    "set mco to unmanaged",

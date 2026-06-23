@@ -14,7 +14,7 @@ import (
 func RunInteractive(ctx context.Context, mgr *process.Manager, prepare func() ([]*recipe.Step, error), updates chan<- recipe.StepUpdate) error {
 	internalUpdates := make(chan recipe.StepUpdate, 100)
 	retryCh := make(chan struct{}, 1)
-	model := ui.NewModel(mgr, nil, internalUpdates, retryCh)
+	model := ui.NewModel(mgr, internalUpdates, retryCh)
 
 	p := tea.NewProgram(model, tea.WithAltScreen())
 

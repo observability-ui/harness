@@ -33,8 +33,20 @@ func (r *StartLoggingPlugin) Steps(cfg *recipe.Config) ([]*recipe.Step, error) {
 
 	return []*recipe.Step{
 		{
-			Name:      "start-lp-frontend",
+			Name:      "install-lp-frontend-deps",
 			DependsOn: []string{},
+			Processes: []recipe.ProcessSpec{
+				{
+					Name:    "install lp frontend dependencies",
+					Command: "npm",
+					Args:    []string{"install"},
+					Dir:     dir + "/web",
+				},
+			},
+		},
+		{
+			Name:      "start-lp-frontend",
+			DependsOn: []string{"install-lp-frontend-deps"},
 			Processes: []recipe.ProcessSpec{
 				{
 					Name:    "start lp frontend",

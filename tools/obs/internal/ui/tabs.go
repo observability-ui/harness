@@ -13,9 +13,6 @@ var (
 		Bold(true).
 		Underline(true)
 
-	inactiveNameStyle = lipgloss.NewStyle().
-		Foreground(lipgloss.Color("8"))
-
 	tabBarStyle = lipgloss.NewStyle().
 		BorderBottom(true).
 		BorderStyle(lipgloss.NormalBorder()).
@@ -63,7 +60,7 @@ func (tb TabBar) View(width int) string {
 func (tb TabBar) ViewWithIcons(width int, icons []string) string {
 	var rendered []string
 	for i, name := range tb.tabs {
-		nameStyle := inactiveNameStyle
+		nameStyle := dimStyle
 		if i == tb.active {
 			nameStyle = activeNameStyle
 		}

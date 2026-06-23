@@ -71,6 +71,11 @@ func watchStepReady(ctx context.Context, step *recipe.Step, procs []*process.Pro
 			close(ch)
 			return
 		}
+		if proc.Status == process.ProcessStopped {
+			stepErr[step.Name] = fmt.Errorf("process %q was stopped", proc.Spec.Name)
+			close(ch)
+			return
+		}
 	}
 	close(ch)
 }

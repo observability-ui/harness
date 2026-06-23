@@ -10,14 +10,11 @@ import (
 
 func TestModel_Init(t *testing.T) {
 	mgr := process.NewManager()
-	steps := []*recipe.Step{
-		{Name: "step1", Processes: []recipe.ProcessSpec{{Name: "proc1"}}},
-	}
 	updates := make(chan recipe.StepUpdate)
 	close(updates)
 
 	retryCh := make(chan struct{}, 1)
-	model := ui.NewModel(mgr, steps, updates, retryCh)
+	model := ui.NewModel(mgr, updates, retryCh)
 	cmd := model.Init()
 	if cmd == nil {
 		t.Fatal("Init should return a Cmd")

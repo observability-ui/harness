@@ -56,18 +56,12 @@ type Model struct {
 	reqStatus      reqState
 	reqErr         error
 	retryCh        chan<- struct{}
-	processToStep       map[string]string
 	cachedContentHeight int
 }
 
-func NewModel(mgr *process.Manager, steps []*recipe.Step, updates <-chan recipe.StepUpdate, retryCh chan<- struct{}) Model {
+func NewModel(mgr *process.Manager, updates <-chan recipe.StepUpdate, retryCh chan<- struct{}) Model {
 	tabs := []string{"main"}
 	mt := NewMainTab()
-
-	for _, step := range steps {
-		mt.AddStep(step.Name)
-	}
-
 	h := help.New()
 	h.ShortSeparator = " · "
 
@@ -78,8 +72,7 @@ func NewModel(mgr *process.Manager, steps []*recipe.Step, updates <-chan recipe.
 		help:          h,
 		updates:       updates,
 		reqStatus:     reqChecking,
-		retryCh:       retryCh,
-		processToStep: make(map[string]string),
+		retryCh: retryCh,
 	}
 }
 
@@ -123,7 +116,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.statusMsg = ""
 				m.mainTab = NewMainTab()
 				m.processTabs = nil
-				m.processToStep = make(map[string]string)
 				m.tabBar = NewTabBar([]string{"main"})
 				cmds = append(cmds, m.mainTab.spinner.Tick)
 				select {
@@ -139,19 +131,27 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				})
 			}
 		case key.Matches(msg, keys.Up):
-			if tab := m.activeProcessTab(); tab != nil {
+			if m.tabBar.Active() == 0 {
+				m.mainTab.viewport.LineUp(1)
+			} else if tab := m.activeProcessTab(); tab != nil {
 				tab.viewport.LineUp(1)
 			}
 		case key.Matches(msg, keys.Down):
-			if tab := m.activeProcessTab(); tab != nil {
+			if m.tabBar.Active() == 0 {
+				m.mainTab.viewport.LineDown(1)
+			} else if tab := m.activeProcessTab(); tab != nil {
 				tab.viewport.LineDown(1)
 			}
 		case key.Matches(msg, keys.PageUp):
-			if tab := m.activeProcessTab(); tab != nil {
+			if m.tabBar.Active() == 0 {
+				m.mainTab.viewport.ViewUp()
+			} else if tab := m.activeProcessTab(); tab != nil {
 				tab.viewport.ViewUp()
 			}
 		case key.Matches(msg, keys.PageDown):
-			if tab := m.activeProcessTab(); tab != nil {
+			if m.tabBar.Active() == 0 {
+				m.mainTab.viewport.ViewDown()
+			} else if tab := m.activeProcessTab(); tab != nil {
 				tab.viewport.ViewDown()
 			}
 		}
@@ -176,34 +176,25 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if proc == nil {
 				continue
 			}
-			stepName, ok := m.processToStep[tab.Name]
-			if !ok {
+			stepName := tab.StepName
+			if stepName == "" {
 				continue
 			}
 			step := m.mainTab.GetStep(stepName)
 			if step == nil || step.Status == recipe.StatusDone || step.Status == recipe.StatusStopped || step.Status == recipe.StatusFailed {
 				continue
 			}
-			var procStatus recipe.Status
 			if !proc.Running() {
-				switch proc.Status {
-				case process.ProcessFailed:
-					procStatus = recipe.StatusFailed
-					m.mainTab.UpdateStep(stepName, recipe.StatusFailed, proc.Err)
-				case process.ProcessStopped:
-					procStatus = recipe.StatusStopped
-					m.mainTab.UpdateStep(stepName, recipe.StatusStopped, nil)
-				case process.ProcessDone:
-					procStatus = recipe.StatusDone
-					m.mainTab.UpdateStep(stepName, recipe.StatusDone, nil)
-				default:
-					procStatus = recipe.StatusDone
-					m.mainTab.UpdateStep(stepName, recipe.StatusDone, nil)
+				procStatus := MapProcessStatus(proc.Status)
+				var stepErr error
+				if procStatus == recipe.StatusFailed {
+					stepErr = proc.Err
 				}
-			} else {
-				procStatus = recipe.StatusStarted
+				m.mainTab.UpdateStep(stepName, procStatus, stepErr)
+				m.mainTab.UpdateProcess(stepName, tab.Name, procStatus)
+			} else if step.Status != recipe.StatusReady {
+				m.mainTab.UpdateProcess(stepName, tab.Name, recipe.StatusStarted)
 			}
-			m.mainTab.UpdateProcess(stepName, tab.Name, procStatus)
 		}
 		cmds = append(cmds, tickOutputRefresh())
 
@@ -212,15 +203,15 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		for i := range m.processTabs {
 			if m.processTabs[i].Name == msg.Name {
 				m.processTabs[i].SetProcess(msg.Proc)
+				if msg.StepName != "" {
+					m.processTabs[i].StepName = msg.StepName
+				}
 				found = true
 				break
 			}
 		}
 		if !found {
 			m.addProcessTab(msg.Name, msg.Proc)
-		}
-		if msg.StepName != "" {
-			m.processToStep[msg.Name] = msg.StepName
 		}
 
 	case processRestartedMsg:
@@ -230,11 +221,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			for i := range m.processTabs {
 				if m.processTabs[i].Name == msg.name {
 					m.processTabs[i].SetProcess(msg.proc)
+					m.mainTab.UpdateStep(m.processTabs[i].StepName, recipe.StatusStarted, nil)
 					break
 				}
-			}
-			if stepName, ok := m.processToStep[msg.name]; ok {
-				m.mainTab.UpdateStep(stepName, recipe.StatusStarted, nil)
 			}
 		}
 
@@ -249,18 +238,16 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case RequirementsPassedMsg:
 		m.reqStatus = reqPassed
 		for _, step := range msg.Steps {
-			var procNames []string
+			procNames := make([]string, 0, len(step.Processes))
 			for _, spec := range step.Processes {
 				procNames = append(procNames, spec.Name)
-			}
-			m.mainTab.AddStepWithProcesses(step.Name, procNames)
-			for _, spec := range step.Processes {
 				pt := NewProcessTab(spec.Name, nil, m.width, m.contentHeight())
+				pt.StepName = step.Name
 				pt.DependsOn = step.DependsOn
 				m.tabBar.Add(spec.Name)
 				m.processTabs = append(m.processTabs, pt)
-				m.processToStep[spec.Name] = step.Name
 			}
+			m.mainTab.AddStepWithProcesses(step.Name, procNames)
 		}
 		m.recomputeLayout()
 
@@ -300,7 +287,7 @@ func (m Model) View() string {
 
 	bottom := helpBar
 	if m.statusMsg != "" {
-		bottom = statusBarStyle.Width(m.width).Render(m.statusMsg) + "\n" + bottom
+		bottom = dimStyle.Width(m.width).Render(m.statusMsg) + "\n" + bottom
 	}
 
 	return tabBarView + "\n" + content + "\n" + bottom
@@ -321,6 +308,7 @@ func (m *Model) recomputeLayout() {
 		h = 1
 	}
 	m.cachedContentHeight = h
+	m.mainTab.SetSize(m.width, h)
 	for i := range m.processTabs {
 		m.processTabs[i].SetSize(m.width, h)
 	}
@@ -336,26 +324,25 @@ func (m *Model) addProcessTab(name string, proc *process.Process) {
 
 func (m Model) tabIcons() []string {
 	icons := make([]string, m.tabBar.Count())
+	spinnerView := m.mainTab.spinner.View()
 	for i := range m.processTabs {
 		tabIdx := i + 1
 		if tabIdx >= len(icons) {
 			break
 		}
-		name := m.processTabs[i].Name
-		stepName, ok := m.processToStep[name]
-		if !ok {
+		stepName := m.processTabs[i].StepName
+		if stepName == "" {
 			continue
 		}
 		step := m.mainTab.GetStep(stepName)
 		if step == nil {
 			continue
 		}
-		icons[tabIdx] = StatusIcon(step.Status, m.mainTab.spinner.View())
+		icons[tabIdx] = StatusIcon(step.Status, spinnerView)
 	}
 	return icons
 }
 
-var statusBarStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("8"))
 
 func (m *Model) activeProcessTab() *ProcessTab {
 	if m.tabBar.Active() > 0 {
