@@ -22,7 +22,7 @@ func (s *stubRecipe) Flags() *pflag.FlagSet {
 	}
 	return pflag.NewFlagSet(s.name, pflag.ContinueOnError)
 }
-func (s *stubRecipe) Requirements() []recipe.Requirement { return nil }
+func (s *stubRecipe) Requirements(_ *pflag.FlagSet) []recipe.Requirement { return nil }
 func (s *stubRecipe) Steps(_ *recipe.Config) ([]*recipe.Step, error) { return nil, nil }
 
 func newStubWithFlags(name string, aliases []string, flags func(fs *pflag.FlagSet)) *stubRecipe {

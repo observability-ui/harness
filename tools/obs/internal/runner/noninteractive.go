@@ -6,7 +6,6 @@ import (
 	"io"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/charmbracelet/lipgloss"
 	"obs/internal/process"
@@ -59,60 +58,23 @@ func NewNonInteractive(out io.Writer) *NonInteractiveRunner {
 }
 
 func (r *NonInteractiveRunner) Run(ctx context.Context, mgr *process.Manager, steps []*recipe.Step, updates chan<- recipe.StepUpdate) error {
-	type stepProc struct {
-		stepName string
-		proc     *process.Process
-	}
-
-	// Mark steps with dependencies as waiting
-	for _, step := range steps {
-		if len(step.DependsOn) > 0 {
-			updates <- recipe.StepUpdate{StepName: step.Name, Status: recipe.StatusWaiting}
-		}
-	}
-
 	colorIdx := 0
-	var launched []stepProc
-	ready := make(map[string]chan struct{})
-	for _, step := range steps {
-		ready[step.Name] = make(chan struct{})
-	}
 
-	for _, step := range steps {
-		for _, dep := range step.DependsOn {
-			if ch, ok := ready[dep]; ok {
-				select {
-				case <-ch:
-				case <-ctx.Done():
-					close(updates)
-					return ctx.Err()
-				}
-			}
-		}
-
-		updates <- recipe.StepUpdate{StepName: step.Name, Status: recipe.StatusRunning}
-
-		for _, spec := range step.Processes {
-			pw := NewPrefixWriter(r.Out, spec.Name, colorIdx)
+	cb := StepCallbacks{
+		OnUpdate: func(u recipe.StepUpdate) { updates <- u },
+		Writers: func(specName string) []io.Writer {
+			pw := NewPrefixWriter(r.Out, specName, colorIdx)
 			colorIdx++
-
-			proc, err := mgr.StartProcess(ctx, spec, pw)
-			if err != nil {
-				updates <- recipe.StepUpdate{StepName: step.Name, Status: recipe.StatusFailed, Err: err}
-				close(updates)
-				return fmt.Errorf("failed to start %q: %w", spec.Name, err)
-			}
-			launched = append(launched, stepProc{stepName: step.Name, proc: proc})
-		}
-
-		updates <- recipe.StepUpdate{StepName: step.Name, Status: recipe.StatusStarted}
-
-		if !step.HasPorts() {
-			close(ready[step.Name])
-		}
+			return []io.Writer{pw}
+		},
 	}
 
-	// Monitor with WaitGroup — channel stays open until all goroutines finish
+	launched, err := ExecuteSteps(ctx, mgr, steps, cb)
+	if err != nil {
+		close(updates)
+		return err
+	}
+
 	type procResult struct {
 		stepName string
 		err      error
@@ -122,55 +84,24 @@ func (r *NonInteractiveRunner) Run(ctx context.Context, mgr *process.Manager, st
 
 	for _, sp := range launched {
 		wg.Add(1)
-		go func(s stepProc) {
+		go func(s StartedProc) {
 			defer wg.Done()
-			ports := s.proc.Spec.Ports
+			<-s.Proc.Wait()
 
-			if len(ports) > 0 {
-				for {
-					if process.ProbePorts(ports) {
-						updates <- recipe.StepUpdate{StepName: s.stepName, Status: recipe.StatusReady}
-						if ch, ok := ready[s.stepName]; ok {
-							select {
-							case <-ch:
-							default:
-								close(ch)
-							}
-						}
-						break
-					}
-					select {
-					case <-time.After(time.Second):
-					case <-s.proc.Wait():
-						goto exited
-					}
-				}
-			}
-
-			<-s.proc.Wait()
-		exited:
-			switch s.proc.Status {
+			switch s.Proc.Status {
 			case process.ProcessFailed:
-				updates <- recipe.StepUpdate{StepName: s.stepName, Status: recipe.StatusFailed, Err: s.proc.Err}
-				results <- procResult{s.stepName, fmt.Errorf("process %q failed: %v", s.proc.Spec.Name, s.proc.Err)}
+				updates <- recipe.StepUpdate{StepName: s.StepName, Status: recipe.StatusFailed, Err: s.Proc.Err}
+				results <- procResult{s.StepName, fmt.Errorf("process %q failed: %v", s.Proc.Spec.Name, s.Proc.Err)}
 			case process.ProcessStopped:
-				updates <- recipe.StepUpdate{StepName: s.stepName, Status: recipe.StatusStopped}
-				results <- procResult{s.stepName, nil}
+				updates <- recipe.StepUpdate{StepName: s.StepName, Status: recipe.StatusStopped}
+				results <- procResult{s.StepName, nil}
 			default:
-				updates <- recipe.StepUpdate{StepName: s.stepName, Status: recipe.StatusDone}
-				if ch, ok := ready[s.stepName]; ok {
-					select {
-					case <-ch:
-					default:
-						close(ch)
-					}
-				}
-				results <- procResult{s.stepName, nil}
+				updates <- recipe.StepUpdate{StepName: s.StepName, Status: recipe.StatusDone}
+				results <- procResult{s.StepName, nil}
 			}
 		}(sp)
 	}
 
-	// Wait for goroutines to finish so we can close the channel safely
 	allDone := make(chan struct{})
 	go func() {
 		wg.Wait()

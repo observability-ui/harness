@@ -8,5 +8,6 @@ import (
 
 func init() {
 	recipe.DefaultRegistry.Register("start", &mp.StartMonitoringPlugin{})
+	recipe.DefaultRegistry.Register("deploy", &mp.DeployMonitoringPlugin{})
 	recipe.DefaultRegistry.Register("start", &lp.StartLoggingPlugin{})
 }

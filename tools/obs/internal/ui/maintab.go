@@ -9,48 +9,50 @@ import (
 	"obs/internal/recipe"
 )
 
-var (
-	waitStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("3")) // yellow
-	doneStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("2")) // green
-	stoppedStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("8")) // grey
-	failStyle    = lipgloss.NewStyle().Foreground(lipgloss.Color("1")) // red
-	readyStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("2")) // green
-	statusIcons = map[recipe.Status]string{
-		recipe.StatusPending: "○",
-		recipe.StatusWaiting: "◷", // waiting on dependency
-		recipe.StatusRunning: "",  // replaced by spinner
-		recipe.StatusStarted: "",  // replaced by spinner (running process)
-		recipe.StatusReady:   "●", // ports accepting connections
-		recipe.StatusDone:    "✓", // completed and exited
-		recipe.StatusStopped: "■", // stopped by user
-		recipe.StatusFailed:  "✗",
-		recipe.StatusSkipped: "⊘",
-	}
-)
+var failStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("1"))
+
+type statusDef struct {
+	Icon       string
+	Style      lipgloss.Style
+	UseSpinner bool
+}
+
+var statusDefs = map[recipe.Status]statusDef{
+	recipe.StatusPending: {Icon: "○"},
+	recipe.StatusWaiting: {Icon: "◷", Style: lipgloss.NewStyle().Foreground(lipgloss.Color("3"))},
+	recipe.StatusRunning: {UseSpinner: true},
+	recipe.StatusStarted: {UseSpinner: true},
+	recipe.StatusReady:   {Icon: "●", Style: lipgloss.NewStyle().Foreground(lipgloss.Color("2"))},
+	recipe.StatusDone:    {Icon: "✓", Style: lipgloss.NewStyle().Foreground(lipgloss.Color("2"))},
+	recipe.StatusStopped: {Icon: "■", Style: lipgloss.NewStyle().Foreground(lipgloss.Color("8"))},
+	recipe.StatusFailed:  {Icon: "✗", Style: failStyle},
+	recipe.StatusSkipped: {Icon: "⊘"},
+}
 
 func StatusIcon(status recipe.Status, spinnerView string) string {
-	switch status {
-	case recipe.StatusWaiting:
-		return waitStyle.Render(statusIcons[status])
-	case recipe.StatusRunning, recipe.StatusStarted:
+	def := statusDefs[status]
+	if def.UseSpinner {
 		return spinnerView
-	case recipe.StatusReady:
-		return readyStyle.Render(statusIcons[status])
-	case recipe.StatusDone:
-		return doneStyle.Render(statusIcons[status])
-	case recipe.StatusStopped:
-		return stoppedStyle.Render(statusIcons[status])
-	case recipe.StatusFailed:
-		return failStyle.Render(statusIcons[status])
-	default:
-		return statusIcons[status]
 	}
+	if def.Icon == "" {
+		return ""
+	}
+	if def.Style.GetForeground() != (lipgloss.NoColor{}) {
+		return def.Style.Render(def.Icon)
+	}
+	return def.Icon
+}
+
+type ProcessInfo struct {
+	Name   string
+	Status recipe.Status
 }
 
 type StepState struct {
-	Name   string
-	Status recipe.Status
-	Err    error
+	Name      string
+	Status    recipe.Status
+	Err       error
+	Processes []ProcessInfo
 }
 
 type MainTab struct {
@@ -67,6 +69,27 @@ func NewMainTab() MainTab {
 
 func (mt *MainTab) AddStep(name string) {
 	mt.steps = append(mt.steps, StepState{Name: name, Status: recipe.StatusPending})
+}
+
+func (mt *MainTab) AddStepWithProcesses(name string, processNames []string) {
+	var procs []ProcessInfo
+	for _, pn := range processNames {
+		procs = append(procs, ProcessInfo{Name: pn, Status: recipe.StatusPending})
+	}
+	mt.steps = append(mt.steps, StepState{Name: name, Status: recipe.StatusPending, Processes: procs})
+}
+
+func (mt *MainTab) UpdateProcess(stepName, procName string, status recipe.Status) {
+	step := mt.GetStep(stepName)
+	if step == nil {
+		return
+	}
+	for i := range step.Processes {
+		if step.Processes[i].Name == procName {
+			step.Processes[i].Status = status
+			return
+		}
+	}
 }
 
 func (mt *MainTab) GetStep(name string) *StepState {
@@ -107,7 +130,7 @@ func (mt MainTab) ViewWithRequirements(width, height int, reqStatus reqState, re
 		lines = append(lines, "")
 	case reqPassed:
 		lines = append(lines, lipgloss.NewStyle().Bold(true).Render("Requirements:"))
-		lines = append(lines, fmt.Sprintf("  %s All requirements met", doneStyle.Render("✓")))
+		lines = append(lines, fmt.Sprintf("  %s All requirements met", StatusIcon(recipe.StatusDone, "")))
 		lines = append(lines, "")
 	}
 
@@ -116,6 +139,7 @@ func (mt MainTab) ViewWithRequirements(width, height int, reqStatus reqState, re
 		lines = append(lines, "")
 	}
 
+	treeStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("8"))
 	for _, step := range mt.steps {
 		icon := StatusIcon(step.Status, mt.spinner.View())
 		line := fmt.Sprintf("  %s %s", icon, step.Name)
@@ -123,6 +147,10 @@ func (mt MainTab) ViewWithRequirements(width, height int, reqStatus reqState, re
 			line += failStyle.Render(fmt.Sprintf(" — %v", step.Err))
 		}
 		lines = append(lines, line)
+		for _, proc := range step.Processes {
+			procIcon := StatusIcon(proc.Status, mt.spinner.View())
+			lines = append(lines, fmt.Sprintf("  %s %s %s", treeStyle.Render("│"), procIcon, proc.Name))
+		}
 	}
 
 	return strings.Join(lines, "\n")

@@ -7,6 +7,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -19,6 +20,7 @@ type ProcessStatus int
 const (
 	ProcessPending ProcessStatus = iota
 	ProcessRunning
+	ProcessDone
 	ProcessStopped
 	ProcessFailed
 )
@@ -63,6 +65,10 @@ func (p *Process) Start(ctx context.Context, extraWriters ...io.Writer) error {
 	// Put child in its own process group for clean shutdown
 	p.cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
 
+	if p.Spec.Stdin != "" {
+		p.cmd.Stdin = strings.NewReader(p.Spec.Stdin)
+	}
+
 	writers := []io.Writer{p.Output}
 	writers = append(writers, extraWriters...)
 	mw := io.MultiWriter(writers...)
@@ -90,7 +96,7 @@ func (p *Process) Start(ctx context.Context, extraWriters ...io.Writer) error {
 				p.Err = err
 			}
 		} else {
-			p.Status = ProcessStopped
+			p.Status = ProcessDone
 		}
 		p.mu.Unlock()
 		close(p.done)
@@ -139,3 +145,4 @@ func (p *Process) PID() int {
 	}
 	return 0
 }
+

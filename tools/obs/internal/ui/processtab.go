@@ -1,14 +1,19 @@
 package ui
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/viewport"
+	"github.com/charmbracelet/lipgloss"
 	"obs/internal/process"
 )
 
+var waitingMsgStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("8"))
+
 type ProcessTab struct {
 	Name              string
+	DependsOn         []string
 	proc              *process.Process
 	viewport          viewport.Model
 	lastRenderedCount int
@@ -50,5 +55,14 @@ func (pt *ProcessTab) SetSize(width, height int) {
 }
 
 func (pt ProcessTab) View() string {
+	if pt.proc == nil && len(pt.DependsOn) > 0 {
+		var lines []string
+		lines = append(lines, "")
+		lines = append(lines, waitingMsgStyle.Render("Waiting for:"))
+		for _, dep := range pt.DependsOn {
+			lines = append(lines, waitingMsgStyle.Render(fmt.Sprintf("  • %s", dep)))
+		}
+		return strings.Join(lines, "\n")
+	}
 	return pt.viewport.View()
 }

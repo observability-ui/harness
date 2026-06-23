@@ -29,11 +29,6 @@ type processRestartedMsg struct {
 	err  error
 }
 
-type readinessResultMsg struct {
-	processName string
-	ready       bool
-}
-
 type RequirementsCheckingMsg struct{}
 type RequirementsPassedMsg struct{ Steps []*recipe.Step }
 type RequirementsFailedMsg struct{ Err error }
@@ -61,7 +56,8 @@ type Model struct {
 	reqStatus      reqState
 	reqErr         error
 	retryCh        chan<- struct{}
-	processToStep  map[string]string
+	processToStep       map[string]string
+	cachedContentHeight int
 }
 
 func NewModel(mgr *process.Manager, steps []*recipe.Step, updates <-chan recipe.StepUpdate, retryCh chan<- struct{}) Model {
@@ -102,7 +98,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
-		m.resizeAllTabs()
+		m.recomputeLayout()
 
 	case tea.KeyMsg:
 		switch {
@@ -188,38 +184,41 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if step == nil || step.Status == recipe.StatusDone || step.Status == recipe.StatusStopped || step.Status == recipe.StatusFailed {
 				continue
 			}
+			var procStatus recipe.Status
 			if !proc.Running() {
-				if proc.Status == process.ProcessFailed {
+				switch proc.Status {
+				case process.ProcessFailed:
+					procStatus = recipe.StatusFailed
 					m.mainTab.UpdateStep(stepName, recipe.StatusFailed, proc.Err)
-				} else if proc.Status == process.ProcessStopped {
+				case process.ProcessStopped:
+					procStatus = recipe.StatusStopped
 					m.mainTab.UpdateStep(stepName, recipe.StatusStopped, nil)
-				} else {
+				case process.ProcessDone:
+					procStatus = recipe.StatusDone
+					m.mainTab.UpdateStep(stepName, recipe.StatusDone, nil)
+				default:
+					procStatus = recipe.StatusDone
 					m.mainTab.UpdateStep(stepName, recipe.StatusDone, nil)
 				}
-				continue
+			} else {
+				procStatus = recipe.StatusStarted
 			}
-			if step.Status == recipe.StatusStarted && len(proc.Spec.Ports) > 0 {
-				pName := tab.Name
-				ports := proc.Spec.Ports
-				cmds = append(cmds, func() tea.Msg {
-					return readinessResultMsg{processName: pName, ready: process.ProbePorts(ports)}
-				})
-			}
+			m.mainTab.UpdateProcess(stepName, tab.Name, procStatus)
 		}
 		cmds = append(cmds, tickOutputRefresh())
 
-	case readinessResultMsg:
-		if msg.ready {
-			if stepName, ok := m.processToStep[msg.processName]; ok {
-				step := m.mainTab.GetStep(stepName)
-				if step != nil && step.Status == recipe.StatusStarted {
-					m.mainTab.UpdateStep(stepName, recipe.StatusReady, nil)
-				}
+	case AddProcessTabMsg:
+		found := false
+		for i := range m.processTabs {
+			if m.processTabs[i].Name == msg.Name {
+				m.processTabs[i].SetProcess(msg.Proc)
+				found = true
+				break
 			}
 		}
-
-	case AddProcessTabMsg:
-		m.addProcessTab(msg.Name, msg.Proc)
+		if !found {
+			m.addProcessTab(msg.Name, msg.Proc)
+		}
 		if msg.StepName != "" {
 			m.processToStep[msg.Name] = msg.StepName
 		}
@@ -250,8 +249,20 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case RequirementsPassedMsg:
 		m.reqStatus = reqPassed
 		for _, step := range msg.Steps {
-			m.mainTab.AddStep(step.Name)
+			var procNames []string
+			for _, spec := range step.Processes {
+				procNames = append(procNames, spec.Name)
+			}
+			m.mainTab.AddStepWithProcesses(step.Name, procNames)
+			for _, spec := range step.Processes {
+				pt := NewProcessTab(spec.Name, nil, m.width, m.contentHeight())
+				pt.DependsOn = step.DependsOn
+				m.tabBar.Add(spec.Name)
+				m.processTabs = append(m.processTabs, pt)
+				m.processToStep[spec.Name] = step.Name
+			}
 		}
+		m.recomputeLayout()
 
 	case RequirementsFailedMsg:
 		m.reqStatus = reqFailed
@@ -296,6 +307,10 @@ func (m Model) View() string {
 }
 
 func (m Model) contentHeight() int {
+	return m.cachedContentHeight
+}
+
+func (m *Model) recomputeLayout() {
 	tabBarHeight := lipgloss.Height(m.tabBar.View(m.width))
 	bottomHeight := lipgloss.Height(m.help.View(keyMapForTab(0)))
 	if m.statusMsg != "" {
@@ -305,13 +320,9 @@ func (m Model) contentHeight() int {
 	if h < 1 {
 		h = 1
 	}
-	return h
-}
-
-func (m *Model) resizeAllTabs() {
-	ch := m.contentHeight()
+	m.cachedContentHeight = h
 	for i := range m.processTabs {
-		m.processTabs[i].SetSize(m.width, ch)
+		m.processTabs[i].SetSize(m.width, h)
 	}
 }
 
@@ -320,7 +331,7 @@ func (m *Model) addProcessTab(name string, proc *process.Process) {
 	ch := m.contentHeight()
 	pt := NewProcessTab(name, proc, m.width, ch)
 	m.processTabs = append(m.processTabs, pt)
-	m.resizeAllTabs()
+	m.recomputeLayout()
 }
 
 func (m Model) tabIcons() []string {

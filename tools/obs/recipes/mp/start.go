@@ -18,11 +18,12 @@ func (r *StartMonitoringPlugin) Flags() *pflag.FlagSet {
 	return pflag.NewFlagSet("monitoring-plugin", pflag.ContinueOnError)
 }
 
-func (r *StartMonitoringPlugin) Requirements() []recipe.Requirement {
+func (r *StartMonitoringPlugin) Requirements(_ *pflag.FlagSet) []recipe.Requirement {
 	return []recipe.Requirement{
 		recipe.RequireNode(),
 		recipe.RequireNPM(),
 		recipe.RequireGo(),
+		recipe.RequirePodman(),
 		recipe.RequireOCLogin(),
 	}
 }
@@ -32,11 +33,23 @@ func (r *StartMonitoringPlugin) Steps(cfg *recipe.Config) ([]*recipe.Step, error
 
 	return []*recipe.Step{
 		{
-			Name:      "start-mp-frontend",
+			Name:      "install-mp-frontend-deps",
 			DependsOn: []string{},
 			Processes: []recipe.ProcessSpec{
 				{
-					Name:    "mp-frontend",
+					Name:    "install mp frontend dependencies",
+					Command: "npm",
+					Args:    []string{"install"},
+					Dir:     dir + "/web",
+				},
+			},
+		},
+		{
+			Name:      "start-mp-frontend",
+			DependsOn: []string{"install-mp-frontend-deps"},
+			Processes: []recipe.ProcessSpec{
+				{
+					Name:    "start mp frontend",
 					Command: "make",
 					Args:    []string{"start-frontend"},
 					Dir:     dir,
@@ -49,7 +62,7 @@ func (r *StartMonitoringPlugin) Steps(cfg *recipe.Config) ([]*recipe.Step, error
 			DependsOn: []string{},
 			Processes: []recipe.ProcessSpec{
 				{
-					Name:    "mp-backend",
+					Name:    "start mp backend",
 					Command: "make",
 					Args:    []string{"start-feature-backend"},
 					Dir:     dir,
@@ -62,7 +75,7 @@ func (r *StartMonitoringPlugin) Steps(cfg *recipe.Config) ([]*recipe.Step, error
 			DependsOn: []string{},
 			Processes: []recipe.ProcessSpec{
 				{
-					Name:    "mp-console",
+					Name:    "start mp console",
 					Command: "make",
 					Args:    []string{"start-feature-console"},
 					Dir:     dir,

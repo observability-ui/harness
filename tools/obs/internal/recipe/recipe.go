@@ -2,6 +2,7 @@ package recipe
 
 import (
 	"fmt"
+	"io/fs"
 	"os/exec"
 
 	"github.com/spf13/pflag"
@@ -51,13 +52,21 @@ type Requirement struct {
 	Check func() error
 }
 
+type FileRef struct {
+	FS   fs.FS
+	Path string
+}
+
 type ProcessSpec struct {
-	Name    string
-	Command string
-	Args    []string
-	Dir     string
-	Env     map[string]string
-	Ports   []int
+	Name      string
+	Command   string
+	Args      []string
+	Dir       string
+	Env       map[string]string
+	Ports     []int
+	Stdin     string
+	StdinFile string
+	Files     map[string]FileRef
 }
 
 type Step struct {
@@ -91,7 +100,7 @@ type Recipe interface {
 	Aliases() []string
 	Description() string
 	Flags() *pflag.FlagSet
-	Requirements() []Requirement
+	Requirements(flags *pflag.FlagSet) []Requirement
 	Steps(cfg *Config) ([]*Step, error)
 }
 
@@ -99,6 +108,7 @@ func RequireNode() Requirement   { return RequireTool("node", "install via nvm o
 func RequireNPM() Requirement    { return RequireTool("npm", "install via nvm or brew") }
 func RequireGo() Requirement     { return RequireTool("go", "") }
 func RequirePodman() Requirement { return RequireTool("podman", "install via brew or dnf") }
+func RequireJQ() Requirement     { return RequireTool("jq", "install via brew or dnf") }
 
 func RequireTool(name, hint string) Requirement {
 	return Requirement{
@@ -109,6 +119,22 @@ func RequireTool(name, hint string) Requirement {
 					return fmt.Errorf("%s is not installed — %s", name, hint)
 				}
 				return fmt.Errorf("%s is not installed", name)
+			}
+			return nil
+		},
+	}
+}
+
+func RequireFlag(flags *pflag.FlagSet, name, usage string) Requirement {
+	return Requirement{
+		Name: fmt.Sprintf("--%s", name),
+		Check: func() error {
+			if flags == nil {
+				return fmt.Errorf("--%s is required — %s", name, usage)
+			}
+			f := flags.Lookup(name)
+			if f == nil || !f.Changed {
+				return fmt.Errorf("--%s is required — %s", name, usage)
 			}
 			return nil
 		},

@@ -18,7 +18,7 @@ func (r *StartLoggingPlugin) Flags() *pflag.FlagSet {
 	return pflag.NewFlagSet("logging-view-plugin", pflag.ContinueOnError)
 }
 
-func (r *StartLoggingPlugin) Requirements() []recipe.Requirement {
+func (r *StartLoggingPlugin) Requirements(_ *pflag.FlagSet) []recipe.Requirement {
 	return []recipe.Requirement{
 		recipe.RequireNode(),
 		recipe.RequireNPM(),
@@ -37,7 +37,7 @@ func (r *StartLoggingPlugin) Steps(cfg *recipe.Config) ([]*recipe.Step, error) {
 			DependsOn: []string{},
 			Processes: []recipe.ProcessSpec{
 				{
-					Name:    "lp-frontend",
+					Name:    "start lp frontend",
 					Command: "make",
 					Args:    []string{"start-frontend"},
 					Dir:     dir,
@@ -50,7 +50,7 @@ func (r *StartLoggingPlugin) Steps(cfg *recipe.Config) ([]*recipe.Step, error) {
 			DependsOn: []string{"start-lp-frontend"},
 			Processes: []recipe.ProcessSpec{
 				{
-					Name:    "lp-backend",
+					Name:    "start lp backend",
 					Command: "make",
 					Args:    []string{"start-backend"},
 					Dir:     dir,
@@ -63,7 +63,7 @@ func (r *StartLoggingPlugin) Steps(cfg *recipe.Config) ([]*recipe.Step, error) {
 			DependsOn: []string{},
 			Processes: []recipe.ProcessSpec{
 				{
-					Name:    "lp-console",
+					Name:    "start lp console",
 					Command: "make",
 					Args:    []string{"start-console"},
 					Dir:     dir,

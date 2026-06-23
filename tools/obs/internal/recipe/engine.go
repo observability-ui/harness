@@ -16,7 +16,7 @@ func (e *Engine) Prepare(segments []RecipeSegment, dryRun bool, checkPorts func(
 	var allSteps []*Step
 
 	for _, seg := range segments {
-		allReqs = append(allReqs, seg.Recipe.Requirements()...)
+		allReqs = append(allReqs, seg.Recipe.Requirements(seg.Flags)...)
 
 		cfg := &Config{Flags: seg.Flags, DryRun: dryRun}
 		steps, err := seg.Recipe.Steps(cfg)
@@ -26,20 +26,21 @@ func (e *Engine) Prepare(segments []RecipeSegment, dryRun bool, checkPorts func(
 		allSteps = append(allSteps, steps...)
 	}
 
-	if checkPorts != nil {
-		allReqs = append(allReqs, portRequirements(allSteps, checkPorts)...)
-	}
-
 	if !dryRun {
 		if err := e.checkRequirements(allReqs); err != nil {
 			return nil, &RequirementsError{Err: err}
+		}
+		if checkPorts != nil {
+			if err := checkPortAvailability(allSteps, checkPorts); err != nil {
+				return nil, &RequirementsError{Err: err}
+			}
 		}
 	}
 
 	return resolveDependencies(allSteps)
 }
 
-func portRequirements(steps []*Step, checkPorts func([]int) error) []Requirement {
+func checkPortAvailability(steps []*Step, checkPorts func([]int) error) error {
 	seen := make(map[int]bool)
 	var ports []int
 	for _, step := range steps {
@@ -55,15 +56,10 @@ func portRequirements(steps []*Step, checkPorts func([]int) error) []Requirement
 	if len(ports) == 0 {
 		return nil
 	}
-	var reqs []Requirement
-	for _, p := range ports {
-		port := p
-		reqs = append(reqs, Requirement{
-			Name:  fmt.Sprintf("port %d", port),
-			Check: func() error { return checkPorts([]int{port}) },
-		})
+	if err := checkPorts(ports); err != nil {
+		return fmt.Errorf("port availability check failed:\n  - %v", err)
 	}
-	return reqs
+	return nil
 }
 
 type RequirementsError struct {

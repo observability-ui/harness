@@ -18,7 +18,7 @@ func (r *prepareStubRecipe) Name() string                              { return 
 func (r *prepareStubRecipe) Aliases() []string                         { return nil }
 func (r *prepareStubRecipe) Description() string                       { return "" }
 func (r *prepareStubRecipe) Flags() *pflag.FlagSet                     { return pflag.NewFlagSet(r.name, pflag.ContinueOnError) }
-func (r *prepareStubRecipe) Requirements() []recipe.Requirement        { return r.reqs }
+func (r *prepareStubRecipe) Requirements(_ *pflag.FlagSet) []recipe.Requirement { return r.reqs }
 func (r *prepareStubRecipe) Steps(_ *recipe.Config) ([]*recipe.Step, error) { return r.steps, nil }
 
 func TestEngine_Prepare(t *testing.T) {
@@ -165,6 +165,52 @@ func TestEngine_Prepare_AutoPortRequirements_Fail(t *testing.T) {
 	}
 	if _, ok := err.(*recipe.RequirementsError); !ok {
 		t.Fatalf("expected RequirementsError, got %T: %v", err, err)
+	}
+}
+
+func TestEngine_Prepare_RequireFlag_Missing(t *testing.T) {
+	eng := recipe.NewEngine()
+
+	fs := pflag.NewFlagSet("test", pflag.ContinueOnError)
+	fs.String("image", "", "container image")
+
+	seg := recipe.RecipeSegment{
+		Recipe: &prepareStubRecipe{
+			name:  "test",
+			reqs:  []recipe.Requirement{recipe.RequireFlag(fs, "image", "container image to deploy")},
+			steps: []*recipe.Step{{Name: "s1"}},
+		},
+		Flags: fs,
+	}
+
+	_, err := eng.Prepare([]recipe.RecipeSegment{seg}, false, nil)
+	if err == nil {
+		t.Fatal("should fail when required flag is not set")
+	}
+	if _, ok := err.(*recipe.RequirementsError); !ok {
+		t.Fatalf("expected RequirementsError, got %T", err)
+	}
+}
+
+func TestEngine_Prepare_RequireFlag_Set(t *testing.T) {
+	eng := recipe.NewEngine()
+
+	fs := pflag.NewFlagSet("test", pflag.ContinueOnError)
+	fs.String("image", "", "container image")
+	fs.Parse([]string{"--image=quay.io/my/image:latest"})
+
+	seg := recipe.RecipeSegment{
+		Recipe: &prepareStubRecipe{
+			name:  "test",
+			reqs:  []recipe.Requirement{recipe.RequireFlag(fs, "image", "container image to deploy")},
+			steps: []*recipe.Step{{Name: "s1"}},
+		},
+		Flags: fs,
+	}
+
+	_, err := eng.Prepare([]recipe.RecipeSegment{seg}, false, nil)
+	if err != nil {
+		t.Fatalf("should pass when required flag is set: %v", err)
 	}
 }
 
