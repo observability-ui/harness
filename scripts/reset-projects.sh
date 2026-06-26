@@ -80,6 +80,8 @@ reset_submodule() {
 
     git -C "$submodule_dir" clean -fd --quiet
 
+    git -C "$submodule_dir" submodule update --init --recursive --quiet 2>&1
+
     echo "   reset to ${remote}/${branch} ✓"
   } > "$logfile" 2>&1
 }
@@ -123,8 +125,6 @@ for i in "${!pids[@]}"; do
     echo ""
   fi
 done
-
-git submodule update --init --recursive
 
 echo "═══════════════════════════════════════════════════════════"
 if [[ ${#errors[@]} -gt 0 ]]; then
