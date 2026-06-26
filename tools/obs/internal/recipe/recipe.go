@@ -104,6 +104,21 @@ type Recipe interface {
 	Steps(cfg *Config) ([]*Step, error)
 }
 
+type StepNeed struct {
+	Provider string
+	Config   map[string]string
+}
+
+type NeedfulRecipe interface {
+	Recipe
+	Needs() []StepNeed
+}
+
+type StepProvider interface {
+	Name() string
+	Provide(needs []StepNeed, cfg *Config) ([]*Step, error)
+}
+
 func RequireNode() Requirement   { return RequireTool("node", "install via nvm or brew") }
 func RequireNPM() Requirement    { return RequireTool("npm", "install via nvm or brew") }
 func RequireGo() Requirement     { return RequireTool("go", "") }

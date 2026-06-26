@@ -214,6 +214,138 @@ func TestEngine_Prepare_RequireFlag_Set(t *testing.T) {
 	}
 }
 
+// --- Provider tests ---
+
+type stubProvider struct {
+	name  string
+	steps []*recipe.Step
+}
+
+func (p *stubProvider) Name() string { return p.name }
+func (p *stubProvider) Provide(needs []recipe.StepNeed, cfg *recipe.Config) ([]*recipe.Step, error) {
+	return p.steps, nil
+}
+
+type needfulStubRecipe struct {
+	prepareStubRecipe
+	needs []recipe.StepNeed
+}
+
+func (r *needfulStubRecipe) Needs() []recipe.StepNeed { return r.needs }
+
+func TestEngine_Prepare_ProviderMergesNeeds(t *testing.T) {
+	eng := recipe.NewEngine()
+
+	var receivedNeeds []recipe.StepNeed
+	recipe.RegisterProvider(&stubProvider{
+		name:  "console",
+		steps: []*recipe.Step{{Name: "start-console"}},
+	})
+	// Override with a provider that captures needs
+	recipe.RegisterProvider(&captureProvider{
+		name:  "console",
+		needs: &receivedNeeds,
+		steps: []*recipe.Step{{Name: "start-console"}},
+	})
+
+	seg1 := recipe.RecipeSegment{
+		Recipe: &needfulStubRecipe{
+			prepareStubRecipe: prepareStubRecipe{name: "mp", steps: []*recipe.Step{{Name: "mp-frontend"}}},
+			needs:             []recipe.StepNeed{{Provider: "console", Config: map[string]string{"plugin": "monitoring-plugin"}}},
+		},
+		Flags: pflag.NewFlagSet("mp", pflag.ContinueOnError),
+	}
+	seg2 := recipe.RecipeSegment{
+		Recipe: &needfulStubRecipe{
+			prepareStubRecipe: prepareStubRecipe{name: "lp", steps: []*recipe.Step{{Name: "lp-frontend"}}},
+			needs:             []recipe.StepNeed{{Provider: "console", Config: map[string]string{"plugin": "logging-view-plugin"}}},
+		},
+		Flags: pflag.NewFlagSet("lp", pflag.ContinueOnError),
+	}
+
+	ordered, err := eng.Prepare([]recipe.RecipeSegment{seg1, seg2}, true, nil)
+	if err != nil {
+		t.Fatalf("Prepare failed: %v", err)
+	}
+
+	if len(receivedNeeds) != 2 {
+		t.Fatalf("expected provider called with 2 needs, got %d", len(receivedNeeds))
+	}
+
+	hasConsole := false
+	for _, s := range ordered {
+		if s.Name == "start-console" {
+			hasConsole = true
+		}
+	}
+	if !hasConsole {
+		t.Fatal("expected provider-generated start-console step in output")
+	}
+}
+
+type captureProvider struct {
+	name  string
+	needs *[]recipe.StepNeed
+	steps []*recipe.Step
+}
+
+func (p *captureProvider) Name() string { return p.name }
+func (p *captureProvider) Provide(needs []recipe.StepNeed, cfg *recipe.Config) ([]*recipe.Step, error) {
+	*p.needs = needs
+	return p.steps, nil
+}
+
+func TestEngine_Prepare_NoNeedsRecipeUnchanged(t *testing.T) {
+	eng := recipe.NewEngine()
+
+	seg := recipe.RecipeSegment{
+		Recipe: &prepareStubRecipe{
+			name:  "test",
+			steps: []*recipe.Step{{Name: "s1"}, {Name: "s2", DependsOn: []string{"s1"}}},
+		},
+		Flags: pflag.NewFlagSet("test", pflag.ContinueOnError),
+	}
+
+	ordered, err := eng.Prepare([]recipe.RecipeSegment{seg}, true, nil)
+	if err != nil {
+		t.Fatalf("Prepare failed: %v", err)
+	}
+	if len(ordered) != 2 {
+		t.Fatalf("expected 2 steps, got %d", len(ordered))
+	}
+}
+
+func TestEngine_Prepare_ProviderStepsInDependencyResolution(t *testing.T) {
+	eng := recipe.NewEngine()
+
+	recipe.RegisterProvider(&stubProvider{
+		name:  "infra",
+		steps: []*recipe.Step{{Name: "setup-infra"}},
+	})
+
+	seg := recipe.RecipeSegment{
+		Recipe: &needfulStubRecipe{
+			prepareStubRecipe: prepareStubRecipe{
+				name: "app",
+				steps: []*recipe.Step{{Name: "start-app", DependsOn: []string{"setup-infra"}}},
+			},
+			needs: []recipe.StepNeed{{Provider: "infra"}},
+		},
+		Flags: pflag.NewFlagSet("app", pflag.ContinueOnError),
+	}
+
+	ordered, err := eng.Prepare([]recipe.RecipeSegment{seg}, true, nil)
+	if err != nil {
+		t.Fatalf("Prepare failed: %v", err)
+	}
+	if len(ordered) != 2 {
+		t.Fatalf("expected 2 steps, got %d", len(ordered))
+	}
+	if ordered[0].Name != "setup-infra" {
+		t.Fatalf("expected setup-infra first, got %s", ordered[0].Name)
+	}
+}
+
 func TestEngine_Prepare_CircularDeps(t *testing.T) {
 	eng := recipe.NewEngine()
 

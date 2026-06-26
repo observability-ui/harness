@@ -26,6 +26,12 @@ func (e *Engine) Prepare(segments []RecipeSegment, dryRun bool, checkPorts func(
 		allSteps = append(allSteps, steps...)
 	}
 
+	providerSteps, err := e.resolveProviders(segments)
+	if err != nil {
+		return nil, err
+	}
+	allSteps = append(allSteps, providerSteps...)
+
 	if !dryRun {
 		if err := e.checkRequirements(allReqs); err != nil {
 			return nil, &RequirementsError{Err: err}
@@ -38,6 +44,33 @@ func (e *Engine) Prepare(segments []RecipeSegment, dryRun bool, checkPorts func(
 	}
 
 	return resolveDependencies(allSteps)
+}
+
+func (e *Engine) resolveProviders(segments []RecipeSegment) ([]*Step, error) {
+	grouped := make(map[string][]StepNeed)
+	for _, seg := range segments {
+		nr, ok := seg.Recipe.(NeedfulRecipe)
+		if !ok {
+			continue
+		}
+		for _, need := range nr.Needs() {
+			grouped[need.Provider] = append(grouped[need.Provider], need)
+		}
+	}
+
+	var steps []*Step
+	for providerName, needs := range grouped {
+		provider, ok := GetProvider(providerName)
+		if !ok {
+			return nil, fmt.Errorf("unknown step provider %q", providerName)
+		}
+		provided, err := provider.Provide(needs, &Config{})
+		if err != nil {
+			return nil, fmt.Errorf("provider %q: %w", providerName, err)
+		}
+		steps = append(steps, provided...)
+	}
+	return steps, nil
 }
 
 func checkPortAvailability(steps []*Step, checkPorts func([]int) error) error {
