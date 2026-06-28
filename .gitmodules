@@ -38,3 +38,9 @@
 	path = projects/perses-spec
 	url = https://github.com/perses/spec
 	branch = main
+[submodule "projects/troubleshooting-panel-plugin"]
+	path = projects/troubleshooting-panel-plugin
+	url = https://github.com/openshift/troubleshooting-panel-console-plugin
+[submodule "projects/distributed-tracing-plugin"]
+	path = projects/distributed-tracing-plugin
+	url = https://github.com/openshift/distributed-tracing-console-plugin.git
