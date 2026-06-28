@@ -27,44 +27,60 @@ govulncheck -version             # required for Go projects
 
 If a required tool is missing, stop and tell the user what to install before proceeding.
 
+## Directory Navigation
+
+Every Bash tool call starts from the **repo root**. Never assume you are already in a subdirectory. Never use absolute paths. Use relative paths with
+a single `cd` per Bash call.
+
+In Discovery step 1, resolve the concrete paths to `package.json` and `go.mod` (e.g., `./projects/monitoring-plugin/web` for npm,
+`./projects/monitoring-plugin` for Go). Use these resolved paths directly in all subsequent commands — no placeholders, no abstractions.
+
+**npm commands** — always init nvm, cd to the npm directory, then run the command in a single chain:
+
+```bash
+export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" && cd ./projects/monitoring-plugin/web && nvm use &>/dev/null && npm audit
+```
+
+**Go commands** — cd to the go directory, then run the command:
+
+```bash
+cd ./projects/monitoring-plugin && govulncheck ./...
+```
+
+**git commands** — use `git -C`, no `cd` needed:
+
+```bash
+git -C ./projects/monitoring-plugin branch --show-current
+```
+
+**File reads** — use relative paths from repo root, no `cd`, no leading `./`:
+
+```
+projects/monitoring-plugin/web/package.json
+```
+
 ## Process
 
 ### Phase 1: Discovery
 
 1. **Detect ecosystem and locate files** — find `go.mod`, `package.json`, `.nvmrc`, and `.node-version`. These may be in the project root OR a
-   subdirectory (e.g., `web/`, `frontend/`, `ui/`). Record the directory where each file lives — this is the `<npm-dir>` or `<go-dir>` used in all
-   subsequent commands.
+   subdirectory (e.g., `web/`, `frontend/`, `ui/`). Record the relative path from repo root for each — these become `<npm-dir>` and `<go-dir>` in the
+   prefixes defined above.
 
 ```bash
 find ./projects/<project> -maxdepth 2 -name go.mod -o -name package.json -o -name .nvmrc -o -name .node-version 2>/dev/null
 ```
 
-2. **Switch runtime versions** — check if the project pins a specific runtime version and switch to it before any other commands. Different versions
-   may have different vulnerabilities or available fixes.
+2. **Switch runtime versions** — different versions may have different vulnerabilities or available fixes.
 
-   - **Node**: nvm is a shell function, not a binary — it must be sourced before use. Every Bash call that needs node/npm must initialize nvm first.
-     Look for `.nvmrc` or `.node-version` in the same directory as `package.json` OR in the project root. If found, `cd` to the directory containing
-     the nvm config file and run `nvm use`:
+   - **Node**: if `.nvmrc` or `.node-version` was found, install and activate the correct version:
 
      ```bash
-     export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" && cd ./projects/<project>/<npm-dir> && nvm use
+     export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" && cd <resolved-npm-path> && nvm install && nvm use
      ```
 
-     If the version is not installed, install it first:
-
-     ```bash
-     export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" && cd ./projects/<project>/<npm-dir> && nvm install && nvm use
-     ```
-
-     IMPORTANT: because each Bash tool call runs in a fresh shell, you must prepend the nvm initialization to EVERY subsequent command that uses
-     node or npm throughout the entire skill execution. Always `cd` to the `<npm-dir>` so nvm picks up the correct `.nvmrc`:
-
-     ```bash
-     export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" && cd ./projects/<project>/<npm-dir> && nvm use &>/dev/null && <your npm command>
-     ```
-
-   - **Go**: look for `.go-version` in the `<go-dir>` or the `go` directive in `go.mod`. If `gvm` is available (`command -v gvm`), run
-     `gvm use <version>`. If the version is not installed, tell the user to install it with `gvm install <version>`.
+   - **Go**: look for `.go-version` or the `go` directive in `go.mod`. If `gvm` is available (`command -v gvm`), run `gvm use <version>`. If the
+     version is not installed, tell the user to install it with `gvm install <version>`.
 
 3. **Detect branch** — report to user before proceeding (different branches = different product versions):
 
@@ -72,21 +88,21 @@ find ./projects/<project> -maxdepth 2 -name go.mod -o -name package.json -o -nam
 git -C ./projects/<project> branch --show-current
 ```
 
-4. **Update branch and install dependencies** — pull the latest changes and install dependencies to ensure the analysis reflects the current state:
+4. **Update branch and install dependencies** — pull the latest changes and install to ensure the analysis reflects the current state:
 
 ```bash
 git -C ./projects/<project> pull --ff-only
 ```
 
-- **npm**: `cd ./projects/<project>/<npm-dir> && npm install`
-- **Go**: `cd ./projects/<project> && go mod tidy`
+- **npm**: init nvm, cd to npm dir, then `npm install` (see Directory Navigation for the pattern)
+- **Go**: cd to go dir, then `go mod tidy`
 
 5. **Discover verification commands** — read the project's `Makefile`, `package.json` scripts, `CLAUDE.md`, and `AGENTS.md` to identify build, lint,
    and test commands. Record them for Phase 3.
 
 6. **Run audit**:
-   - **npm**: `cd ./projects/<project>/<npm-dir> && npm audit` (add `--json` for parseable output)
-   - **Go**: `cd ./projects/<project> && govulncheck ./...`
+   - **npm**: init nvm, cd to npm dir, then `npm audit` (add `--json` for parseable output)
+   - **Go**: cd to go dir, then `govulncheck ./...`
    - If a specific CVE or package was given as argument, filter results to that target
 
 7. **Present findings** as a table: package, severity, CVE, current version, fixed version (if known), direct vs transitive.
@@ -110,26 +126,27 @@ Apply fixes using this escalation strategy. Try each level in order — stop at 
 3. **npm audit fix**: if no parent update resolves it → run `npm audit fix`. NEVER use `--force` — it can introduce breaking major version changes.
    This patches the lock file for safe transitive fixes.
 
+All npm commands above must follow the npm command pattern from the Directory Navigation section (init nvm, cd to resolved npm path, then command).
+
 4. **Override**: last resort — no upgrade path exists. Check whether the vulnerable package is only reachable through `devDependencies` (use
-   `npm ls <vulnerable-pkg>` and trace the root ancestor). If it is dev-only, recommend skipping the override — it does not affect production
-   payloads and overriding it risks breaking CI, tests, or build tooling. Report it as a known dev-only vulnerability and move on.
-   If the vulnerability affects production dependencies, add an `overrides` entry in `package.json` pinning the transitive dep to the fixed version.
-   Warn the user this is risky and may cause incompatibilities. Confirm with the user before applying. Always run full verification (Phase 3) after
-   applying overrides.
+   `npm ls <vulnerable-pkg>` and trace the root ancestor). If it is dev-only, recommend skipping the override — it does not affect production payloads
+   and overriding it risks breaking CI, tests, or build tooling. Report it as a known dev-only vulnerability and move on. If the vulnerability affects
+   production dependencies, add an `overrides` entry in `package.json` pinning the transitive dep to the fixed version. Warn the user this is risky
+   and may cause incompatibilities. Confirm with the user before applying. Always run full verification (Phase 3) after applying overrides.
 
 IMPORTANT: the dev-only skip applies ONLY to overrides (step 4). Dev dependencies should still be fixed through steps 1-3 (direct update, parent
 update, npm audit fix) when possible — these are safe and keep the dependency tree clean.
 
 #### Go escalation
 
-1. **Module update**: the vulnerability is in a third-party module → check for an updated version with `go list -m -versions <module>` or the
-   advisory's fixed version → apply with `go get <module>@<version> && go mod tidy`.
+1. **Module update**: the vulnerability is in a third-party module → cd to go dir, then check `go list -m -versions <module>` for an updated version
+   or check the advisory's fixed version → apply with `go get <module>@<version> && go mod tidy`.
 
 2. **Go version upgrade**: the vulnerability is in the Go standard library → check the advisory for the fixed Go version. Update the `go` directive in
    `go.mod`, NOT the `toolchain` directive — the `go` directive is the minimum version requirement that govulncheck checks against and that gets
-   enforced when others build the module. The `toolchain` directive only controls which toolchain binary is downloaded locally.
-   Warn the user this may affect CI/CD pipelines, container base images, and other build systems. Confirm with the user before applying.
-   Always run full verification (Phase 3).
+   enforced when others build the module. The `toolchain` directive only controls which toolchain binary is downloaded locally. Warn the user this may
+   affect CI/CD pipelines, container base images, and other build systems. Confirm with the user before applying. Always run full verification (Phase
+   3).
 
 After each fix, re-run `npm audit` or `govulncheck` to confirm the vulnerability is resolved before proceeding.
 
@@ -159,11 +176,7 @@ when done.
 - Overrides are LAST RESORT — always try direct update, parent update, and audit fix first
 - Always confirm override changes with the user before applying
 - Always verify overrides with build + lint + test
-- ALWAYS use relative paths from the repo root — never absolute paths or `cd /absolute/path && ...` as these trigger permission prompts
-- File reads: `projects/<project>/path/to/file` (relative, no leading `./`)
-- Bash find/grep/ls: `./projects/<project>/...`
-- Git commands in submodules: `git -C ./projects/<project> <command>` (e.g., `git -C ./projects/monitoring-plugin log --oneline -5`)
-- If you must use `cd`, always use the relative form: `cd ./projects/<project> && ...`
+- Follow the **Directory Navigation** section for ALL commands — use the concrete patterns shown there, never ad-hoc `cd` chains
 
 ## Report
 

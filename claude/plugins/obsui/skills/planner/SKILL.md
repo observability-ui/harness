@@ -19,7 +19,8 @@ The projects referenced in the spec live as git submodules under `projects/`. Th
 - Bash find/grep/ls: `./projects/<project>/...`
 - Git commands in submodules: `git -C ./projects/<project> <command>` (e.g., `git -C ./projects/perses log --oneline -5`)
 - NEVER use absolute paths or `cd /absolute/path && git ...` — these trigger permission prompts for untrusted hooks
-- The permission allowlist matches `cd ./projects/* && git *`, so if you must use `cd`, always use the relative form: `cd ./projects/<project> && git ...`
+- The permission allowlist matches `cd ./projects/* && git *`, so if you must use `cd`, always use the relative form:
+  `cd ./projects/<project> && git ...`
 
 ## Steps
 
@@ -150,7 +151,8 @@ at a time. Phases touching different repos or non-overlapping files can run in p
 Before saving, verify the plan against the spec:
 
 1. **Acceptance criteria coverage** — every spec criterion is addressed by a phase/task; Verification section covers all criteria, not just easy ones
-2. **Dependency ordering and parallelism** — phases reference correct dependencies, no phase uses output from a later phase, parallel phases don't modify overlapping files
+2. **Dependency ordering and parallelism** — phases reference correct dependencies, no phase uses output from a later phase, parallel phases don't
+   modify overlapping files
 3. **File path accuracy** — every path exists in the codebase or is marked as a new file
 4. **Component reuse** — new components/functions placed in the right directory given their consumers across all phases
 

@@ -8,12 +8,10 @@
 
 ## Phase 1: Refactor `alerts-data.ts` to generic alert model
 
-Depends on: nothing
-Parallel with: Phase 2 (different file)
-Type: implementation
-Projects: perses-spec
+Depends on: nothing Parallel with: Phase 2 (different file) Type: implementation Projects: perses-spec
 
-- [x] Replace `AlertStatus`, `Receiver`, and AM-coupled `Alert` interfaces with generic `AlertState` type, `Alert`, `SuppressionRule`, `AlertsData`, and `AlertsMetadata` interfaces - `ts/src/dashboard/query-type/alerts-data.ts` -- **done**
+- [x] Replace `AlertStatus`, `Receiver`, and AM-coupled `Alert` interfaces with generic `AlertState` type, `Alert`, `SuppressionRule`, `AlertsData`,
+      and `AlertsMetadata` interfaces - `ts/src/dashboard/query-type/alerts-data.ts` -- **done**
 
 ### Phase 1 Verification
 
@@ -24,12 +22,10 @@ Projects: perses-spec
 
 ## Phase 2: Refactor `silences-data.ts` to generic silence model
 
-Depends on: nothing
-Parallel with: Phase 1 (different file)
-Type: implementation
-Projects: perses-spec
+Depends on: nothing Parallel with: Phase 1 (different file) Type: implementation Projects: perses-spec
 
-- [x] Replace `Matcher`, `SilenceStatus`, and AM-coupled `Silence` interfaces with generic `SilenceState` type, `SilenceMatcher`, `Silence`, `SilencesData`, and `SilencesMetadata` interfaces - `ts/src/dashboard/query-type/silences-data.ts` -- **done**
+- [x] Replace `Matcher`, `SilenceStatus`, and AM-coupled `Silence` interfaces with generic `SilenceState` type, `SilenceMatcher`, `Silence`,
+      `SilencesData`, and `SilencesMetadata` interfaces - `ts/src/dashboard/query-type/silences-data.ts` -- **done**
 
 ### Phase 2 Verification
 
@@ -40,13 +36,12 @@ Projects: perses-spec
 
 ## Phase 3: Verify query type mapping and exports
 
-Depends on: Phase 1, Phase 2
-Parallel with: none
-Type: configuration
-Projects: perses-spec
+Depends on: Phase 1, Phase 2 Parallel with: none Type: configuration Projects: perses-spec
 
-- [x] Verify `query.ts` imports `AlertsData` and `SilencesData` without changes needed - `ts/src/dashboard/query-type/query.ts` -- **passes, no changes needed**
-- [x] Verify `index.ts` re-exports `'./alerts-data'` and `'./silences-data'` without changes needed - `ts/src/dashboard/query-type/index.ts` -- **passes, no changes needed**
+- [x] Verify `query.ts` imports `AlertsData` and `SilencesData` without changes needed - `ts/src/dashboard/query-type/query.ts` -- **passes, no
+      changes needed**
+- [x] Verify `index.ts` re-exports `'./alerts-data'` and `'./silences-data'` without changes needed - `ts/src/dashboard/query-type/index.ts` --
+      **passes, no changes needed**
 
 ### Phase 3 Verification
 

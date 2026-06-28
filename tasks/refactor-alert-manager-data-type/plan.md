@@ -150,9 +150,12 @@ export interface AlertsMetadata extends BaseMetadata {
 - `name` added as an explicit field (was embedded as `labels.alertname` in AM — the plugin is responsible for extracting it)
 - `state` uses the generic lifecycle (`inactive`/`pending`/`firing`/`resolved`) instead of AM-specific states
 - `suppressed` and `acknowledged` are orthogonal boolean flags, not part of the state enum — this matches PagerDuty, OpsGenie, and Zabbix models
-- `suppressedBy` is a `SuppressionRule[]` instead of a flat `string[]` — each entry has a `type` (provider-defined category like `'silence'`, `'inhibition'`, `'mute'`) and an `id`, preserving the reason for suppression without coupling to AM-specific field names. AM maps `silencedBy` -> `{ type: 'silence', id }`, `inhibitedBy` -> `{ type: 'inhibition', id }`, `mutedBy` -> `{ type: 'mute', id }`
+- `suppressedBy` is a `SuppressionRule[]` instead of a flat `string[]` — each entry has a `type` (provider-defined category like `'silence'`,
+  `'inhibition'`, `'mute'`) and an `id`, preserving the reason for suppression without coupling to AM-specific field names. AM maps `silencedBy` ->
+  `{ type: 'silence', id }`, `inhibitedBy` -> `{ type: 'inhibition', id }`, `mutedBy` -> `{ type: 'mute', id }`
 - `severity` is optional because providers vary widely (string label, P1-P5, 0-5 numeric) — the plugin normalizes its provider's model to a string
-- `receivers` kept as an optional `string[]` — this is a cross-provider concept (AM receivers, Grafana contact points, PagerDuty services, OpsGenie responders). Simplified from `Receiver[]` to `string[]` since only the name is needed for filtering; the `Receiver` interface is removed
+- `receivers` kept as an optional `string[]` — this is a cross-provider concept (AM receivers, Grafana contact points, PagerDuty services, OpsGenie
+  responders). Simplified from `Receiver[]` to `string[]` since only the name is needed for filtering; the `Receiver` interface is removed
 - `fingerprint` removed (replaced by generic `id`)
 - `generatorURL` renamed to `sourceURL` (more generic term)
 - `endsAt` and `updatedAt` made optional — not all providers supply both (e.g., OpsGenie has no `endsAt`)
@@ -162,19 +165,19 @@ export interface AlertsMetadata extends BaseMetadata {
 
 The AlertManager plugin (in `perses-plugins`, out of scope for this task) would map its native API response to the generic model:
 
-| AM Field                                        | Generic Field                               | Mapping             |
-| ----------------------------------------------- | ------------------------------------------- | ------------------- |
-| `fingerprint`                                   | `id`                                        | Direct              |
-| `labels.alertname`                              | `name`                                      | Extract from labels |
-| `status.state` = `'active'`                     | `state` = `'firing'`                        | Map                 |
-| `status.state` = `'unprocessed'`                | `state` = `'pending'`                       | Map                 |
-| `status.state` = `'suppressed'`                 | `state` = `'firing'`, `suppressed` = `true` | Split               |
-| `labels.severity`                               | `severity`                                  | Extract from labels |
-| `status.silencedBy`                             | `suppressedBy` entries with `type: 'silence'`    | Map each ID to `{ type: 'silence', id }` |
-| `status.inhibitedBy`                            | `suppressedBy` entries with `type: 'inhibition'` | Map each ID to `{ type: 'inhibition', id }` |
-| `status.mutedBy`                                | `suppressedBy` entries with `type: 'mute'`       | Map each ID to `{ type: 'mute', id }` |
-| `generatorURL`                                  | `sourceURL`                                 | Rename              |
-| `receivers[].name`                              | `receivers`                                 | Extract names       |
+| AM Field                         | Generic Field                                    | Mapping                                     |
+| -------------------------------- | ------------------------------------------------ | ------------------------------------------- |
+| `fingerprint`                    | `id`                                             | Direct                                      |
+| `labels.alertname`               | `name`                                           | Extract from labels                         |
+| `status.state` = `'active'`      | `state` = `'firing'`                             | Map                                         |
+| `status.state` = `'unprocessed'` | `state` = `'pending'`                            | Map                                         |
+| `status.state` = `'suppressed'`  | `state` = `'firing'`, `suppressed` = `true`      | Split                                       |
+| `labels.severity`                | `severity`                                       | Extract from labels                         |
+| `status.silencedBy`              | `suppressedBy` entries with `type: 'silence'`    | Map each ID to `{ type: 'silence', id }`    |
+| `status.inhibitedBy`             | `suppressedBy` entries with `type: 'inhibition'` | Map each ID to `{ type: 'inhibition', id }` |
+| `status.mutedBy`                 | `suppressedBy` entries with `type: 'mute'`       | Map each ID to `{ type: 'mute', id }`       |
+| `generatorURL`                   | `sourceURL`                                      | Rename                                      |
+| `receivers[].name`               | `receivers`                                      | Extract names                               |
 
 #### Phase 1 Verification
 

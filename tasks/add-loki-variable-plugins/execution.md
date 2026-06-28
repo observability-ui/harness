@@ -8,17 +8,15 @@
 
 ## Phase 1: Update Loki Client to Support Matchers
 
-Depends on: nothing
-Parallel with: Phase 2 (CUE schemas — different files)
-Type: implementation
-Projects: perses-plugins
+Depends on: nothing Parallel with: Phase 2 (CUE schemas — different files) Type: implementation Projects: perses-plugins
 
 - [x] Add optional `query` parameter to `LokiClient` interface for `labels()` and `labelValues()` - `loki/src/model/loki-client.ts`
 - [x] Update `labels()` function implementation to accept and pass `query` param to Loki API - `loki/src/model/loki-client.ts`
 - [x] Update `labelValues()` function implementation to accept and pass `query` param to Loki API - `loki/src/model/loki-client.ts`
 - [x] Add `getLokiTimeRange()` helper function - `loki/src/model/loki-client.ts`
 - [x] Update `createClient` in LokiDatasource to pass through `query` parameter - `loki/src/datasources/loki-datasource/LokiDatasource.tsx`
-- [x] Update any existing callers (`complete.ts`) if needed - `loki/src/components/complete.ts` -- **not needed, existing callers pass fewer args and remain valid**
+- [x] Update any existing callers (`complete.ts`) if needed - `loki/src/components/complete.ts` -- **not needed, existing callers pass fewer args and
+      remain valid**
 
 ### Phase 1 Verification
 
@@ -32,10 +30,7 @@ Projects: perses-plugins
 
 ## Phase 2: Create CUE Schemas for Loki Variable Types
 
-Depends on: nothing
-Parallel with: Phase 1 (different file tree)
-Type: configuration
-Projects: perses-plugins
+Depends on: nothing Parallel with: Phase 1 (different file tree) Type: configuration Projects: perses-plugins
 
 - [x] Create LokiLabelValuesVariable CUE schema - `loki/schemas/variables/loki-label-values/loki-label-values.cue`
 - [x] Create LokiLabelValuesVariable valid test fixture - `loki/schemas/variables/loki-label-values/tests/valid/loki-label-values.json`
@@ -48,14 +43,12 @@ Projects: perses-plugins
 ### Phase 2 Verification
 
 - [x] Schema directory structure matches the Prometheus pattern -- **matches (7 files)**
-- [x] CUE files have correct `kind`, `spec`, and datasource selector references -- **correct, uses `ds "github.com/perses/plugins/loki/schemas/datasources:model"`**
+- [x] CUE files have correct `kind`, `spec`, and datasource selector references -- **correct, uses
+      `ds "github.com/perses/plugins/loki/schemas/datasources:model"`**
 
 ## Phase 3: Implement Variable Plugin Types, Runtime Logic, and Editor UI
 
-Depends on: Phase 1
-Parallel with: none
-Type: implementation
-Projects: perses-plugins
+Depends on: Phase 1 Parallel with: none Type: implementation Projects: perses-plugins
 
 ### 3a. Variable types and shared helpers
 

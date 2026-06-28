@@ -4,10 +4,7 @@
 
 ## Phase 1: Define Alert Manager Query Types in perses-spec
 
-Depends on: nothing
-Parallel with: none
-Type: implementation
-Projects: perses-spec
+Depends on: nothing Parallel with: none Type: implementation Projects: perses-spec
 
 ### 1a. Go types
 
@@ -39,10 +36,7 @@ Projects: perses-spec
 
 ## Phase 2: Add Plugin System Support and HierarchicalTable to perses-shared
 
-Depends on: Phase 1
-Parallel with: none
-Type: implementation
-Projects: perses-shared
+Depends on: Phase 1 Parallel with: none Type: implementation Projects: perses-shared
 
 ### 2a. AlertsQuery and SilencesQuery Plugin Types
 
@@ -74,16 +68,14 @@ Projects: perses-shared
 - [x] `AlertsQueryPlugin` and `SilencesQueryPlugin` are exported from `@perses-dev/plugin-system` -- **confirmed**
 - [x] `HierarchicalTable` is exported from `@perses-dev/components` -- **confirmed**
 
-> Note: AlertsData/SilencesData types were defined locally in plugin-system model files since @perses-dev/spec hasn't been published with the new types yet. These should be migrated to import from @perses-dev/spec after Phase 1's branch is merged and published.
+> Note: AlertsData/SilencesData types were defined locally in plugin-system model files since @perses-dev/spec hasn't been published with the new
+> types yet. These should be migrated to import from @perses-dev/spec after Phase 1's branch is merged and published.
 
 ---
 
 ## Phase 3: Create Alert Manager Plugin Module in perses-plugins
 
-Depends on: Phase 2
-Parallel with: none
-Type: implementation
-Projects: perses-plugins
+Depends on: Phase 2 Parallel with: none Type: implementation Projects: perses-plugins
 
 ### 3a. Plugin scaffolding and configuration
 
@@ -119,7 +111,8 @@ Projects: perses-plugins
 
 - [x] Write failing tests for get-silences-data (4 tests)
 - [x] Implement `getSilencesData` - `perses-plugins/alert-manager/src/plugins/alertmanager-silences-query/get-silences-data.ts`
-- [x] Implement `AlertManagerSilencesQuery` plugin - `perses-plugins/alert-manager/src/plugins/alertmanager-silences-query/AlertManagerSilencesQuery.ts`
+- [x] Implement `AlertManagerSilencesQuery` plugin -
+      `perses-plugins/alert-manager/src/plugins/alertmanager-silences-query/AlertManagerSilencesQuery.ts`
 - [x] Implement query editor - `perses-plugins/alert-manager/src/plugins/alertmanager-silences-query/AlertManagerSilencesQueryEditor.tsx`
 - [x] Run tests -- **GREEN (4 pass)**
 
@@ -157,7 +150,8 @@ Projects: perses-plugins
 
 - [x] Create datasource schema - `perses-plugins/alert-manager/schemas/datasource/alertmanager.cue` -- **validated with cue vet**
 - [x] Create alerts query schema - `perses-plugins/alert-manager/schemas/alertmanager-alerts-query/alertmanager-alerts-query.cue` -- **validated**
-- [x] Create silences query schema - `perses-plugins/alert-manager/schemas/alertmanager-silences-query/alertmanager-silences-query.cue` -- **validated**
+- [x] Create silences query schema - `perses-plugins/alert-manager/schemas/alertmanager-silences-query/alertmanager-silences-query.cue` --
+      **validated**
 
 ### Phase 3 Verification
 
@@ -166,7 +160,9 @@ Projects: perses-plugins
 - [x] All 7 module federation entry points reference files that exist -- **verified**
 
 > Notes:
-> - AlertsQueryPlugin/SilencesQueryPlugin interfaces not yet available from published @perses-dev/plugin-system — query plugins use local types with TODO
+>
+> - AlertsQueryPlugin/SilencesQueryPlugin interfaces not yet available from published @perses-dev/plugin-system — query plugins use local types with
+>   TODO
 > - SilenceForm.onSubmit currently logs to console — needs wiring to AlertManagerClient at runtime
 > - Icons use mdi-material-ui (project convention) instead of @mui/icons-material
 
@@ -174,12 +170,10 @@ Projects: perses-plugins
 
 ## Phase 4: Register Alert Manager Plugin in Perses
 
-Depends on: Phase 3
-Parallel with: none
-Type: configuration
-Projects: perses
+Depends on: Phase 3 Parallel with: none Type: configuration Projects: perses
 
-- [x] Add `AlertManager` entry with version `0.1.0` to plugin registry - `perses/scripts/plugin/plugin.yaml` -- **added alphabetically as first entry**
+- [x] Add `AlertManager` entry with version `0.1.0` to plugin registry - `perses/scripts/plugin/plugin.yaml` -- **added alphabetically as first
+      entry**
 
 ### Phase 4 Verification
 
@@ -195,22 +189,22 @@ Projects: perses
 
 ### Git state per project
 
-| Project | Branch | Commits | Base |
-| ------- | ------ | ------- | ---- |
-| perses-spec | `feat/alertmanager-query-types` | 1 | main |
-| perses-shared | `feat/alertmanager-plugin-types` | 4 | main |
-| perses-plugins | `feat/alert-manager-plugin` | 2 | main |
-| perses | `feat/alert-manager-plugin` | 1 | main |
+| Project        | Branch                           | Commits | Base |
+| -------------- | -------------------------------- | ------- | ---- |
+| perses-spec    | `feat/alertmanager-query-types`  | 1       | main |
+| perses-shared  | `feat/alertmanager-plugin-types` | 4       | main |
+| perses-plugins | `feat/alert-manager-plugin`      | 2       | main |
+| perses         | `feat/alert-manager-plugin`      | 1       | main |
 
 ### Test summary
 
-| Project | Suites | Tests | Status |
-| ------- | ------ | ----- | ------ |
-| perses-spec (Go) | 1 | 3 | PASS |
-| perses-spec (TS) | - | type-check only | PASS |
-| perses-shared | 8 | 19 | PASS |
-| perses-plugins/alert-manager | 7 | 50 | PASS |
-| **Total** | **16** | **72** | **ALL PASS** |
+| Project                      | Suites | Tests           | Status       |
+| ---------------------------- | ------ | --------------- | ------------ |
+| perses-spec (Go)             | 1      | 3               | PASS         |
+| perses-spec (TS)             | -      | type-check only | PASS         |
+| perses-shared                | 8      | 19              | PASS         |
+| perses-plugins/alert-manager | 7      | 50              | PASS         |
+| **Total**                    | **16** | **72**          | **ALL PASS** |
 
 ### Outstanding items
 
@@ -223,7 +217,8 @@ Projects: perses
 ### Notes
 
 - Phase 1 → Phase 2 → Phase 3 → Phase 4 executed strictly sequentially due to type dependencies
-- Local linking (`npm link`) resolved cross-repo deps during development; `link-with-perses.sh` had peer dependency conflicts with version mismatches (0.53.1 vs 0.54.0-beta.1)
+- Local linking (`npm link`) resolved cross-repo deps during development; `link-with-perses.sh` had peer dependency conflicts with version mismatches
+  (0.53.1 vs 0.54.0-beta.1)
 - Fixed pre-existing bug: `isValidQueryPluginType` in perses-spec was missing `LogQuery` from validation array
 - Fixed Jest 30 ESM compatibility issues in perses-shared (`__dirname` → `import.meta.url`, added `.ts` extensions to imports)
 - Icons in perses-plugins use `mdi-material-ui` (project convention) instead of `@mui/icons-material`

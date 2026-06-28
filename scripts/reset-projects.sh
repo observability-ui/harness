@@ -51,39 +51,50 @@ reset_submodule() {
   local display_name
   display_name="$(basename "$path")"
 
-  {
+  (
+    set +e
     echo "── $display_name ──────────────────────────────────"
 
     if [[ ! -d "$submodule_dir/.git" ]] && [[ ! -f "$submodule_dir/.git" ]]; then
       echo "   initializing submodule..."
-      git -C "$REPO_ROOT" submodule update --init "$path" 2>&1
+      if ! git -C "$REPO_ROOT" submodule update --init "$path" 2>&1; then
+        echo "   ERROR: failed to initialize submodule"
+        exit 1
+      fi
     fi
 
     local remote
     remote="$(find_remote_for_url "$submodule_dir" "$url")" || {
-      echo "   ERROR: no remote matches URL '$url'" >&2
-      return 1
+      echo "   ERROR: no remote matches URL '$url'"
+      exit 1
     }
 
     echo "   branch: $branch  remote: $remote"
 
     echo "   fetching ${remote}/${branch}..."
     if ! git -C "$submodule_dir" fetch "$remote" "$branch" --quiet 2>&1; then
-      echo "   ERROR: fetch failed for ${remote}/${branch}" >&2
-      return 1
+      echo "   ERROR: fetch failed for ${remote}/${branch}"
+      exit 1
     fi
 
-    git -C "$submodule_dir" checkout "$branch" --quiet 2>/dev/null || \
-      git -C "$submodule_dir" checkout -B "$branch" "${remote}/${branch}" --quiet
+    if ! git -C "$submodule_dir" checkout "$branch" --quiet 2>/dev/null; then
+      if ! git -C "$submodule_dir" checkout -B "$branch" "${remote}/${branch}" --quiet 2>&1; then
+        echo "   ERROR: checkout failed for branch '$branch'"
+        exit 1
+      fi
+    fi
 
-    git -C "$submodule_dir" reset --hard "${remote}/${branch}" --quiet
+    if ! git -C "$submodule_dir" reset --hard "${remote}/${branch}" --quiet 2>&1; then
+      echo "   ERROR: reset --hard failed for ${remote}/${branch}"
+      exit 1
+    fi
 
-    git -C "$submodule_dir" clean -fd --quiet
+    git -C "$submodule_dir" clean -fd --quiet 2>&1 || true
 
-    git -C "$submodule_dir" submodule update --init --recursive --quiet 2>&1
+    git -C "$submodule_dir" submodule update --init --recursive --quiet 2>&1 || true
 
     echo "   reset to ${remote}/${branch} ✓"
-  } > "$logfile" 2>&1
+  ) > "$logfile" 2>&1
 }
 
 echo "═══════════════════════════════════════════════════════════"
@@ -102,11 +113,23 @@ done < <(git config -f "$GITMODULES" --get-regexp 'submodule\..*\.path')
 pids=()
 logfiles=()
 names=()
+errors=()
 
 for name in "${submodule_names[@]}"; do
-  path="$(git config -f "$GITMODULES" "submodule.${name}.path")"
-  branch="$(git config -f "$GITMODULES" "submodule.${name}.branch")"
-  url="$(git config -f "$GITMODULES" "submodule.${name}.url")"
+  path="$(git config -f "$GITMODULES" "submodule.${name}.path" 2>/dev/null)" || true
+  branch="$(git config -f "$GITMODULES" "submodule.${name}.branch" 2>/dev/null)" || true
+  url="$(git config -f "$GITMODULES" "submodule.${name}.url" 2>/dev/null)" || true
+
+  if [[ -z "$path" || -z "$branch" || -z "$url" ]]; then
+    display="$name"
+    [[ -n "$path" ]] && display="$(basename "$path")"
+    echo "── $display ──────────────────────────────────"
+    echo "   SKIPPED: missing .gitmodules config (path=${path:-?} branch=${branch:-?} url=${url:-?})"
+    echo ""
+    errors+=("$display")
+    continue
+  fi
+
   logfile="$TMPDIR_BASE/$(basename "$path").log"
 
   reset_submodule "$name" "$path" "$branch" "$url" "$logfile" &
@@ -115,7 +138,6 @@ for name in "${submodule_names[@]}"; do
   names+=("$(basename "$path")")
 done
 
-errors=()
 for i in "${!pids[@]}"; do
   if ! wait "${pids[$i]}"; then
     errors+=("${names[$i]}")

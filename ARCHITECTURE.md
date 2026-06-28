@@ -1,8 +1,8 @@
 # Architecture
 
-This repository is a monorepo of git submodules for the Observability UI team at Red Hat. It contains 10 projects spanning OpenShift Console plugins,
-the Perses open-source dashboarding platform (CNCF Sandbox), Kubernetes operators, and Red Hat productization pipelines. The repo itself provides AI
-agent tooling (`claude/plugins/`) and structured task tracking (`tasks/` directory with a spec, plan, execution workflow).
+This repository is a monorepo of git submodules for the Observability UI team at Red Hat. It contains projects spanning OpenShift Console plugins, the
+Perses open-source dashboarding platform (CNCF Sandbox), Kubernetes operators, and Red Hat productization pipelines. The repo itself provides AI agent
+tooling (`claude/plugins/`) and structured task tracking (`tasks/` directory with a spec, plan, execution workflow).
 
 Projects are organized as git submodules under `projects/`. Each project has its own repository, CI/CD, and release cycle. Projects span three GitHub
 organizations with different CI systems and contributor workflows: `openshift/` (console, plugins — Prow CI), `perses/` (upstream Perses ecosystem —
@@ -10,18 +10,20 @@ GitHub Actions), and `rhobs/` (operators, productization — GitHub Actions and 
 
 ## Project Catalog
 
-| Project                                                   | Repository                    | Stack               | Purpose                                                                                                                                                  |
-| --------------------------------------------------------- | ----------------------------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [console](projects/console)                               | openshift/console             | Go, React/TS        | OpenShift Web Console. Runtime host for dynamic plugins via webpack module federation.                                                                   |
-| [konflux-coo](projects/konflux-coo)                       | rhobs/konflux-coo             | Dockerfiles, Tekton | Red Hat productization pipeline for COO. Builds container images, OLM bundles, and catalogs via Konflux CI/CD.                                           |
-| [logging-view-plugin](projects/logging-view-plugin)       | openshift/logging-view-plugin | Go, React/TS        | Console dynamic plugin for logging using Loki stack as a backend with the Loki Operator. Deploys via COO.                                                |
-| [monitoring-plugin](projects/monitoring-plugin)           | openshift/monitoring-plugin   | Go, React/TS        | Console dynamic plugin for metrics, alerts, silences, targets, and dashboards (Perses + legacy). Depends on `@perses-dev/*` packages. Deploys via COO.   |
-| [observability-operator](projects/observability-operator) | rhobs/observability-operator  | Go                  | Cluster Observability Operator (COO). Manages monitoring stacks and embeds perses-operator. Deploys via OLM.                                             |
-| [perses](projects/perses)                                 | perses/perses                 | Go, React/TS        | Open-source dashboarding platform (CNCF Sandbox). API server, CLI, and main UI.                                                                          |
-| [perses-operator](projects/perses-operator)               | perses/perses-operator        | Go                  | Kubernetes operator for Perses CRDs: Perses, PersesDashboard, PersesDatasource, PersesGlobalDatasource.                                                  |
-| [perses-plugins](projects/perses-plugins)                 | perses/plugins                | React/TS            | Core Perses plugin modules: datasources (prometheus, loki, tempo, pyroscope, clickhouse, victorialogs), panels, variables, and explore pages.            |
-| [perses-shared](projects/perses-shared)                   | perses/shared                 | React/TS, Turborepo | Published as `@perses-dev/*` npm packages: components, dashboards, explore, plugin-system. Consumed by perses UI, perses-plugins, and monitoring-plugin. |
-| [perses-spec](projects/perses-spec)                       | perses/spec                   | CUE, Go, TS         | CUE specifications for Perses resources. Generated into Go and TypeScript types.                                                                         |
+| Project                                                               | Repository                                     | Stack               | Purpose                                                                                                                                                  |
+| --------------------------------------------------------------------- | ---------------------------------------------- | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [console](projects/console)                                           | openshift/console                              | Go, React/TS        | OpenShift Web Console. Runtime host for dynamic plugins via webpack module federation.                                                                   |
+| [distributed-tracing-plugin](projects/distributed-tracing-plugin)     | openshift/distributed-tracing-console-plugin   | Go, React/TS        | Console dynamic plugin for distributed tracing using Tempo as a backend. Depends on `@perses-dev/*` packages. Deploys via COO.                           |
+| [konflux-coo](projects/konflux-coo)                                   | rhobs/konflux-coo                              | Dockerfiles, Tekton | Red Hat productization pipeline for COO. Builds container images, OLM bundles, and catalogs via Konflux CI/CD.                                           |
+| [logging-view-plugin](projects/logging-view-plugin)                   | openshift/logging-view-plugin                  | Go, React/TS        | Console dynamic plugin for logging using Loki stack as a backend with the Loki Operator. Deploys via COO.                                                |
+| [monitoring-plugin](projects/monitoring-plugin)                       | openshift/monitoring-plugin                    | Go, React/TS        | Console dynamic plugin for metrics, alerts, silences, targets, and dashboards (Perses + legacy). Depends on `@perses-dev/*` packages. Deploys via COO.   |
+| [observability-operator](projects/observability-operator)             | rhobs/observability-operator                   | Go                  | Cluster Observability Operator (COO). Manages monitoring stacks and embeds perses-operator. Deploys via OLM.                                             |
+| [perses](projects/perses)                                             | perses/perses                                  | Go, React/TS        | Open-source dashboarding platform (CNCF Sandbox). API server, CLI, and main UI.                                                                          |
+| [perses-operator](projects/perses-operator)                           | perses/perses-operator                         | Go                  | Kubernetes operator for Perses CRDs: Perses, PersesDashboard, PersesDatasource, PersesGlobalDatasource.                                                  |
+| [perses-plugins](projects/perses-plugins)                             | perses/plugins                                 | React/TS            | Core Perses plugin modules: datasources (prometheus, loki, tempo, pyroscope, clickhouse, victorialogs), panels, variables, and explore pages.            |
+| [perses-shared](projects/perses-shared)                               | perses/shared                                  | React/TS, Turborepo | Published as `@perses-dev/*` npm packages: components, dashboards, explore, plugin-system. Consumed by perses UI, perses-plugins, and monitoring-plugin. |
+| [perses-spec](projects/perses-spec)                                   | perses/spec                                    | CUE, Go, TS         | CUE specifications for Perses resources. Generated into Go and TypeScript types.                                                                         |
+| [troubleshooting-panel-plugin](projects/troubleshooting-panel-plugin) | openshift/troubleshooting-panel-console-plugin | Go, React/TS        | Console dynamic plugin for Korrel8r correlation data. Connects alerts, logs, and metrics in a topology view for troubleshooting. Deploys via COO.        |
 
 ## Dependencies and Feature Delivery
 
@@ -47,11 +49,15 @@ graph LR
     subgraph "OpenShift Integration"
         mon["monitoring-plugin"]
         log["logging-view-plugin"]
+        tracing["distributed-tracing-plugin"]
+        troubleshoot["troubleshooting-panel-plugin"]
         coo["observability-operator\n(COO)"]
         console["console\n(module federation host)"]
 
         mon -- loads into --> console
         log -- loads into --> console
+        tracing -- loads into --> console
+        troubleshoot -- loads into --> console
     end
 
     subgraph Productization
@@ -63,10 +69,13 @@ graph LR
     end
 
     shared -- "npm: @perses-dev/*" --> mon
+    shared -- "npm: @perses-dev/*" --> tracing
     coo -- "Go: embeds via rhobs/ forks" --> operator
 
     mon --> konflux
     log --> konflux
+    tracing --> konflux
+    troubleshoot --> konflux
     coo --> konflux
 
     konflux -- "OLM bundles\ncontainer images" --> ocp
@@ -74,12 +83,12 @@ graph LR
 
 Key relationships:
 
-- **perses-shared is the cross-cutting dependency.** Its `@perses-dev/*` npm packages are consumed by three projects: the perses UI, perses-plugins,
-  and the monitoring-plugin. Version alignment across these consumers is critical.
+- **perses-shared is the cross-cutting dependency.** Its `@perses-dev/*` npm packages are consumed by four projects: the perses UI, perses-plugins,
+  monitoring-plugin, and distributed-tracing-plugin. Version alignment across these consumers is critical.
 - **observability-operator embeds perses-operator** as a Go module dependency via `rhobs/` forks. When COO is installed in an OpenShift cluster, it
   can manage Perses instances, dashboards, and datasources via Kubernetes CRDs.
-- **Console hosts plugins at runtime** via webpack module federation. The monitoring-plugin and logging-view-plugin are built and released
-  independently from Console, then loaded dynamically.
+- **Console hosts plugins at runtime** via webpack module federation. The monitoring-plugin, logging-view-plugin, distributed-tracing-plugin, and
+  troubleshooting-panel-plugin are built and released independently from Console, then loaded dynamically.
 - **konflux-coo is the single productization pipeline.** It builds container images for observability-operator, UI plugins, and all supporting
   components (prometheus, alertmanager, thanos, korrel8r), producing OLM bundles and catalogs pushed to Quay.
 
@@ -92,15 +101,15 @@ Key relationships:
    points.
 3. **Productization.** konflux-coo builds container images from all components using Tekton pipelines, produces OLM bundles and catalogs, and pushes
    to the Quay registry.
-4. **Delivery.** COO is installed on OpenShift clusters via OLM. UIPlugin custom resources install the monitoring and logging plugins into Console.
-   Customers interact with observability features through the Console UI.
+4. **Delivery.** COO is installed on OpenShift clusters via OLM. UIPlugin custom resources install the monitoring, logging, distributed-tracing, and
+   troubleshooting-panel plugins into Console. Customers interact with observability features through the Console UI.
 
 ## Observability UI Plugins
 
-The monitoring-plugin and logging-view-plugin are OpenShift Console dynamic plugins built with webpack module federation. Console loads them at
-runtime without requiring a Console rebuild or redeployment. Each plugin is a container image with a Go backend that serves the static frontend assets
-and proxies API requests. Plugins interact with Console through `@console/dynamic-plugin-sdk`, which is the public API surface for extension points,
-hooks, and shared utilities.
+The monitoring-plugin, logging-view-plugin, distributed-tracing-plugin, and troubleshooting-panel-plugin are OpenShift Console dynamic plugins built
+with webpack module federation. Console loads them at runtime without requiring a Console rebuild or redeployment. Each plugin is a container image
+with a Go backend that serves the static frontend assets and proxies API requests. Plugins interact with Console through
+`@console/dynamic-plugin-sdk`, which is the public API surface for extension points, hooks, and shared utilities.
 
 ### Deployment modes
 
@@ -108,8 +117,9 @@ Plugins are deployed through two paths:
 
 - **CMO-managed (monitoring-plugin core).** The Cluster Monitoring Operator (CMO) manages the core monitoring-plugin deployment. This is the default
   monitoring UI shipped with every OpenShift cluster.
-- **COO-managed (monitoring-console-plugin, logging-view-plugin).** When COO is installed, UIPlugin custom resources install additional plugin
-  instances. The monitoring-console-plugin is a COO-managed variant of the monitoring-plugin that includes extra features not in the CMO-managed core.
+- **COO-managed (monitoring-console-plugin, logging-view-plugin, distributed-tracing-plugin, troubleshooting-panel-plugin).** When COO is installed,
+  UIPlugin custom resources install additional plugin instances. The monitoring-console-plugin is a COO-managed variant of the monitoring-plugin that
+  includes extra features not in the CMO-managed core.
 
 ### Compatibility matrix and feature flags
 
@@ -158,12 +168,13 @@ the upstream repos directly. When upgrading Perses in the operator, the fork bra
 
 When planning tasks that span multiple projects, these dependency chains matter:
 
-- **Perses package upgrades.** When `@perses-dev/*` packages are updated in perses-shared, both perses-plugins and monitoring-plugin must be updated
-  to match. Check version alignment across all three consumers before merging.
+- **Perses package upgrades.** When `@perses-dev/*` packages are updated in perses-shared, perses-plugins, monitoring-plugin, and
+  distributed-tracing-plugin must be updated to match. Check version alignment across all four consumers before merging.
 - **Operator changes.** Changes to perses-operator CRDs or API types propagate through: upstream perses-operator → rhobs/ fork `release-coo-*`
   branches → observability-operator Go dependencies → observability-operator CRD copies in `deploy/perses/crds/` → konflux-coo Dockerfiles.
-- **New plugin features.** Adding a feature to monitoring-plugin or logging-view-plugin may require: Console SDK changes (if new extension points are
-  needed), operator changes (if new UIPlugin spec fields), and konflux-coo updates (if new images or pipeline changes).
+- **New plugin features.** Adding a feature to monitoring-plugin, logging-view-plugin, distributed-tracing-plugin, or troubleshooting-panel-plugin may
+  require: Console SDK changes (if new extension points are needed), operator changes (if new UIPlugin spec fields), and konflux-coo updates (if new
+  images or pipeline changes).
 - **Release alignment.** COO release branches (e.g., `release-1.5`) coordinate versions across observability-operator, rhobs/ forks (e.g.,
   `release-coo-1.5`), and konflux-coo (e.g., `release-1.5`). Feature work should target the correct release branch.
 

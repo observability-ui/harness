@@ -36,7 +36,8 @@ make setup    # install tools and reset submodules to their configured branches
 
 ## Resetting projects
 
-After working on tasks, submodules may have checked-out branches or uncommitted changes. Run `make reset-projects` to reset all submodules back to the branches defined in `.gitmodules` at the latest remote HEAD. This prevents intermediate states from being committed to this meta-repo.
+After working on tasks, submodules may have checked-out branches or uncommitted changes. Run `make reset-projects` to reset all submodules back to the
+branches defined in `.gitmodules` at the latest remote HEAD. This prevents intermediate states from being committed to this meta-repo.
 
 ## Markdown formatting
 

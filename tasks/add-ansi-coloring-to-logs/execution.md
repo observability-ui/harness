@@ -4,10 +4,7 @@
 
 ## Phase 1: Add Dependencies and Create ANSI Utility
 
-Depends on: nothing
-Parallel with: Phase 2 (no file overlap)
-Type: implementation
-Projects: perses-plugins/logstable
+Depends on: nothing Parallel with: Phase 2 (no file overlap) Type: implementation Projects: perses-plugins/logstable
 
 - [x] Add `ansi_up` and `dompurify` as dependencies - `logstable/package.json` -- **done**
 - [x] Create ANSI-to-HTML conversion utility with sanitization - `logstable/src/utils/ansi.ts` -- **done**
@@ -26,10 +23,7 @@ Projects: perses-plugins/logstable
 
 ## Phase 2: Add Theme-Aware ANSI Color Styles via CSS
 
-Depends on: nothing
-Parallel with: Phase 1 (no file overlap)
-Type: configuration
-Projects: perses-plugins/logstable
+Depends on: nothing Parallel with: Phase 1 (no file overlap) Type: configuration Projects: perses-plugins/logstable
 
 - [x] Create CSS file with ANSI color classes using CSS custom properties - `logstable/src/components/LogRow/ansiColors.css` -- **done**
   - Light mode defaults on `:root`
@@ -47,10 +41,7 @@ Projects: perses-plugins/logstable
 
 ## Phase 3: Integrate ANSI Rendering into LogRow
 
-Depends on: Phase 1, Phase 2
-Parallel with: none
-Type: implementation
-Projects: perses-plugins/logstable
+Depends on: Phase 1, Phase 2 Parallel with: none Type: implementation Projects: perses-plugins/logstable
 
 ### 3a. ANSI rendering in LogRow component
 
@@ -75,10 +66,7 @@ Projects: perses-plugins/logstable
 
 ## Phase 4: Testing
 
-Depends on: Phase 3
-Parallel with: none
-Type: implementation
-Projects: perses-plugins/logstable
+Depends on: Phase 3 Parallel with: none Type: implementation Projects: perses-plugins/logstable
 
 - [x] Write comprehensive unit tests for ANSI utility - `logstable/src/utils/ansi.test.ts` -- **13 new tests added (18 total)**
   - Multiple colors on one line
@@ -109,20 +97,21 @@ Projects: perses-plugins/logstable
 
 ### Files changed
 
-| File | Change |
-| ---- | ------ |
-| `logstable/package.json` | Added `ansi_up: ^6.0.0` and `dompurify: ^3.2.3` as dependencies |
-| `logstable/jest.config.ts` | Added `ansi_up` to `transformIgnorePatterns` (ESM-only package) |
-| `logstable/src/utils/ansi.ts` | **New.** `ansiToSanitizedHtml()` and `stripAnsi()` utility functions |
-| `logstable/src/utils/ansi.test.ts` | **New.** 18 unit tests covering colors, edge cases, and XSS prevention |
-| `logstable/src/components/LogRow/ansiColors.css` | **New.** CSS custom properties for ANSI colors with light/dark mode support |
-| `logstable/src/components/LogRow/LogRow.tsx` | ANSI rendering with conditional `dangerouslySetInnerHTML`, CSS import |
-| `logstable/src/components/LogRow/LogRow.test.tsx` | 2 new tests for ANSI rendering in component |
-| `logstable/src/utils/copyHelpers.ts` | `formatLogMessage` and `formatLogEntry` now strip ANSI codes |
-| `logstable/src/utils/copyHelpers.test.ts` | 3 new tests for ANSI stripping in copy operations |
+| File                                              | Change                                                                      |
+| ------------------------------------------------- | --------------------------------------------------------------------------- |
+| `logstable/package.json`                          | Added `ansi_up: ^6.0.0` and `dompurify: ^3.2.3` as dependencies             |
+| `logstable/jest.config.ts`                        | Added `ansi_up` to `transformIgnorePatterns` (ESM-only package)             |
+| `logstable/src/utils/ansi.ts`                     | **New.** `ansiToSanitizedHtml()` and `stripAnsi()` utility functions        |
+| `logstable/src/utils/ansi.test.ts`                | **New.** 18 unit tests covering colors, edge cases, and XSS prevention      |
+| `logstable/src/components/LogRow/ansiColors.css`  | **New.** CSS custom properties for ANSI colors with light/dark mode support |
+| `logstable/src/components/LogRow/LogRow.tsx`      | ANSI rendering with conditional `dangerouslySetInnerHTML`, CSS import       |
+| `logstable/src/components/LogRow/LogRow.test.tsx` | 2 new tests for ANSI rendering in component                                 |
+| `logstable/src/utils/copyHelpers.ts`              | `formatLogMessage` and `formatLogEntry` now strip ANSI codes                |
+| `logstable/src/utils/copyHelpers.test.ts`         | 3 new tests for ANSI stripping in copy operations                           |
 
 ### Notes
 
 - `ansi_up` v6 uses named export (`{ AnsiUp }`) not default — deviated from plan which used default import
-- `ansi_up` renders bold as inline `style="font-weight:bold"` not CSS class — `.ansi-bold` in CSS file won't be applied for bold. Bold still works via inline style.
+- `ansi_up` renders bold as inline `style="font-weight:bold"` not CSS class — `.ansi-bold` in CSS file won't be applied for bold. Bold still works via
+  inline style.
 - XSS protection is double-layered: `ansi_up` HTML-escapes `<` and `>` before DOMPurify runs
