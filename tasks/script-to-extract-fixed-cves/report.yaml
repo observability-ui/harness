@@ -1,0 +1,1421 @@
+cves:
+  - key: CVE-2026-27137
+    component: perses-operator-1-5
+  - key: CVE-2026-27138
+    component: perses-operator-1-5
+  - key: CVE-2026-25679
+    component: perses-operator-1-5
+  - key: CVE-2026-27139
+    component: perses-operator-1-5
+  - key: CVE-2026-27142
+    component: perses-operator-1-5
+  - key: CVE-2026-32282
+    component: perses-operator-1-5
+  - key: CVE-2026-32289
+    component: perses-operator-1-5
+  - key: CVE-2026-33810
+    component: perses-operator-1-5
+  - key: CVE-2026-32288
+    component: perses-operator-1-5
+  - key: CVE-2026-32283
+    component: perses-operator-1-5
+  - key: CVE-2026-33814
+    component: perses-operator-1-5
+  - key: CVE-2026-32281
+    component: perses-operator-1-5
+  - key: CVE-2026-32280
+    component: perses-operator-1-5
+  - key: CVE-2026-39836
+    component: perses-operator-1-5
+  - key: CVE-2026-39825
+    component: perses-operator-1-5
+  - key: CVE-2026-42499
+    component: perses-operator-1-5
+  - key: CVE-2026-39826
+    component: perses-operator-1-5
+  - key: CVE-2026-33811
+    component: perses-operator-1-5
+  - key: CVE-2026-39823
+    component: perses-operator-1-5
+  - key: CVE-2026-39820
+    component: perses-operator-1-5
+  - key: CVE-2026-48801
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-40181
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-6733
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-45736
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-55602
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-6402
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-48779
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-11525
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-6734
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-12143
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-9595
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-9679
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-44705
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-9678
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-41691
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-8723
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-53632
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-9697
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-12151
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-9277
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2025-22868
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2025-22870
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2025-22872
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2025-68121
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2025-61730
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2025-61730
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2025-61726
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2025-61726
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2025-61728
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2025-61728
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2025-47911
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2025-58190
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-25679
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-27139
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-27142
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-32282
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-32289
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-32288
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-32283
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-33814
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-32281
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-32280
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-39836
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-39825
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-42499
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-39826
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-33811
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-39823
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-39820
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-39824
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-42506
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-39821
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-42502
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-25680
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-25681
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-27136
+    component: monitoring-console-plugin-pf5-1-5
+  - key: CVE-2026-48801
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-40181
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-6733
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-49356
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-45736
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-55602
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-48779
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-41239
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-11525
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-41240
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-6734
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-12143
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-49458
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-9595
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-9679
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-44705
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-9678
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-41691
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-8723
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-49459
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-49978
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-0540
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-53632
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-41238
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-9697
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-12151
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-9277
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2025-22868
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2025-22870
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2025-22872
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2025-68121
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2025-61730
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2025-61730
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2025-61726
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2025-61726
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2025-61728
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2025-61728
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2025-47911
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2025-58190
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-25679
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-27139
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-27142
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-32282
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-32289
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-32288
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-32283
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-33814
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-32281
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-32280
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-39836
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-39825
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-42499
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-39826
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-33811
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-39823
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-39820
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-39824
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-42506
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-39821
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-42502
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-25680
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-25681
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-27136
+    component: monitoring-console-plugin-pf6-1-5
+  - key: CVE-2026-48801
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-6733
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-49356
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-45736
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-55602
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-6402
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-48779
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-41239
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-44728
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-11525
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-41240
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-6734
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-12143
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-49458
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-45149
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-9595
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-9679
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-44705
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-9678
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-6321
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-8723
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-49459
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-49978
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-0540
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-6322
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-53632
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-41238
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-9697
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-12151
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-9277
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2025-22868
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2025-22870
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2025-22872
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2025-68121
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2025-61730
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2025-61730
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2025-61726
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2025-61726
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2025-61728
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2025-61728
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2025-47911
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2025-58190
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-25679
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-27139
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-27142
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-32282
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-32289
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-32288
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-32283
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-33814
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-32281
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-32280
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-39836
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-39825
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-42499
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-39826
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-33811
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-39823
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-39820
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-39824
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-42506
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-39821
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-42502
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-25680
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-25681
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-27136
+    component: monitoring-console-plugin-1-5
+  - key: CVE-2026-33896
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-32141
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-40181
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-1525
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-33916
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-33937
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-6733
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-4867
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-33938
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-33672
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-1527
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-49356
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-45736
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-33891
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-55602
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-6402
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-48779
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-33939
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2024-52011
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-33671
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-2950
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-1528
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-33750
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-44728
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-11525
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-53550
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-12143
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2025-64718
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-9595
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-9679
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-44705
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-33894
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-6321
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-33895
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-41691
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-8723
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-34043
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-41305
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-4800
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-33228
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-6322
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-53632
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-2229
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-1526
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-12151
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-9277
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-29063
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-33940
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-33941
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2024-45338
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2025-22868
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2025-22870
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2025-22872
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2025-68121
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2025-61730
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2025-61730
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2025-61726
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2025-61726
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2025-61728
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2025-61728
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2025-47911
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2025-58190
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-25679
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-27139
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-27142
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-32282
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-32289
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-32288
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-32283
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-33814
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-32281
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-32280
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-39836
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-39825
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-42499
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-39826
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-33811
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-39823
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-39820
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-39824
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-42506
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-39821
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-42502
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-25680
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-25681
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-27136
+    component: logging-console-plugin-pf4-1-5
+  - key: CVE-2026-32141
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-40181
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-1525
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-33916
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-33937
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-6733
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-4867
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-33938
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-33672
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-1527
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-49356
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-45736
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-55602
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-6402
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-48779
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-33939
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2024-52011
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-33671
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-2950
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-1528
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-33750
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-44728
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-11525
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-12143
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-45149
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-9595
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-9679
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-44705
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-6321
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-41691
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-34043
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-41305
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-4800
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-33228
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-6322
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-53632
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-2229
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-1526
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-12151
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-9277
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-29063
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-33940
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-33941
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2025-22868
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2025-22870
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2025-22872
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2025-68121
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2025-61730
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2025-61730
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2025-61726
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2025-61726
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2025-61728
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2025-61728
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2025-47911
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2025-58190
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-25679
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-27139
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-27142
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-32282
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-32289
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-32288
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-32283
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-33814
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-32281
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-32280
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-39836
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-39825
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-42499
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-39826
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-33811
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-39823
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-39820
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-39824
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-42506
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-39821
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-42502
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-25680
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-25681
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-27136
+    component: logging-console-plugin-pf5-1-5
+  - key: CVE-2026-6733
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-49356
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-45736
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-55602
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-6402
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-48779
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-44728
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-11525
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-6734
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-12143
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-45149
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-9595
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-9679
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-44705
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-9678
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-6321
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-8723
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-6322
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-53632
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-9697
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-12151
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-9277
+    component: logging-console-plugin-1-5
+  - key: CVE-2025-68121
+    component: logging-console-plugin-1-5
+  - key: CVE-2025-61730
+    component: logging-console-plugin-1-5
+  - key: CVE-2025-61730
+    component: logging-console-plugin-1-5
+  - key: CVE-2025-61726
+    component: logging-console-plugin-1-5
+  - key: CVE-2025-61726
+    component: logging-console-plugin-1-5
+  - key: CVE-2025-61728
+    component: logging-console-plugin-1-5
+  - key: CVE-2025-61728
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-25679
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-27139
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-27142
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-32282
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-32289
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-32288
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-32283
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-32281
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-32280
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-39836
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-39825
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-42499
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-39826
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-33811
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-39823
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-39820
+    component: logging-console-plugin-1-5
+  - key: CVE-2026-6733
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-49356
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2021-23382
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-45736
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-55602
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2023-44270
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2021-33623
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2024-4067
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-48779
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-44728
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2024-6783
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-11525
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2024-4068
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-53550
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-6734
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-12143
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2025-64718
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-9679
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2022-33987
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-44705
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-9678
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-6321
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-41691
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-41305
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-6322
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-53632
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-9697
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-12151
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2020-7753
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-9277
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2025-22870
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2025-22872
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2025-68121
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2025-61730
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2025-61730
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2025-61726
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2025-61726
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2025-61728
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2025-61728
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2025-47911
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2025-58190
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-25679
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-27139
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-27142
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-32282
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-32289
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-32288
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-32283
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-33814
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-32281
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-32280
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-39836
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-39825
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-42499
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-39826
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-33811
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-39823
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-39820
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-39824
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-42506
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-39821
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-42502
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-25680
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-25681
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-27136
+    component: distributed-tracing-console-plugin-pf4-1-5
+  - key: CVE-2026-40181
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-6733
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-49356
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-45736
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-55602
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-6402
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-48779
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-44728
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-11525
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-53550
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-6734
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-12143
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-9595
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-9679
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-44705
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-9678
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-6321
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-41691
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-6322
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-53632
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-9697
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-12151
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-9277
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2025-68121
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2025-61730
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2025-61730
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2025-61726
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2025-61726
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2025-61728
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2025-61728
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-25679
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-27139
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-27142
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-32282
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-32289
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-32288
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-32283
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-33814
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-32281
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-32280
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-39836
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-39825
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-42499
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-39826
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-33811
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-39823
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-39820
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-39824
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-42506
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-39821
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-42502
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-25680
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-25681
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-27136
+    component: distributed-tracing-console-plugin-pf5-1-5
+  - key: CVE-2026-40181
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-6733
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-49356
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-45736
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-55602
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-6402
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-48779
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-44728
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-11525
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-53550
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-6734
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-12143
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-9595
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-9679
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-44705
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-9678
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-6321
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-41691
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-6322
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-53632
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-9697
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-12151
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-9277
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2025-68121
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2025-61730
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2025-61730
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2025-61726
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2025-61726
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2025-61728
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2025-61728
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-25679
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-27139
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-27142
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-32282
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-32289
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-32288
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-32283
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-33814
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-32281
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-32280
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-39836
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-39825
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-42499
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-39826
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-33811
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-39823
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-39820
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-39824
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-42506
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-39821
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-42502
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-25680
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-25681
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-27136
+    component: distributed-tracing-console-plugin-pf6-1-5
+  - key: CVE-2026-6733
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-49356
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-45736
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-55602
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-6402
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-48779
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-44728
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-11525
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-53550
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-6734
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-12143
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-45149
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-9595
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-9679
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-44705
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-9678
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-6321
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-8723
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-6322
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-53632
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-9697
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-12151
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-9277
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2025-68121
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2025-61730
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2025-61730
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2025-61726
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2025-61726
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2025-61728
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2025-61728
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-25679
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-27139
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-27142
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-32282
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-32289
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-32288
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-32283
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-33814
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-32281
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-32280
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-39836
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-39825
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-42499
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-39826
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-33811
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-39823
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-39820
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-39824
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-42506
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-39821
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-42502
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-25680
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-25681
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-27136
+    component: distributed-tracing-console-plugin-1-5
+  - key: CVE-2026-32141
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-40181
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-1525
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-33916
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-33937
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-6733
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-4867
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-33938
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-33672
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-1527
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-49356
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-45736
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-55602
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-6402
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-48779
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-33939
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-33671
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-2950
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-1528
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-33750
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-44728
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-11525
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-53550
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-12143
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2025-64718
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-9595
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-9679
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-44705
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-2581
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-9678
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-6321
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-8723
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-41305
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-4800
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-33228
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-6322
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-53632
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-2229
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-3449
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-1526
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-12151
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-9277
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-29063
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-33940
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-33941
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2025-68121
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2025-61730
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2025-61730
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2025-61726
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2025-61726
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2025-61728
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2025-61728
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-25679
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-27139
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-27142
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-32282
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-32289
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-32288
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-32283
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-32281
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-32280
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-39836
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-39825
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-42499
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-39826
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-33811
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-39823
+    component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-39820
+    component: troubleshooting-panel-console-plugin-pf6-1-5
