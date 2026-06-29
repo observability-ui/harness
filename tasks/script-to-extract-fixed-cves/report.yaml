@@ -507,3 +507,23 @@ cves:
     component: troubleshooting-panel-console-plugin-pf6-1-5
   - key: CVE-2026-33941
     component: troubleshooting-panel-console-plugin-pf6-1-5
+  - key: CVE-2026-48779
+    component: troubleshooting-panel-console-plugin-1-5
+  - key: CVE-2026-44728
+    component: troubleshooting-panel-console-plugin-1-5
+  - key: CVE-2026-6734
+    component: troubleshooting-panel-console-plugin-1-5
+  - key: CVE-2026-12143
+    component: troubleshooting-panel-console-plugin-1-5
+  - key: CVE-2026-44705
+    component: troubleshooting-panel-console-plugin-1-5
+  - key: CVE-2026-6321
+    component: troubleshooting-panel-console-plugin-1-5
+  - key: CVE-2026-6322
+    component: troubleshooting-panel-console-plugin-1-5
+  - key: CVE-2026-9697
+    component: troubleshooting-panel-console-plugin-1-5
+  - key: CVE-2026-12151
+    component: troubleshooting-panel-console-plugin-1-5
+  - key: CVE-2026-9277
+    component: troubleshooting-panel-console-plugin-1-5

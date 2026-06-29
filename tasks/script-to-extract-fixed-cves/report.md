@@ -493,14 +493,25 @@ No high/critical Go vulnerabilities were fixed.
 
 ### Commits analyzed
 
+- `5b562b1 Merge pull request #255 from openshift-cherrypick-robot/cherry-pick-253-to-release-coo-ocp-4.22`
+- `958d195 fix: update vulnerable dependencies`
 - `94d11ba Merge pull request #247 from openshift-cherrypick-robot/cherry-pick-246-to-release-coo-ocp-4.22`
 - `f48f34a fix: COO-1850: Minor UI fixes`
-- `ae1a576 Merge pull request #244 from openshift-cherrypick-robot/cherry-pick-243-to-release-coo-ocp-4.22`
-- `5365208 fix: COO-1841: prevent Error object from rendering as React child in AgentMenu`
 
 ### NPM Vulnerabilities Fixed
 
-No high/critical NPM vulnerabilities were fixed.
+| Advisory | CVE | Package | Severity | Title |
+| -------- | --- | ------- | -------- | ----- |
+| https://github.com/advisories/GHSA-96hv-2xvq-fx4p | CVE-2026-48779 | ws | high | ws: Memory exhaustion DoS from tiny fragments and data chunks |
+| https://github.com/advisories/GHSA-fv7c-fp4j-7gwp | CVE-2026-44728 | @babel/plugin-transform-modules-systemjs | high | @babel/plugin-transform-modules-systemjs generates arbitrary code when compiling malicious input |
+| https://github.com/advisories/GHSA-hm92-r4w5-c3mj | CVE-2026-6734 | undici | high | undici vulnerable to cross-origin request routing via SOCKS5 proxy pool reuse |
+| https://github.com/advisories/GHSA-hmw2-7cc7-3qxx | CVE-2026-12143 | form-data | high | form-data: CRLF injection in form-data via unescaped multipart field names and filenames |
+| https://github.com/advisories/GHSA-ph9p-34f9-6g65 | CVE-2026-44705 | tmp | high | tmp has Path Traversal via unsanitized prefix/postfix that enables directory escape |
+| https://github.com/advisories/GHSA-q3j6-qgpj-74h6 | CVE-2026-6321 | fast-uri | high | fast-uri vulnerable to path traversal via percent-encoded dot segments |
+| https://github.com/advisories/GHSA-v39h-62p7-jpjc | CVE-2026-6322 | fast-uri | high | fast-uri vulnerable to host confusion via percent-encoded authority delimiters |
+| https://github.com/advisories/GHSA-vmh5-mc38-953g | CVE-2026-9697 | undici | high | undici vulnerable to TLS certificate validation bypass via dropped requestTls in SOCKS5 ProxyAgent |
+| https://github.com/advisories/GHSA-vxpw-j846-p89q | CVE-2026-12151 | undici | high | undici WebSocket client vulnerable to denial of service via fragment count bypass |
+| https://github.com/advisories/GHSA-w7jw-789q-3m8p | CVE-2026-9277 | shell-quote | critical | shell-quote quote() does not escape newlines in object .op values |
 
 ### Go Vulnerabilities Fixed
 
@@ -522,5 +533,5 @@ No high/critical Go vulnerabilities were fixed.
 | distributed-tracing-plugin | release-coo-ocp-4.19 | 10 | 8 | 18 | ok |
 | distributed-tracing-plugin | release-coo-ocp-4.22 | 10 | 8 | 18 | ok |
 | troubleshooting-panel-plugin | release-coo-ocp-4.19 | 22 | 0 | 22 | ok |
-| troubleshooting-panel-plugin | release-coo-ocp-4.22 | 0 | 0 | 0 | ok |
+| troubleshooting-panel-plugin | release-coo-ocp-4.22 | 10 | 0 | 10 | ok |
 
