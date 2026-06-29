@@ -46,3 +46,7 @@
 	path = projects/distributed-tracing-plugin
 	url = https://github.com/openshift/distributed-tracing-console-plugin.git
 	branch = main
+[submodule "projects/dashboards-plugin"]
+	path = projects/dashboards-plugin
+	url = https://github.com/openshift/console-dashboards-plugin
+	branch = main
