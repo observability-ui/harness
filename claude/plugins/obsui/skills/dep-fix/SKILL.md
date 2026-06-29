@@ -16,171 +16,185 @@ Audit dependencies for known vulnerabilities and apply fixes with verified safet
 $ARGUMENTS must start with a project name (e.g., `monitoring-plugin`). Optionally followed by a CVE ID (e.g., `CVE-2024-1234`) or package name to
 target a specific vulnerability. If no project name is provided, ask the user for one before proceeding.
 
-## Prerequisites
+## Error Handling
 
-Verify required tools are installed for the detected ecosystems:
-
-```bash
-node --version && npm --version  # required for npm projects
-govulncheck -version             # required for Go projects
-```
-
-If a required tool is missing, stop and tell the user what to install before proceeding.
+If any setup command fails (`git pull`, `npm install`, `go mod tidy`), stop and report the error to the user before proceeding. Do not attempt to
+fix infrastructure issues — they require user intervention.
 
 ## Directory Navigation
 
-Every Bash tool call starts from the **repo root**. Never assume you are already in a subdirectory. Never use absolute paths. Use relative paths with
-a single `cd` per Bash call.
-
-In Discovery step 1, resolve the concrete paths to `package.json` and `go.mod` (e.g., `./projects/monitoring-plugin/web` for npm,
-`./projects/monitoring-plugin` for Go). Use these resolved paths directly in all subsequent commands — no placeholders, no abstractions.
-
-**npm commands** — always init nvm, cd to the npm directory, then run the command in a single chain:
+The shell CWD persists between Bash tool calls. Preferred pattern: **cd into the target directory once** as a standalone call, then run subsequent
+commands without cd. If the agent combines cd with a read-only command like `npm audit`, that is acceptable.
 
 ```bash
-export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" && cd ./projects/monitoring-plugin/web && nvm use &>/dev/null && npm audit
+cd ./projects/<project>/web    # npm — directory containing package.json
+cd ./projects/<project>        # Go — directory containing go.mod
 ```
 
-**Go commands** — cd to the go directory, then run the command:
+Then run commands directly:
 
 ```bash
-cd ./projects/monitoring-plugin && govulncheck ./...
+npm audit --json
+govulncheck ./...
 ```
 
 **git commands** — use `git -C`, no `cd` needed:
 
 ```bash
-git -C ./projects/monitoring-plugin branch --show-current
+git -C ./projects/<project> branch --show-current
 ```
 
 **File reads** — use relative paths from repo root, no `cd`, no leading `./`:
 
 ```
-projects/monitoring-plugin/web/package.json
+projects/<project>/web/package.json
 ```
+
+## Allowed Commands
+
+Subagents should use these commands. Commands not on this list may trigger permission prompts.
+
+**npm:** `npm audit`, `npm audit fix`, `npm audit --json`, `npm ls`, `npm info`, `npm view`, `npm install`, `npm run`
+**audit script:** `npm audit --json > .audit.json 2>/dev/null; echo done` then `node <skill-path>/scripts/audit-summary.js .audit.json`
+**Go:** `go get`, `go mod tidy`, `go build`, `go test`, `go list`, `govulncheck`
+**git:** `git -C <path> <command>` (always with `-C`)
+**shell:** `grep`, `head`, `cat`, `find`
+
+**BANNED — dangerous or unnecessary:**
+- `npm audit fix --force` — may downgrade packages to ancient versions
+- `--legacy-peer-deps` — silently ignores peer dependency conflicts
+- `npm --prefix` — use cd instead
+- `node -e`, `node -p` — use `npm ls` to check versions
+- `python`, `source`, `nvm` — subagents do not manage runtimes
 
 ## Process
 
 ### Phase 1: Discovery
 
-1. **Detect ecosystem and locate files** — find `go.mod`, `package.json`, `.nvmrc`, and `.node-version`. These may be in the project root OR a
-   subdirectory (e.g., `web/`, `frontend/`, `ui/`). Record the relative path from repo root for each — these become `<npm-dir>` and `<go-dir>` in the
-   prefixes defined above.
+1. **Detect ecosystem and locate files**:
 
 ```bash
-find ./projects/<project> -maxdepth 2 -name go.mod -o -name package.json -o -name .nvmrc -o -name .node-version 2>/dev/null
+find ./projects/<project> -maxdepth 2 \( -name go.mod -o -name package.json -o -name .nvmrc -o -name .node-version -o -name "Dockerfile*" \) 2>/dev/null
 ```
 
-2. **Switch runtime versions** — different versions may have different vulnerabilities or available fixes.
+   From the output, identify the directory containing `package.json` (npm dir) and `go.mod` (Go dir). These may be in the project root OR a
+   subdirectory (e.g., `web/`, `frontend/`, `ui/`). If multiple `package.json` files are found (e.g., `web/` and `tests/`), focus on the main
+   application package. Report additional locations to the user.
 
-   - **Node**: if `.nvmrc` or `.node-version` was found, install and activate the correct version:
+   Locate all Dockerfiles. Categorize:
+   - **Modifiable**: any Dockerfile variant EXCEPT `.art`
+   - **NEVER modify**: `Dockerfile.art` — managed by another team
 
-     ```bash
-     export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" && cd <resolved-npm-path> && nvm install && nvm use
-     ```
+2. **Check prerequisites** — verify only the tools needed for the detected ecosystems:
+   - If npm detected: `node --version && npm --version`
+   - If Go detected: `govulncheck -version`
+   - If a required tool is missing, stop and tell the user what to install.
 
-   - **Go**: look for `.go-version` or the `go` directive in `go.mod`. If `gvm` is available (`command -v gvm`), run `gvm use <version>`. If the
-     version is not installed, tell the user to install it with `gvm install <version>`.
+3. **Switch runtime versions** — if `.nvmrc` or `.node-version` was found, tell the user to run `nvm use` in their terminal. If NOT found, use
+   whatever node/npm is in PATH — report the version. For Go, check `.go-version` or the `go` directive in `go.mod`.
 
-3. **Detect branch** — report to user before proceeding (different branches = different product versions):
+4. **Detect branch** — report to user before proceeding:
 
 ```bash
 git -C ./projects/<project> branch --show-current
 ```
 
-4. **Update branch and install dependencies** — pull the latest changes and install to ensure the analysis reflects the current state:
+5. **Update branch and install dependencies**:
 
 ```bash
 git -C ./projects/<project> pull --ff-only
 ```
 
-- **npm**: init nvm, cd to npm dir, then `npm install` (see Directory Navigation for the pattern)
-- **Go**: cd to go dir, then `go mod tidy`
+   If pull fails (no tracking info), skip and warn the user.
 
-5. **Discover verification commands** — read the project's `Makefile`, `package.json` scripts, `CLAUDE.md`, and `AGENTS.md` to identify build, lint,
-   and test commands. Record them for Phase 3.
+   - **npm**: cd to the directory containing `package.json` (discovered in step 1 — e.g., `web/`, `frontend/`), then `npm install`
+   - **Go**: cd to the directory containing `go.mod`, then `go mod tidy`
 
-6. **Run audit**:
-   - **npm**: init nvm, cd to npm dir, then `npm audit` (add `--json` for parseable output)
-   - **Go**: cd to go dir, then `govulncheck ./...`
-   - If a specific CVE or package was given as argument, filter results to that target
+6. **Discover verification commands** — use the Read tool to read `projects/<project>/Makefile`, `package.json` scripts, `CLAUDE.md`, and `AGENTS.md`.
+   Identify build, lint, and test commands for both ecosystems. Record for Phase 3.
 
-7. **Present findings** as a table: package, severity, CVE, current version, fixed version (if known), direct vs transitive.
+7. **Dispatch ecosystem agents** — if the project has BOTH npm and Go, spawn two subagents in parallel. If only one ecosystem, run Phase 2 directly.
 
-If no vulnerabilities found, report clean and stop.
+   Each subagent receives:
+   - The ecosystem (npm or Go) and its resolved directory path
+   - The CVE or package filter (if any)
+   - The audit-summary script path (npm only)
+   - The allowed commands and banned commands from this skill
+   - The verification commands from step 6
+   - **Navigation**: "cd to the directory as your first call. Then run all commands without cd."
 
-### Phase 2: Fix
+   Each subagent returns:
+   1. Vulnerabilities found (table)
+   2. Fixes applied (old → new versions)
+   3. Recommendations needing user confirmation (overrides, Go version upgrades)
+   4. Skipped vulnerabilities with reason
+   5. Remaining vulnerability count
 
-Apply fixes using this escalation strategy. Try each level in order — stop at the first that resolves the vulnerability.
+   Subagents must NOT apply overrides (npm) or Go version upgrades — return as recommendations only.
+   Go subagents must check `go` directive before and after each `go get` — flag implicit bumps.
 
-#### npm escalation
+### Phase 2: Audit and Fix
 
-1. **Direct update**: the vulnerable package is a direct dependency in `package.json` → check `npm info <pkg> versions` for a patched version → update
-   `package.json` + `npm install`.
+#### npm audit and fix
 
-2. **Parent dependency update**: the vulnerability is in a transitive dependency → use `npm ls <vulnerable-pkg>` to trace the dependency chain back to
-   the direct (parent) dependency in `package.json`. Check if the parent has a newer version (`npm info <parent-pkg> versions`) that pulls in a fixed
-   version of the transitive dep. If so, update the parent in `package.json` + `npm install`. This is preferred over `npm audit fix` because it
-   produces a cleaner, more intentional update.
+1. **Audit, fix, re-audit** — run as separate Bash calls:
 
-3. **npm audit fix**: if no parent update resolves it → run `npm audit fix`. NEVER use `--force` — it can introduce breaking major version changes.
-   This patches the lock file for safe transitive fixes.
+   a. `npm audit --json > .audit.json 2>/dev/null; echo done`
+   b. `node <skill-path>/scripts/audit-summary.js .audit.json` — produces a table with: package, declared version, installed version, vuln range,
+      severity, prod/dev, parent chain, fix version, advisory IDs. If installed version is outside the vuln range, it's marked as a false positive.
+   c. `npm audit fix` (NEVER `--force`)
+   d. Re-run steps a-b to see what remains.
+   e. When analysis is complete, clean up: `rm -f .audit.json`
 
-All npm commands above must follow the npm command pattern from the Directory Navigation section (init nvm, cd to resolved npm path, then command).
+2. **For remaining vulnerabilities**, apply fixes in escalation order:
 
-4. **Override**: last resort — no upgrade path exists. Check whether the vulnerable package is only reachable through `devDependencies` (use
-   `npm ls <vulnerable-pkg>` and trace the root ancestor). If it is dev-only, recommend skipping the override — it does not affect production payloads
-   and overriding it risks breaking CI, tests, or build tooling. Report it as a known dev-only vulnerability and move on. If the vulnerability affects
-   production dependencies, add an `overrides` entry in `package.json` pinning the transitive dep to the fixed version. Warn the user this is risky
-   and may cause incompatibilities. Confirm with the user before applying. Always run full verification (Phase 3) after applying overrides.
+   a. **Direct update**: vulnerable package is a direct dep → `npm info <pkg> versions` to find a patched version → update `package.json` +
+      `npm install`. If blocked by peer deps, note the constraining package.
 
-IMPORTANT: the dev-only skip applies ONLY to overrides (step 4). Dev dependencies should still be fixed through steps 1-3 (direct update, parent
-update, npm audit fix) when possible — these are safe and keep the dependency tree clean.
+   b. **Parent dependency update**: transitive dep → use `npm ls <pkg> --depth=3` (only if the audit summary lacks detail) to find the parent →
+      check if parent has an update that pulls in the fix.
 
-#### Go escalation
+   c. **Override**: last resort. If the vuln is dev-only, recommend skipping — it doesn't affect production. If production, recommend an `overrides`
+      entry but DO NOT APPLY without user confirmation.
 
-1. **Module update**: the vulnerability is in a third-party module → cd to go dir, then check `go list -m -versions <module>` for an updated version
-   or check the advisory's fixed version → apply with `go get <module>@<version> && go mod tidy`.
+   The dev-only skip applies ONLY to overrides (step c). Dev deps should still be fixed through steps a-b and npm audit fix.
 
-2. **Go version upgrade**: the vulnerability is in the Go standard library → check the advisory for the fixed Go version. Update the `go` directive in
-   `go.mod`, NOT the `toolchain` directive — the `go` directive is the minimum version requirement that govulncheck checks against and that gets
-   enforced when others build the module. The `toolchain` directive only controls which toolchain binary is downloaded locally. Warn the user this may
-   affect CI/CD pipelines, container base images, and other build systems. Confirm with the user before applying. Always run full verification (Phase
-   3).
+3. **Align declared versions**: when `package.json` was modified (steps a or b), bump the base version to match the installed version
+   (e.g., `^4.17.11` → `^4.17.21`). Always use `^x.y.z`. Skip after npm audit fix (lock file only).
 
-After each fix, re-run `npm audit` or `govulncheck` to confirm the vulnerability is resolved before proceeding.
+#### Go audit and fix
 
-### Phase 3: Verify
+1. **Audit**: `govulncheck ./...`. Report both go.mod directive and local toolchain version. Categorize:
+   - **"Standard library"** → Go version upgrade (step b)
+   - **"Module"** → module update (step a)
 
-Run the project's build, lint, and test commands discovered in Phase 1.
+2. **Fix**:
 
-For override fixes or major version bumps: ALL THREE (build + lint + test) must pass. If any fail, attempt up to 2 fix cycles. If still failing,
-revert the change, report the issue, and suggest the user investigate manually with the versions that were attempted.
+   a. **Module update**: `go get <module>@<version> && go mod tidy`. After each `go get`, check if the `go` directive changed — if so, flag as
+      implicit Go version upgrade needing confirmation.
 
-### Phase 4: Cross-branch
+   b. **Go version upgrade**: find the HIGHEST fix version across all stdlib CVEs. Update `go` directive (NOT `toolchain`). Confirm with user first.
 
-After fixing on the current branch, ask the user:
+3. **Re-audit**: `govulncheck ./...` to confirm.
 
-1. "Should I check which other release branches are affected by this vulnerability?"
-2. "Should I apply this fix to other affected release branches?"
+### Phase 3: Update Dockerfiles and Verify
 
-If yes: for each target branch, checkout → re-audit to confirm vulnerability exists → apply same fix strategy → verify → return to original branch
-when done.
+**Dockerfiles** — if Go or Node version changed, scan modifiable Dockerfiles (excluding `.art`) for `FROM` lines with the old version. Show the user
+what will change before applying. Skip if no version changed.
+
+**Verify** — run ALL verification commands from step 6 (both ecosystems). For overrides or major bumps: build + lint + test must ALL pass. Up to 2
+retry cycles. If still failing, revert and report.
 
 ## Safety Rules
 
-- NEVER run `npm audit fix --force`
-- NEVER use `--legacy-peer-deps` — it silently ignores peer dependency conflicts that may cause runtime errors
-- When updating versions in `package.json`, always use the caret range `^x.y.z` — never use tilde `~x.y.z` or exact `x.y.z`
-- NEVER edit `package-lock.json` or `go.sum` directly — let the package manager regenerate them
-- Overrides are LAST RESORT — always try direct update, parent update, and audit fix first
-- Always confirm override changes with the user before applying
-- Always verify overrides with build + lint + test
-- Follow the **Directory Navigation** section for ALL commands — use the concrete patterns shown there, never ad-hoc `cd` chains
+- Use `^x.y.z` for versions — never `~` or exact
+- NEVER edit `package-lock.json` or `go.sum` directly
+- Overrides are LAST RESORT — confirm with user before applying
+- NEVER modify `Dockerfile.art` files
 
 ## Report
 
-When complete, use this template exactly:
+When complete, use this template:
 
 ```
 ## Dependency Audit Report
@@ -203,7 +217,6 @@ When complete, use this template exactly:
 
 | Package | CVE | Severity | Method | Previous Version | Fixed Version |
 |---------|-----|----------|--------|------------------|---------------|
-|         |     |          |        |                  |               |
 
 Methods: `direct update` | `parent update (<parent-pkg>)` | `npm audit fix` | `override` | `module update` | `go version upgrade`
 
@@ -211,15 +224,18 @@ Methods: `direct update` | `parent update (<parent-pkg>)` | `npm audit fix` | `o
 
 | Package | CVE | Severity | Reason |
 |---------|-----|----------|--------|
-|         |     |          |        |
 
-Reasons: `dev-only dependency` | `override too risky` | `no fix available`
+Reasons: `dev-only dependency` | `override too risky` | `no fix available` | `false positive`
 
 ### Unfixed Vulnerabilities
 
 | Package | CVE | Severity | Blocked By | Recommendation |
 |---------|-----|----------|------------|----------------|
-|         |     |          |            |                |
+
+### Dockerfile Updates
+
+| Dockerfile | Old Base Image | New Base Image |
+|------------|---------------|----------------|
 
 ### Verification
 
@@ -228,12 +244,6 @@ Reasons: `dev-only dependency` | `override too risky` | `no fix available`
 | Build |        |       |
 | Lint  |        |       |
 | Test  |        |       |
-
-### Cross-branch Status
-
-| Branch | Affected | Action Taken |
-|--------|----------|--------------|
-|        |          |              |
 ```
 
-Omit sections that have no entries (e.g., if nothing was skipped, omit "Skipped Vulnerabilities"). Always include Summary and Verification.
+Omit empty sections. Always include Summary and Verification.
