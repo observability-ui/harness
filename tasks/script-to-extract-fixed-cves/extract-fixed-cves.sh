@@ -7,7 +7,7 @@ CONFIG_FILE="$SCRIPT_DIR/config.yaml"
 REPORT="$SCRIPT_DIR/report.md"
 WORK_DIR=$(mktemp -d)
 
-YAML_OUTPUT=false
+YAML_OUTPUT=true
 FILTER=""
 for arg in "$@"; do
   case "$arg" in
@@ -71,6 +71,31 @@ done
 
 echo "Loaded ${#ENTRIES[@]} entries from $CONFIG_FILE (default rollback: $DEFAULT_ROLLBACK)" >&2
 
+# ---- Pre-flight: validate all configured project directories ----
+
+validation_errors=0
+seen_invalid_projects=""
+for i in "${!ENTRIES[@]}"; do
+  entry="${ENTRIES[$i]}"
+  project="${entry%%:*}"
+  branch="${entry##*:}"
+  [ -n "$FILTER" ] && [[ "$project" != *"$FILTER"* ]] && continue
+  pdir="$REPO_ROOT/projects/$project"
+  if [ ! -e "$pdir/.git" ]; then
+    echo "[ERROR] [$project @ $branch] Project directory is not a git repo: $pdir" >&2
+    # Print the fix hint once per unique project to avoid repetition
+    if [[ "$seen_invalid_projects" != *"|${project}|"* ]]; then
+      echo "        Fix: git submodule update --init projects/$project" >&2
+      seen_invalid_projects="${seen_invalid_projects}|${project}|"
+    fi
+    validation_errors=$((validation_errors + 1))
+  fi
+done
+if [ "$validation_errors" -gt 0 ]; then
+  echo "[ERROR] $validation_errors entry/entries failed pre-flight validation — aborting." >&2
+  exit 1
+fi
+
 # ---- Cleanup ----
 
 cleanup() {
@@ -90,7 +115,16 @@ trap cleanup EXIT
 
 resolve_remote() {
   local pdir="$1" branch="$2"
-  git -C "$pdir" branch -r | grep -E "/${branch}$" | head -1 | sed 's/^[[:space:]]*//' | cut -d'/' -f1
+  # Try to find the remote by scanning already-fetched tracking branches.
+  # grep exits 1 when there is no match, so guard with || true to avoid a
+  # silent set -e exit before the caller can print a useful error message.
+  local remote
+  remote=$(git -C "$pdir" branch -r | grep -E "/${branch}$" | head -1 | sed 's/^[[:space:]]*//' | cut -d'/' -f1 || true)
+  if [ -z "$remote" ]; then
+    # Branch not fetched yet — fall back to the repo's first configured remote.
+    remote=$(git -C "$pdir" remote 2>/dev/null | head -1 || true)
+  fi
+  echo "$remote"
 }
 
 detect_frontend_dir() {
@@ -150,6 +184,56 @@ extract_go_detail() {
   ' "$json_file" 2>/dev/null | head -1 || true
 }
 
+# Returns the lowercase severity tier (critical|high|medium|low|unknown) for a Go OSV entry.
+# Reads from database_specific.severity first; falls back to parsing the CVSS base score
+# embedded in the vector string via awk when that field is absent.
+extract_go_severity() {
+  local json_file="$1" vid="$2"
+  [ -s "$json_file" ] || { echo "unknown"; return; }
+
+  local tier
+  tier=$(jq -r --arg id "$vid" '
+    select(.osv != null and .osv.id == $id) |
+    # Prefer an explicit tier stored by the Go vuln DB
+    if .osv.database_specific.severity != null then
+      .osv.database_specific.severity | ascii_downcase
+    # Fall back to CVSS vector — emit the numeric base score so awk can bucket it
+    elif (.osv.severity // [] | map(select(.type == "CVSS_V3" or .type == "CVSS_V3_1")) | length) > 0 then
+      (.osv.severity[] | select(.type == "CVSS_V3" or .type == "CVSS_V3_1") | .score)
+    else
+      "unknown"
+    end
+  ' "$json_file" 2>/dev/null | head -1)
+
+  case "$tier" in
+    critical|high|medium|low|unknown) echo "$tier" ;;
+    # Received a raw CVSS vector — extract the base score digit(s) after "CVSS:x.x/"
+    # The Go vuln DB stores pre-computed base scores in database_specific; this path
+    # handles the rare case where only the vector string is available.
+    CVSS:*)
+      local base_score
+      base_score=$(echo "$tier" | awk -F'/' '{
+        for (i=1; i<=NF; i++) {
+          if ($i ~ /^BS:/) { gsub("BS:", "", $i); print $i; exit }
+        }
+        print "0"
+      }')
+      # If we could not extract BS: field, default to unknown (include it to be safe)
+      if [[ "$base_score" == "0" ]]; then
+        echo "unknown"
+      else
+        awk -v s="$base_score" 'BEGIN {
+          if      (s+0 >= 9.0) print "critical"
+          else if (s+0 >= 7.0) print "high"
+          else if (s+0 >= 4.0) print "medium"
+          else                  print "low"
+        }'
+      fi
+      ;;
+    *) echo "unknown" ;;
+  esac
+}
+
 # ---- Per-entry processing ----
 
 process_entry() {
@@ -166,17 +250,13 @@ process_entry() {
   echo "$label Processing $branch..." >&2
 
   if [ ! -e "$pdir/.git" ]; then
-    echo "$label [SKIP] Not found or not a git repo" >&2
-    echo "$project|$branch|0|0|skipped" > "$summary_line"
-    touch "$section_file"
-    return
+    echo "$label [ERROR] Not found or not a git repo: $pdir" >&2
+    exit 1
   fi
 
   if ! git -C "$pdir" diff --quiet 2>/dev/null || ! git -C "$pdir" diff --cached --quiet 2>/dev/null; then
-    echo "$label [SKIP] Uncommitted changes — refusing to modify working tree" >&2
-    echo "$project|$branch|0|0|dirty" > "$summary_line"
-    touch "$section_file"
-    return
+    echo "$label [ERROR] Uncommitted changes in $pdir — refusing to modify working tree" >&2
+    exit 1
   fi
 
   # Save original ref (one file per project, sequential within project so no race)
@@ -189,25 +269,19 @@ process_entry() {
   local remote
   remote=$(resolve_remote "$pdir" "$branch")
   if [ -z "$remote" ]; then
-    echo "$label [SKIP] Cannot find remote for branch $branch" >&2
-    echo "$project|$branch|0|0|no-remote" > "$summary_line"
-    touch "$section_file"
-    return
+    echo "$label [ERROR] Cannot find remote for branch $branch in $pdir" >&2
+    exit 1
   fi
 
   echo "$label Fetching $remote/$branch..." >&2
   if ! git -C "$pdir" fetch "$remote" "$branch" 2>/dev/null; then
-    echo "$label [SKIP] Failed to fetch $remote/$branch" >&2
-    echo "$project|$branch|0|0|fetch-failed" > "$summary_line"
-    touch "$section_file"
-    return
+    echo "$label [ERROR] Failed to fetch $remote/$branch" >&2
+    exit 1
   fi
 
   if ! git -C "$pdir" rev-parse "$remote/$branch~$rollback" &>/dev/null; then
-    echo "$label [SKIP] Branch $branch has fewer than $rollback commits" >&2
-    echo "$project|$branch|0|0|too-few-commits" > "$summary_line"
-    touch "$section_file"
-    return
+    echo "$label [ERROR] Branch $branch has fewer than $rollback commits (need $rollback)" >&2
+    exit 1
   fi
 
   local etmp="$WORK_DIR/${local_dir}_${branch}"
@@ -278,7 +352,54 @@ process_entry() {
   local go_count
   go_count=$(wc -l < "$fixed_go" | tr -d ' ')
 
-  echo "$label $branch: fixed $npm_count npm, $go_count go" >&2
+  # --- Filter NPM by severity (high/critical only) ---
+  # Intermediate files are pre-populated here so the section-writing block
+  # and the YAML fragment can simply cat/read them without re-looping.
+  local npm_table_file="$etmp/npm_table.md"
+  local npm_high_count=0
+  touch "$npm_table_file"
+  if [ -n "$frontend_dir" ] && [ "$npm_count" -gt 0 ]; then
+    while IFS= read -r url; do
+      local detail pkg sev title cve
+      detail=$(extract_npm_detail "$npm_old" "$url")
+      pkg=$(echo "$detail" | cut -f1)
+      sev=$(echo "$detail" | cut -f2)
+      title=$(echo "$detail" | cut -f3)
+      # Skip anything below high
+      [[ "$sev" == "high" || "$sev" == "critical" ]] || continue
+      cve=$(fetch_cve_for_ghsa "$url")
+      echo "${url}|${cve}" >> "$etmp/cve_cache.txt"
+      printf '| %s | %s | %s | %s | %s |\n' "$url" "$cve" "$pkg" "$sev" "$title" \
+        >> "$npm_table_file"
+      npm_high_count=$((npm_high_count + 1))
+    done < "$fixed_npm"
+  fi
+
+  # --- Filter Go by severity (high/critical only) ---
+  local go_table_file="$etmp/go_table.md"
+  local go_aliases_file="$etmp/go_aliases.txt"
+  local go_high_count=0
+  touch "$go_table_file" "$go_aliases_file"
+  if [ -f "$pdir/go.mod" ] && [ "$HAS_GOVULNCHECK" = true ] && [ "$go_count" -gt 0 ]; then
+    while IFS= read -r vid; do
+      local detail aliases module summary sev_tier display_sev
+      detail=$(extract_go_detail "$go_old" "$vid")
+      aliases=$(echo "$detail" | cut -f2)
+      module=$(echo "$detail" | cut -f3)
+      summary=$(echo "$detail" | cut -f4)
+      sev_tier=$(extract_go_severity "$go_old" "$vid")
+      # Skip medium and low; keep high, critical, and unknown (unknown = no data, include to be safe)
+      [[ "$sev_tier" == "medium" || "$sev_tier" == "low" ]] && continue
+      display_sev="${sev_tier^^}"
+      [[ "$display_sev" == "UNKNOWN" ]] && display_sev="N/A"
+      printf '| %s | %s | %s | %s | %s |\n' "$vid" "$aliases" "$module" "$display_sev" "$summary" \
+        >> "$go_table_file"
+      echo "$aliases" >> "$go_aliases_file"
+      go_high_count=$((go_high_count + 1))
+    done < "$fixed_go"
+  fi
+
+  echo "$label $branch: fixed $npm_high_count npm (high/critical), $go_high_count go (high/critical)" >&2
 
   # --- Write report section ---
   {
@@ -300,21 +421,12 @@ process_entry() {
     echo ""
     if [ -z "$frontend_dir" ]; then
       echo "N/A — no frontend in this project."
-    elif [ "$npm_count" -gt 0 ]; then
+    elif [ "$npm_high_count" -gt 0 ]; then
       echo "| Advisory | CVE | Package | Severity | Title |"
       echo "| -------- | --- | ------- | -------- | ----- |"
-      while IFS= read -r url; do
-        local detail pkg sev title cve
-        detail=$(extract_npm_detail "$npm_old" "$url")
-        pkg=$(echo "$detail" | cut -f1)
-        sev=$(echo "$detail" | cut -f2)
-        title=$(echo "$detail" | cut -f3)
-        cve=$(fetch_cve_for_ghsa "$url")
-        echo "${url}|${cve}" >> "$etmp/cve_cache.txt"
-        echo "| $url | $cve | $pkg | $sev | $title |"
-      done < "$fixed_npm"
+      cat "$npm_table_file"
     else
-      echo "No NPM vulnerabilities were fixed."
+      echo "No high/critical NPM vulnerabilities were fixed."
     fi
     echo ""
 
@@ -324,30 +436,23 @@ process_entry() {
       echo "N/A — no go.mod in this project."
     elif [ "$HAS_GOVULNCHECK" = false ]; then
       echo "Skipped — govulncheck not installed."
-    elif [ "$go_count" -gt 0 ]; then
-      echo "| ID | CVE/Aliases | Module | Summary |"
-      echo "| -- | ----------- | ------ | ------- |"
-      while IFS= read -r vid; do
-        local detail aliases module summary
-        detail=$(extract_go_detail "$go_old" "$vid")
-        aliases=$(echo "$detail" | cut -f2)
-        module=$(echo "$detail" | cut -f3)
-        summary=$(echo "$detail" | cut -f4)
-        echo "| $vid | $aliases | $module | $summary |"
-      done < "$fixed_go"
+    elif [ "$go_high_count" -gt 0 ]; then
+      echo "| ID | CVE/Aliases | Module | Severity | Summary |"
+      echo "| -- | ----------- | ------ | -------- | ------- |"
+      cat "$go_table_file"
     else
-      echo "No Go vulnerabilities were fixed."
+      echo "No high/critical Go vulnerabilities were fixed."
     fi
     echo ""
   } > "$section_file"
 
-  echo "$project|$branch|$npm_count|$go_count|ok" > "$summary_line"
+  echo "$project|$branch|$npm_high_count|$go_high_count|ok" > "$summary_line"
 
   # --- YAML fragment ---
   if [ "$YAML_OUTPUT" = true ]; then
     local yaml_file="$WORK_DIR/yaml/${padded_index}.yaml"
     {
-      # NPM CVEs from cache
+      # NPM CVEs — already filtered to high/critical via cve_cache.txt
       if [ -f "$etmp/cve_cache.txt" ]; then
         while IFS='|' read -r _url cve; do
           if [ "$cve" != "N/A" ] && [ -n "$cve" ]; then
@@ -356,12 +461,9 @@ process_entry() {
           fi
         done < "$etmp/cve_cache.txt"
       fi
-      # Go CVEs from aliases
-      if [ -s "$fixed_go" ]; then
-        while IFS= read -r vid; do
-          local detail aliases
-          detail=$(extract_go_detail "$go_old" "$vid")
-          aliases=$(echo "$detail" | cut -f2)
+      # Go CVEs — already filtered to high/critical via go_aliases_file
+      if [ -s "$go_aliases_file" ]; then
+        while IFS= read -r aliases; do
           IFS=', ' read -ra cve_list <<< "$aliases"
           for cve in "${cve_list[@]}"; do
             cve=$(echo "$cve" | tr -d ' ')
@@ -370,7 +472,7 @@ process_entry() {
               echo "    component: $component"
             fi
           done
-        done < "$fixed_go"
+        done < "$go_aliases_file"
       fi
     } > "$yaml_file"
   fi
@@ -413,25 +515,27 @@ done
 echo "Starting parallel processing of ${#unique_projects[@]} projects..." >&2
 
 pids=()
+declare -A pid_project  # maps PID → project name for error reporting
 for project in "${unique_projects[@]}"; do
   if [ -n "$FILTER" ] && [[ "$project" != *"$FILTER"* ]]; then
     continue
   fi
   process_project "$project" &
-  pids+=($!)
+  pid=$!
+  pids+=("$pid")
+  pid_project[$pid]="$project"
 done
 
-# Wait for all background jobs
-failed=0
+# Wait for background jobs — kill all remaining and abort on the first failure
 for pid in "${pids[@]+"${pids[@]}"}"; do
   if ! wait "$pid"; then
-    failed=$((failed + 1))
+    echo "[ERROR] Project group '${pid_project[$pid]}' failed — killing remaining jobs and aborting." >&2
+    for remaining in "${pids[@]+"${pids[@]}"}"; do
+      kill "$remaining" 2>/dev/null || true
+    done
+    exit 1
   fi
 done
-
-if [ "$failed" -gt 0 ]; then
-  echo "[WARN] $failed project group(s) had errors" >&2
-fi
 
 # ---- Assemble report ----
 
