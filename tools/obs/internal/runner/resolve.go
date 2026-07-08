@@ -1,4 +1,4 @@
-package recipe
+package runner
 
 import (
 	"fmt"
@@ -6,9 +6,11 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"obs/internal/component"
 )
 
-func ResolveSpec(spec ProcessSpec) (ProcessSpec, func(), error) {
+func ResolveSpec(spec component.ProcessSpec) (component.ProcessSpec, func(), error) {
 	resolved := spec
 
 	args, tempDir, err := resolveFiles(spec.Args, spec.Files)
@@ -39,7 +41,7 @@ func ResolveSpec(spec ProcessSpec) (ProcessSpec, func(), error) {
 	return resolved, cleanup, nil
 }
 
-func readFileRef(name string, files map[string]FileRef) (string, []byte, error) {
+func readFileRef(name string, files map[string]component.FileRef) (string, []byte, error) {
 	ref, ok := files[name]
 	if !ok {
 		return "", nil, fmt.Errorf("file %q not found in Files map", name)
@@ -51,7 +53,7 @@ func readFileRef(name string, files map[string]FileRef) (string, []byte, error) 
 	return ref.Path, content, nil
 }
 
-func resolveFiles(args []string, files map[string]FileRef) ([]string, string, error) {
+func resolveFiles(args []string, files map[string]component.FileRef) ([]string, string, error) {
 	if len(files) == 0 {
 		return args, "", nil
 	}
@@ -90,4 +92,3 @@ func resolveFiles(args []string, files map[string]FileRef) ([]string, string, er
 	}
 	return resolved, tempDir, nil
 }
-

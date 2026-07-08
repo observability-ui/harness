@@ -6,7 +6,7 @@ import (
 	"io"
 	"sync"
 
-	"obs/internal/recipe"
+	"obs/internal/component"
 )
 
 const DefaultMaxLogLines = 10000
@@ -22,7 +22,7 @@ func NewManager() *Manager {
 	}
 }
 
-func (m *Manager) StartProcess(ctx context.Context, spec recipe.ProcessSpec, writers ...io.Writer) (*Process, error) {
+func (m *Manager) StartProcess(ctx context.Context, spec component.ProcessSpec, writers ...io.Writer) (*Process, error) {
 	m.mu.Lock()
 	if existing, ok := m.processes[spec.Name]; ok && existing.Running() {
 		m.mu.Unlock()

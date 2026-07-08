@@ -5,14 +5,15 @@ import (
 	"fmt"
 	"os"
 
-	tea "github.com/charmbracelet/bubbletea"
+	"obs/internal/component"
 	"obs/internal/process"
-	"obs/internal/recipe"
 	"obs/internal/ui"
+
+	tea "github.com/charmbracelet/bubbletea"
 )
 
-func RunInteractive(ctx context.Context, mgr *process.Manager, prepare func() ([]*recipe.Step, error), updates chan<- recipe.StepUpdate) error {
-	internalUpdates := make(chan recipe.StepUpdate, 100)
+func RunInteractive(ctx context.Context, mgr *process.Manager, prepare func() ([]*component.Step, error), updates chan<- component.StepUpdate) error {
+	internalUpdates := make(chan component.StepUpdate, 100)
 	retryCh := make(chan struct{}, 1)
 	model := ui.NewModel(mgr, internalUpdates, retryCh)
 
@@ -37,8 +38,8 @@ func RunInteractive(ctx context.Context, mgr *process.Manager, prepare func() ([
 			p.Send(ui.RequirementsPassedMsg{Steps: steps})
 
 			cb := StepCallbacks{
-				OnUpdate: func(u recipe.StepUpdate) { internalUpdates <- u },
-				OnProcess: func(step *recipe.Step, spec recipe.ProcessSpec, proc *process.Process) {
+				OnUpdate: func(u component.StepUpdate) { internalUpdates <- u },
+				OnProcess: func(step *component.Step, spec component.ProcessSpec, proc *process.Process) {
 					p.Send(ui.AddProcessTabMsg{StepName: step.Name, Name: spec.Name, Proc: proc})
 				},
 			}

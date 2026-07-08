@@ -12,7 +12,7 @@ import (
 	"syscall"
 	"time"
 
-	"obs/internal/recipe"
+	"obs/internal/component"
 )
 
 type ProcessStatus int
@@ -28,7 +28,7 @@ const (
 const ShutdownTimeout = 5 * time.Second
 
 type Process struct {
-	Spec   recipe.ProcessSpec
+	Spec   component.ProcessSpec
 	Status ProcessStatus
 	Err    error
 	Output *RingBuffer
@@ -38,7 +38,7 @@ type Process struct {
 	done chan struct{}
 }
 
-func NewProcess(spec recipe.ProcessSpec, maxLogLines int) *Process {
+func NewProcess(spec component.ProcessSpec, maxLogLines int) *Process {
 	return &Process{
 		Spec:   spec,
 		Status: ProcessPending,
@@ -51,7 +51,7 @@ func (p *Process) Start(ctx context.Context, extraWriters ...io.Writer) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	p.cmd = exec.CommandContext(ctx, p.Spec.Command, p.Spec.Args...)
+	p.cmd = exec.Command(p.Spec.Command, p.Spec.Args...)
 	if p.Spec.Dir != "" {
 		p.cmd.Dir = p.Spec.Dir
 	}
@@ -83,6 +83,15 @@ func (p *Process) Start(ctx context.Context, extraWriters ...io.Writer) error {
 	}
 
 	p.Status = ProcessRunning
+
+	go func() {
+		// Stop the process group when context is cancelled
+		select {
+		case <-ctx.Done():
+			p.Stop()
+		case <-p.done:
+		}
+	}()
 
 	go func() {
 		err := p.cmd.Wait()
@@ -145,4 +154,3 @@ func (p *Process) PID() int {
 	}
 	return 0
 }
-

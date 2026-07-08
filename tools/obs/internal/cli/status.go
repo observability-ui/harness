@@ -3,8 +3,9 @@ package cli
 import (
 	"fmt"
 
-	"github.com/spf13/cobra"
 	"obs/internal/state"
+
+	"github.com/spf13/cobra"
 )
 
 func newStatusCmd() *cobra.Command {

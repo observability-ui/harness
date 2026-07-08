@@ -7,8 +7,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/spf13/cobra"
 	"obs/internal/state"
+
+	"github.com/spf13/cobra"
 )
 
 func newAttachCmd() *cobra.Command {

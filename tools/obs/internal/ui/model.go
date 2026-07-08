@@ -4,16 +4,17 @@ import (
 	"context"
 	"time"
 
+	"obs/internal/component"
+	"obs/internal/process"
+
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"obs/internal/process"
-	"obs/internal/recipe"
 )
 
-type stepUpdateMsg recipe.StepUpdate
+type stepUpdateMsg component.StepUpdate
 type processOutputMsg struct{}
 type shutdownCompleteMsg struct{}
 
@@ -30,7 +31,7 @@ type processRestartedMsg struct {
 }
 
 type RequirementsCheckingMsg struct{}
-type RequirementsPassedMsg struct{ Steps []*recipe.Step }
+type RequirementsPassedMsg struct{ Steps []*component.Step }
 type RequirementsFailedMsg struct{ Err error }
 
 type reqState int
@@ -42,37 +43,37 @@ const (
 )
 
 type Model struct {
-	tabBar      TabBar
-	mainTab     MainTab
-	processTabs []ProcessTab
-	manager     *process.Manager
-	help        help.Model
-	width       int
-	height      int
-	quitting    bool
-	shutdown    bool
-	updates     <-chan recipe.StepUpdate
-	statusMsg      string
-	reqStatus      reqState
-	reqErr         error
-	retryCh        chan<- struct{}
+	tabBar              TabBar
+	mainTab             MainTab
+	processTabs         []ProcessTab
+	manager             *process.Manager
+	help                help.Model
+	width               int
+	height              int
+	quitting            bool
+	shutdown            bool
+	updates             <-chan component.StepUpdate
+	statusMsg           string
+	reqStatus           reqState
+	reqErr              error
+	retryCh             chan<- struct{}
 	cachedContentHeight int
 }
 
-func NewModel(mgr *process.Manager, updates <-chan recipe.StepUpdate, retryCh chan<- struct{}) Model {
+func NewModel(mgr *process.Manager, updates <-chan component.StepUpdate, retryCh chan<- struct{}) Model {
 	tabs := []string{"main"}
 	mt := NewMainTab()
 	h := help.New()
 	h.ShortSeparator = " · "
 
 	return Model{
-		tabBar:        NewTabBar(tabs),
-		mainTab:       mt,
-		manager:       mgr,
-		help:          h,
-		updates:       updates,
-		reqStatus:     reqChecking,
-		retryCh: retryCh,
+		tabBar:    NewTabBar(tabs),
+		mainTab:   mt,
+		manager:   mgr,
+		help:      h,
+		updates:   updates,
+		reqStatus: reqChecking,
+		retryCh:   retryCh,
 	}
 }
 
@@ -181,19 +182,19 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				continue
 			}
 			step := m.mainTab.GetStep(stepName)
-			if step == nil || step.Status == recipe.StatusDone || step.Status == recipe.StatusStopped || step.Status == recipe.StatusFailed {
+			if step == nil || step.Status == component.StatusDone || step.Status == component.StatusStopped || step.Status == component.StatusFailed {
 				continue
 			}
 			if !proc.Running() {
 				procStatus := MapProcessStatus(proc.Status)
 				var stepErr error
-				if procStatus == recipe.StatusFailed {
+				if procStatus == component.StatusFailed {
 					stepErr = proc.Err
 				}
 				m.mainTab.UpdateStep(stepName, procStatus, stepErr)
 				m.mainTab.UpdateProcess(stepName, tab.Name, procStatus)
-			} else if step.Status != recipe.StatusReady {
-				m.mainTab.UpdateProcess(stepName, tab.Name, recipe.StatusStarted)
+			} else if step.Status != component.StatusReady {
+				m.mainTab.UpdateProcess(stepName, tab.Name, component.StatusStarted)
 			}
 		}
 		cmds = append(cmds, tickOutputRefresh())
@@ -221,7 +222,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			for i := range m.processTabs {
 				if m.processTabs[i].Name == msg.name {
 					m.processTabs[i].SetProcess(msg.proc)
-					m.mainTab.UpdateStep(m.processTabs[i].StepName, recipe.StatusStarted, nil)
+					m.mainTab.UpdateStep(m.processTabs[i].StepName, component.StatusStarted, nil)
 					break
 				}
 			}
@@ -343,7 +344,6 @@ func (m Model) tabIcons() []string {
 	return icons
 }
 
-
 func (m *Model) activeProcessTab() *ProcessTab {
 	if m.tabBar.Active() > 0 {
 		idx := m.tabBar.Active() - 1
@@ -354,7 +354,7 @@ func (m *Model) activeProcessTab() *ProcessTab {
 	return nil
 }
 
-func waitForUpdate(ch <-chan recipe.StepUpdate) tea.Cmd {
+func waitForUpdate(ch <-chan component.StepUpdate) tea.Cmd {
 	return func() tea.Msg {
 		update, ok := <-ch
 		if !ok {

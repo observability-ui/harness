@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/charmbracelet/bubbles/viewport"
 	"obs/internal/process"
-)
 
+	"github.com/charmbracelet/bubbles/viewport"
+)
 
 type ProcessTab struct {
 	Name              string

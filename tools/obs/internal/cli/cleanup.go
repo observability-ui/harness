@@ -6,9 +6,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/spf13/cobra"
 	"obs/internal/process"
 	"obs/internal/state"
+
+	"github.com/spf13/cobra"
 )
 
 func newCleanupCmd() *cobra.Command {

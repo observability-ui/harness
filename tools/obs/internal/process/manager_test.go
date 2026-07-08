@@ -5,15 +5,15 @@ import (
 	"testing"
 	"time"
 
+	"obs/internal/component"
 	"obs/internal/process"
-	"obs/internal/recipe"
 )
 
 func TestManager_StartAndStop(t *testing.T) {
 	mgr := process.NewManager()
 	ctx := context.Background()
 
-	spec := recipe.ProcessSpec{
+	spec := component.ProcessSpec{
 		Name:    "sleeper",
 		Command: "sleep",
 		Args:    []string{"30"},
@@ -49,7 +49,7 @@ func TestManager_OutputCapture(t *testing.T) {
 	mgr := process.NewManager()
 	ctx := context.Background()
 
-	spec := recipe.ProcessSpec{
+	spec := component.ProcessSpec{
 		Name:    "echo",
 		Command: "echo",
 		Args:    []string{"hello world"},

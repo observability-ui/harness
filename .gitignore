@@ -1,3 +1,4 @@
 /bin/
 .playwright-mcp/
 .obs/
+.DS_Store

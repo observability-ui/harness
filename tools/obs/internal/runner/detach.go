@@ -6,8 +6,8 @@ import (
 	"io"
 	"time"
 
+	"obs/internal/component"
 	"obs/internal/process"
-	"obs/internal/recipe"
 	"obs/internal/state"
 )
 
@@ -23,7 +23,7 @@ func NewDetach(stateDir string) *DetachRunner {
 	}
 }
 
-func (r *DetachRunner) Run(ctx context.Context, mgr *process.Manager, steps []*recipe.Step, updates chan<- recipe.StepUpdate) error {
+func (r *DetachRunner) Run(ctx context.Context, mgr *process.Manager, steps []*component.Step, updates chan<- component.StepUpdate) error {
 	if err := r.lock.Acquire(); err != nil {
 		return err
 	}

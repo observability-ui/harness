@@ -3,10 +3,10 @@ package runner
 import (
 	"context"
 
+	"obs/internal/component"
 	"obs/internal/process"
-	"obs/internal/recipe"
 )
 
 type Runner interface {
-	Run(ctx context.Context, mgr *process.Manager, steps []*recipe.Step, updates chan<- recipe.StepUpdate) error
+	Run(ctx context.Context, mgr *process.Manager, steps []*component.Step, updates chan<- component.StepUpdate) error
 }

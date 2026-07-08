@@ -7,19 +7,20 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/charmbracelet/lipgloss"
+	"obs/internal/component"
 	"obs/internal/process"
-	"obs/internal/recipe"
 	"obs/internal/ui"
+
+	"github.com/charmbracelet/lipgloss"
 )
 
 var prefixColors = []lipgloss.Color{
-	lipgloss.Color("6"),  // cyan
-	lipgloss.Color("3"),  // yellow
-	lipgloss.Color("2"),  // green
-	lipgloss.Color("5"),  // magenta
-	lipgloss.Color("4"),  // blue
-	lipgloss.Color("1"),  // red
+	lipgloss.Color("6"), // cyan
+	lipgloss.Color("3"), // yellow
+	lipgloss.Color("2"), // green
+	lipgloss.Color("5"), // magenta
+	lipgloss.Color("4"), // blue
+	lipgloss.Color("1"), // red
 }
 
 type PrefixWriter struct {
@@ -58,11 +59,11 @@ func NewNonInteractive(out io.Writer) *NonInteractiveRunner {
 	return &NonInteractiveRunner{Out: out}
 }
 
-func (r *NonInteractiveRunner) Run(ctx context.Context, mgr *process.Manager, steps []*recipe.Step, updates chan<- recipe.StepUpdate) error {
+func (r *NonInteractiveRunner) Run(ctx context.Context, mgr *process.Manager, steps []*component.Step, updates chan<- component.StepUpdate) error {
 	colorIdx := 0
 
 	cb := StepCallbacks{
-		OnUpdate: func(u recipe.StepUpdate) { updates <- u },
+		OnUpdate: func(u component.StepUpdate) { updates <- u },
 		Writers: func(specName string) []io.Writer {
 			pw := NewPrefixWriter(r.Out, specName, colorIdx)
 			colorIdx++
@@ -90,9 +91,9 @@ func (r *NonInteractiveRunner) Run(ctx context.Context, mgr *process.Manager, st
 			<-s.Proc.Wait()
 
 			status := ui.MapProcessStatus(s.Proc.Status)
-			updates <- recipe.StepUpdate{StepName: s.StepName, Status: status, Err: s.Proc.Err}
+			updates <- component.StepUpdate{StepName: s.StepName, Status: status, Err: s.Proc.Err}
 			var err error
-			if status == recipe.StatusFailed {
+			if status == component.StatusFailed {
 				err = fmt.Errorf("process %q failed: %v", s.Proc.Spec.Name, s.Proc.Err)
 			}
 			results <- procResult{s.StepName, err}

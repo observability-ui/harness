@@ -10,13 +10,13 @@ var (
 	tabPadding = lipgloss.NewStyle().Padding(0, 2)
 
 	activeNameStyle = lipgloss.NewStyle().
-		Bold(true).
-		Underline(true)
+			Bold(true).
+			Underline(true)
 
 	tabBarStyle = lipgloss.NewStyle().
-		BorderBottom(true).
-		BorderStyle(lipgloss.NormalBorder()).
-		BorderForeground(lipgloss.Color("8"))
+			BorderBottom(true).
+			BorderStyle(lipgloss.NormalBorder()).
+			BorderForeground(lipgloss.Color("8"))
 )
 
 type TabBar struct {
@@ -44,8 +44,8 @@ func (tb *TabBar) Prev() {
 	}
 }
 
-func (tb *TabBar) Active() int    { return tb.active }
-func (tb *TabBar) Count() int     { return len(tb.tabs) }
+func (tb *TabBar) Active() int { return tb.active }
+func (tb *TabBar) Count() int  { return len(tb.tabs) }
 func (tb *TabBar) ActiveName() string {
 	if tb.active < len(tb.tabs) {
 		return tb.tabs[tb.active]

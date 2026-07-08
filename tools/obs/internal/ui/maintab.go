@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"strings"
 
+	"obs/internal/component"
+	"obs/internal/process"
+
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/viewport"
 	"github.com/charmbracelet/lipgloss"
-	"obs/internal/process"
-	"obs/internal/recipe"
 )
 
 var (
@@ -22,19 +23,19 @@ type statusDef struct {
 	UseSpinner bool
 }
 
-var statusDefs = map[recipe.Status]statusDef{
-	recipe.StatusPending: {Icon: "○"},
-	recipe.StatusWaiting: {Icon: "◷", Style: lipgloss.NewStyle().Foreground(lipgloss.Color("3"))},
-	recipe.StatusRunning: {UseSpinner: true},
-	recipe.StatusStarted: {UseSpinner: true},
-	recipe.StatusReady:   {Icon: "●", Style: lipgloss.NewStyle().Foreground(lipgloss.Color("2"))},
-	recipe.StatusDone:    {Icon: "✓", Style: lipgloss.NewStyle().Foreground(lipgloss.Color("2"))},
-	recipe.StatusStopped: {Icon: "■", Style: lipgloss.NewStyle().Foreground(lipgloss.Color("8"))},
-	recipe.StatusFailed:  {Icon: "✗", Style: failStyle},
-	recipe.StatusSkipped: {Icon: "⊘"},
+var statusDefs = map[component.Status]statusDef{
+	component.StatusPending: {Icon: "○"},
+	component.StatusWaiting: {Icon: "◷", Style: lipgloss.NewStyle().Foreground(lipgloss.Color("3"))},
+	component.StatusRunning: {UseSpinner: true},
+	component.StatusStarted: {UseSpinner: true},
+	component.StatusReady:   {Icon: "●", Style: lipgloss.NewStyle().Foreground(lipgloss.Color("2"))},
+	component.StatusDone:    {Icon: "✓", Style: lipgloss.NewStyle().Foreground(lipgloss.Color("2"))},
+	component.StatusStopped: {Icon: "■", Style: lipgloss.NewStyle().Foreground(lipgloss.Color("8"))},
+	component.StatusFailed:  {Icon: "✗", Style: failStyle},
+	component.StatusSkipped: {Icon: "⊘"},
 }
 
-func StatusIcon(status recipe.Status, spinnerView string) string {
+func StatusIcon(status component.Status, spinnerView string) string {
 	def := statusDefs[status]
 	if def.UseSpinner {
 		return spinnerView
@@ -48,27 +49,27 @@ func StatusIcon(status recipe.Status, spinnerView string) string {
 	return def.Icon
 }
 
-func MapProcessStatus(ps process.ProcessStatus) recipe.Status {
+func MapProcessStatus(ps process.ProcessStatus) component.Status {
 	switch ps {
 	case process.ProcessFailed:
-		return recipe.StatusFailed
+		return component.StatusFailed
 	case process.ProcessStopped:
-		return recipe.StatusStopped
+		return component.StatusStopped
 	case process.ProcessDone:
-		return recipe.StatusDone
+		return component.StatusDone
 	default:
-		return recipe.StatusDone
+		return component.StatusDone
 	}
 }
 
 type ProcessInfo struct {
 	Name   string
-	Status recipe.Status
+	Status component.Status
 }
 
 type StepState struct {
 	Name      string
-	Status    recipe.Status
+	Status    component.Status
 	Err       error
 	Processes []ProcessInfo
 }
@@ -94,12 +95,12 @@ func (mt *MainTab) SetSize(width, height int) {
 func (mt *MainTab) AddStepWithProcesses(name string, processNames []string) {
 	var procs []ProcessInfo
 	for _, pn := range processNames {
-		procs = append(procs, ProcessInfo{Name: pn, Status: recipe.StatusPending})
+		procs = append(procs, ProcessInfo{Name: pn, Status: component.StatusPending})
 	}
-	mt.steps = append(mt.steps, StepState{Name: name, Status: recipe.StatusPending, Processes: procs})
+	mt.steps = append(mt.steps, StepState{Name: name, Status: component.StatusPending, Processes: procs})
 }
 
-func (mt *MainTab) UpdateProcess(stepName, procName string, status recipe.Status) {
+func (mt *MainTab) UpdateProcess(stepName, procName string, status component.Status) {
 	step := mt.GetStep(stepName)
 	if step == nil {
 		return
@@ -121,14 +122,14 @@ func (mt *MainTab) GetStep(name string) *StepState {
 	return nil
 }
 
-func (mt *MainTab) UpdateStep(name string, status recipe.Status, err error) {
+func (mt *MainTab) UpdateStep(name string, status component.Status, err error) {
 	for i := range mt.steps {
 		if mt.steps[i].Name == name {
 			mt.steps[i].Status = status
 			mt.steps[i].Err = err
-			if status == recipe.StatusDone || status == recipe.StatusStopped ||
-				status == recipe.StatusFailed || status == recipe.StatusSkipped ||
-				status == recipe.StatusReady {
+			if status == component.StatusDone || status == component.StatusStopped ||
+				status == component.StatusFailed || status == component.StatusSkipped ||
+				status == component.StatusReady {
 				for j := range mt.steps[i].Processes {
 					mt.steps[i].Processes[j].Status = status
 				}
@@ -157,7 +158,7 @@ func (mt MainTab) ViewWithRequirements(width, height int, reqStatus reqState, re
 		lines = append(lines, "")
 	case reqPassed:
 		lines = append(lines, lipgloss.NewStyle().Bold(true).Render("Requirements:"))
-		lines = append(lines, fmt.Sprintf("  %s All requirements met", StatusIcon(recipe.StatusDone, "")))
+		lines = append(lines, fmt.Sprintf("  %s All requirements met", StatusIcon(component.StatusDone, "")))
 		lines = append(lines, "")
 	}
 
@@ -170,7 +171,7 @@ func (mt MainTab) ViewWithRequirements(width, height int, reqStatus reqState, re
 	for _, step := range mt.steps {
 		icon := StatusIcon(step.Status, spinnerView)
 		line := fmt.Sprintf("  %s %s", icon, step.Name)
-		if step.Status == recipe.StatusFailed && step.Err != nil {
+		if step.Status == component.StatusFailed && step.Err != nil {
 			line += failStyle.Render(fmt.Sprintf(" — %v", step.Err))
 		}
 		lines = append(lines, line)

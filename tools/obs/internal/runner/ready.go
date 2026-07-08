@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"time"
 
+	"obs/internal/component"
 	"obs/internal/process"
-	"obs/internal/recipe"
 )
 
-func waitDeps(ctx context.Context, step *recipe.Step, ready map[string]chan struct{}, stepErr map[string]error) (skip bool, err error) {
+func waitDeps(ctx context.Context, step *component.Step, ready map[string]chan struct{}, stepErr map[string]error) (skip bool, err error) {
 	for _, dep := range step.DependsOn {
 		if ch, ok := ready[dep]; ok {
 			select {
@@ -25,7 +25,7 @@ func waitDeps(ctx context.Context, step *recipe.Step, ready map[string]chan stru
 	return false, nil
 }
 
-func watchStepReady(ctx context.Context, step *recipe.Step, procs []*process.Process, ch chan struct{}, stepErr map[string]error, onReady func(string, recipe.Status)) {
+func watchStepReady(ctx context.Context, step *component.Step, procs []*process.Process, ch chan struct{}, stepErr map[string]error, onReady func(string, component.Status)) {
 	if step.HasPorts() {
 		var allPorts []int
 		for _, spec := range step.Processes {
@@ -42,7 +42,7 @@ func watchStepReady(ctx context.Context, step *recipe.Step, procs []*process.Pro
 
 		for {
 			if process.ProbePorts(allPorts) {
-				onReady(step.Name, recipe.StatusReady)
+				onReady(step.Name, component.StatusReady)
 				close(ch)
 				return
 			}
