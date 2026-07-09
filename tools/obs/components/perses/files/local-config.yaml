@@ -1,0 +1,26 @@
+security:
+  readonly: false
+  encryption_key: "=tW$56zytgB&3jN2E%7-+qrGZE?v6LCc"
+  enable_auth: false
+
+database:
+  file:
+    folder: "dev/local_db"
+    extension: "json"
+    case_sensitive: false
+
+provisioning:
+  folders:
+    - "dev/data"
+
+ephemeral_dashboard:
+  enable: true
+  cleanup_interval: 1h
+
+frontend:
+  enable_keyboard_shortcuts: true
+  explorer:
+    enable: true
+
+plugin:
+  enable_dev: true

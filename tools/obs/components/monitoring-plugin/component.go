@@ -20,8 +20,7 @@ var Frontend = &component.Component{
 	Dir:         dir,
 	Outputs:     []component.Output{{Name: "port", Value: "9001"}},
 	Config: map[string]string{
-		"make-target":    "start-frontend",
-		"console-plugin": "monitoring-plugin",
+		"make-target": "start-frontend",
 	},
 }
 
@@ -31,7 +30,8 @@ var Backend = &component.Component{
 	Dir:         dir,
 	Outputs:     []component.Output{{Name: "port", Value: "9443"}},
 	Config: map[string]string{
-		"make-target": "start-feature-backend",
+		"make-target":    "start-feature-backend",
+		"console-plugin": "monitoring-plugin",
 	},
 }
 

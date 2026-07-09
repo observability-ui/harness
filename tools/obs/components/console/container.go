@@ -37,9 +37,10 @@ func (s *ContainerStrategy) Run(_ context.Context, comp *component.Component, rc
 		return nil, fmt.Errorf("no container runtime found — install podman or docker")
 	}
 	hostRef := hostReference(rt)
-	plugins := discoverPlugins(rc, hostRef)
+	plugins := discoverPlugins(rc)
+	proxies := discoverProxies()
 
-	env := buildEnv(rc, plugins, hostRef)
+	env := buildEnv(rc, plugins, proxies, hostRef)
 
 	args := []string{"run", "--pull", "always", "--platform", platform, "--rm"}
 	args = append(args, networkArgs(rt)...)
@@ -91,7 +92,7 @@ func (s *ClusterConfigStrategy) Build(_ context.Context, comp *component.Compone
 	return nil, nil
 }
 
-func buildEnv(rc *runcontext.RunContext, plugins []pluginInfo, hostRef string) map[string]string {
+func buildEnv(rc *runcontext.RunContext, plugins []pluginInfo, proxies []proxyInfo, hostRef string) map[string]string {
 	env := map[string]string{
 		"BRIDGE_USER_AUTH":                            "disabled",
 		"BRIDGE_K8S_MODE":                             "off-cluster",
@@ -122,21 +123,19 @@ func buildEnv(rc *runcontext.RunContext, plugins []pluginInfo, hostRef string) m
 		}
 		env["BRIDGE_PLUGINS"] = strings.Join(bridgePlugins, ",")
 		env["BRIDGE_I18N_NAMESPACES"] = strings.Join(i18nNamespaces, ",")
+	}
 
+	if len(proxies) > 0 {
 		var proxyServices []map[string]any
-		for _, p := range plugins {
-			if p.proxyPath != "" {
-				proxyServices = append(proxyServices, map[string]any{
-					"consoleAPIPath": p.proxyPath,
-					"endpoint":      fmt.Sprintf("http://%s:%s", hostRef, p.proxyPort),
-					"authorize":     true,
-				})
-			}
+		for _, p := range proxies {
+			proxyServices = append(proxyServices, map[string]any{
+				"consoleAPIPath": p.path,
+				"endpoint":      fmt.Sprintf("http://%s:%s", hostRef, p.port),
+				"authorize":     true,
+			})
 		}
-		if len(proxyServices) > 0 {
-			proxyJSON, _ := json.Marshal(map[string]any{"services": proxyServices})
-			env["BRIDGE_PLUGIN_PROXY"] = string(proxyJSON)
-		}
+		proxyJSON, _ := json.Marshal(map[string]any{"services": proxyServices})
+		env["BRIDGE_PLUGIN_PROXY"] = string(proxyJSON)
 	}
 
 	return env
@@ -170,13 +169,16 @@ func detectRuntime() string {
 }
 
 type pluginInfo struct {
-	name      string
-	port      string
-	proxyPath string
-	proxyPort string
+	name string
+	port string
 }
 
-func discoverPlugins(rc *runcontext.RunContext, hostRef string) []pluginInfo {
+type proxyInfo struct {
+	path string
+	port string
+}
+
+func discoverPlugins(rc *runcontext.RunContext) []pluginInfo {
 	all := component.All()
 	var plugins []pluginInfo
 	for _, comp := range all {
@@ -194,18 +196,27 @@ func discoverPlugins(rc *runcontext.RunContext, hostRef string) []pluginInfo {
 			}
 		}
 		if port != "" {
-			p := pluginInfo{name: pluginName, port: port}
-			if pp := comp.Config["console-proxy-path"]; pp != "" {
-				p.proxyPath = pp
-				p.proxyPort = comp.Config["console-proxy-port"]
-				if p.proxyPort == "" {
-					p.proxyPort = "8080"
-				}
-			}
-			plugins = append(plugins, p)
+			plugins = append(plugins, pluginInfo{name: pluginName, port: port})
 		}
 	}
 	return plugins
+}
+
+func discoverProxies() []proxyInfo {
+	all := component.All()
+	var proxies []proxyInfo
+	for _, comp := range all {
+		path := comp.Config["console-proxy-path"]
+		if path == "" {
+			continue
+		}
+		port := comp.Config["console-proxy-port"]
+		if port == "" {
+			port = "8080"
+		}
+		proxies = append(proxies, proxyInfo{path: path, port: port})
+	}
+	return proxies
 }
 
 func runOC(args ...string) string {

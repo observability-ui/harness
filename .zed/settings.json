@@ -1,4 +1,18 @@
 {
+  "file_scan_exclusions": [
+    "**/.git",
+    "**/.svn",
+    "**/.hg",
+    "**/.jj",
+    "**/.DS_Store",
+    "**/node_modules",
+    "**/vendor",
+    "**/dist",
+    "**/build",
+    "**/_output",
+    "**/coverage",
+    "**/.next"
+  ],
   "languages": {
     "Markdown": {
       "formatter": {
