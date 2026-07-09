@@ -2,6 +2,8 @@ package mixer_test
 
 import (
 	"context"
+	"errors"
+	"strings"
 	"testing"
 
 	"obs/internal/component"
@@ -46,7 +48,7 @@ func TestMix_SingleComponent(t *testing.T) {
 	})
 
 	m := mixer.New()
-	steps, rc, err := m.Mix(context.Background(), []string{"test-a"}, "local")
+	steps, rc, err := m.Mix(context.Background(), []string{"test-a"}, "local", nil)
 	if err != nil {
 		t.Fatalf("Mix failed: %v", err)
 	}
@@ -72,7 +74,7 @@ func TestMix_DependencyOrder(t *testing.T) {
 	})
 
 	m := mixer.New()
-	steps, _, err := m.Mix(context.Background(), []string{"test-main"}, "local")
+	steps, _, err := m.Mix(context.Background(), []string{"test-main"}, "local", nil)
 	if err != nil {
 		t.Fatalf("Mix failed: %v", err)
 	}
@@ -99,7 +101,7 @@ func TestMix_DeduplicatesSharedComponents(t *testing.T) {
 	})
 
 	m := mixer.New()
-	steps, _, err := m.Mix(context.Background(), []string{"app-a", "app-b"}, "local")
+	steps, _, err := m.Mix(context.Background(), []string{"app-a", "app-b"}, "local", nil)
 	if err != nil {
 		t.Fatalf("Mix failed: %v", err)
 	}
@@ -123,7 +125,7 @@ func TestMix_OutputsWrittenToRunContext(t *testing.T) {
 	})
 
 	m := mixer.New()
-	_, rc, err := m.Mix(context.Background(), []string{"svc"}, "local")
+	_, rc, err := m.Mix(context.Background(), []string{"svc"}, "local", nil)
 	if err != nil {
 		t.Fatalf("Mix failed: %v", err)
 	}
@@ -132,10 +134,78 @@ func TestMix_OutputsWrittenToRunContext(t *testing.T) {
 	}
 }
 
+func TestMix_CircularDependency(t *testing.T) {
+	setup()
+	component.Register(&component.Component{
+		Name:      "cycle-a",
+		DependsOn: []string{"cycle-b"},
+	})
+	component.Register(&component.Component{
+		Name:      "cycle-b",
+		DependsOn: []string{"cycle-a"},
+	})
+
+	m := mixer.New()
+	_, _, err := m.Mix(context.Background(), []string{"cycle-a"}, "local", nil)
+	if err == nil {
+		t.Fatal("expected error for circular dependency")
+	}
+	if !strings.Contains(err.Error(), "circular dependency") {
+		t.Fatalf("expected circular dependency error, got: %v", err)
+	}
+}
+
 func TestMix_UnknownComponent(t *testing.T) {
 	m := mixer.New()
-	_, _, err := m.Mix(context.Background(), []string{"nonexistent"}, "local")
+	_, _, err := m.Mix(context.Background(), []string{"nonexistent"}, "local", nil)
 	if err == nil {
 		t.Fatal("expected error for unknown component")
+	}
+}
+
+func TestMix_RequiredFlagsPropagatedToComponentScope(t *testing.T) {
+	setup()
+	component.Register(&component.Component{
+		Name: "flagged-comp",
+		RequiredFlags: []component.RequiredFlag{
+			{Name: "image", Usage: "container image"},
+		},
+	})
+
+	m := mixer.New()
+	flagValues := map[string]string{"image": "quay.io/test/img:v1"}
+	_, rc, err := m.Mix(context.Background(), []string{"flagged-comp"}, "local", flagValues)
+	if err != nil {
+		t.Fatalf("Mix failed: %v", err)
+	}
+
+	if v := rc.Get("_flags", "image"); v != "quay.io/test/img:v1" {
+		t.Errorf("expected flag under _flags, got %q", v)
+	}
+	if v := rc.Get("flagged-comp", "image"); v != "quay.io/test/img:v1" {
+		t.Errorf("expected flag under component name, got %q", v)
+	}
+}
+
+func TestMix_MissingRequiredFlagReturnsError(t *testing.T) {
+	setup()
+	component.Register(&component.Component{
+		Name: "needs-flag",
+		RequiredFlags: []component.RequiredFlag{
+			{Name: "token", Usage: "auth token"},
+		},
+	})
+
+	m := mixer.New()
+	_, _, err := m.Mix(context.Background(), []string{"needs-flag"}, "local", nil)
+	if err == nil {
+		t.Fatal("expected error for missing required flag")
+	}
+	var mfe *mixer.MissingFlagError
+	if !errors.As(err, &mfe) {
+		t.Fatalf("expected MissingFlagError, got %T: %v", err, err)
+	}
+	if mfe.Flag != "token" {
+		t.Errorf("expected flag name 'token', got %q", mfe.Flag)
 	}
 }

@@ -88,17 +88,18 @@ func runMixer(command string, args []string) error {
 	}()
 
 	m := mixer.New()
+	flagValues := make(map[string]string)
+	for _, flag := range setFlags {
+		parts := strings.SplitN(strings.TrimPrefix(flag, "--"), "=", 2)
+		if len(parts) == 2 {
+			flagValues[parts[0]] = parts[1]
+		}
+	}
 
 	prepare := func() ([]*component.Step, error) {
-		steps, rc, err := m.Mix(ctx, deduped, "local")
+		steps, _, err := m.Mix(ctx, deduped, "local", flagValues)
 		if err != nil {
 			return nil, err
-		}
-		for _, flag := range setFlags {
-			parts := strings.SplitN(strings.TrimPrefix(flag, "--"), "=", 2)
-			if len(parts) == 2 {
-				rc.Set("_flags", parts[0], parts[1])
-			}
 		}
 		if force {
 			if err := checkAndFreePorts(steps); err != nil {
@@ -132,7 +133,7 @@ func runMixer(command string, args []string) error {
 	updates := make(chan component.StepUpdate, 100)
 
 	if !nonInteractive && !outputJSON && !detach && runner.IsTerminal() {
-		return runner.RunInteractive(ctx, mgr, prepare, updates)
+		return runner.RunInteractive(ctx, mgr, prepare, updates, flagValues)
 	}
 
 	steps, err := prepare()

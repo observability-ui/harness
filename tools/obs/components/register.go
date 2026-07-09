@@ -20,7 +20,7 @@ func init() {
 	})
 
 	mixer.RegisterRecipe("start", "perses", []string{"perses"}, []string{
-		"perses-build", "perses",
+		"perses-build", "perses-api",
 	})
 
 	mixer.RegisterRecipe("deploy", "monitoring-plugin", []string{"mp"}, []string{

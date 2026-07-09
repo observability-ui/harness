@@ -9,63 +9,19 @@ import (
 	"obs/internal/strategy"
 )
 
-var BuildPush = &component.Component{
-	Name:         "mp-build-push",
-	Description:  "Build and push monitoring plugin image",
-	Capabilities: []string{"container"},
-	Dir:          dir,
-	Config: map[string]string{
-		"dockerfile": "Dockerfile.dev",
-	},
-}
-
-var SetMCOUnmanaged = &component.Component{
-	Name:         "set-mco-unmanaged",
-	Description:  "Set MCO to unmanaged",
-	DependsOn:    []string{"mp-build-push"},
-	Capabilities: []string{"cluster"},
-}
-
-var ScaleDownMP = &component.Component{
-	Name:         "scale-down-mp",
-	Description:  "Scale down CMO and monitoring plugin",
-	DependsOn:    []string{"set-mco-unmanaged"},
-	Capabilities: []string{"cluster"},
-}
-
-var PatchCMO = &component.Component{
-	Name:         "patch-cmo",
-	Description:  "Patch CMO with custom monitoring plugin image",
-	DependsOn:    []string{"scale-down-mp"},
-	Capabilities: []string{"cluster"},
-}
-
-var ScaleUpMP = &component.Component{
-	Name:         "scale-up-mp",
-	Description:  "Scale up CMO and monitoring plugin",
-	DependsOn:    []string{"patch-cmo"},
-	Capabilities: []string{"cluster"},
-}
-
 func init() {
-	component.Register(BuildPush)
-	component.Register(SetMCOUnmanaged)
-	component.Register(ScaleDownMP)
-	component.Register(PatchCMO)
-	component.Register(ScaleUpMP)
-
 	strategy.RegisterSelector(deploySelector)
 }
 
 func deploySelector(comp *component.Component, mode string) (strategy.BuildStrategy, strategy.RunStrategy) {
 	switch comp.Name {
-	case "set-mco-unmanaged":
+	case SetMCOUnmanaged.Name:
 		return nil, &setMCOStrategy{}
-	case "scale-down-mp":
+	case ScaleDownMP.Name:
 		return nil, &scaleDownMPStrategy{}
-	case "patch-cmo":
+	case PatchCMO.Name:
 		return nil, &patchCMOStrategy{}
-	case "scale-up-mp":
+	case ScaleUpMP.Name:
 		return nil, &scaleUpMPStrategy{}
 	}
 	return nil, nil

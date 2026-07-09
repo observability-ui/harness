@@ -32,7 +32,7 @@ func (s *PersesRunStrategy) Run(_ context.Context, comp *component.Component, _ 
 
 func init() {
 	strategy.RegisterSelector(func(comp *component.Component, mode string) (strategy.BuildStrategy, strategy.RunStrategy) {
-		if comp.Name == "perses" {
+		if comp.Name == Server.Name {
 			return nil, &PersesRunStrategy{}
 		}
 		return nil, nil

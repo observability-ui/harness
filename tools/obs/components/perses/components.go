@@ -12,7 +12,7 @@ var BuildAPI = &component.Component{
 }
 
 var Server = &component.Component{
-	Name:        "perses",
+	Name:        "perses-api",
 	Description: "Perses API server",
 	DependsOn:   []string{"perses-build"},
 	Dir:         "projects/perses",

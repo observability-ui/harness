@@ -17,9 +17,13 @@ import (
 type ContainerStrategy struct{}
 
 func (s *ContainerStrategy) Name() string        { return "console-container" }
-func (s *ContainerStrategy) Requires() []string { return nil }
+func (s *ContainerStrategy) Requires() []string { return []string{"oc"} }
 
 func (s *ContainerStrategy) Run(_ context.Context, comp *component.Component, rc *runcontext.RunContext) (*component.Step, error) {
+	if err := extractClusterConfig(rc); err != nil {
+		return nil, err
+	}
+
 	image := os.Getenv("CONSOLE_IMAGE")
 	if image == "" {
 		image = comp.Config["image"]
@@ -63,19 +67,14 @@ func (s *ContainerStrategy) Run(_ context.Context, comp *component.Component, rc
 	}, nil
 }
 
-type ClusterConfigStrategy struct{}
-
-func (s *ClusterConfigStrategy) Name() string        { return "console-cluster-config" }
-func (s *ClusterConfigStrategy) Requires() []string { return []string{"oc"} }
-
-func (s *ClusterConfigStrategy) Build(_ context.Context, comp *component.Component, rc *runcontext.RunContext) (*component.Step, error) {
+func extractClusterConfig(rc *runcontext.RunContext) error {
 	if _, err := exec.LookPath("oc"); err != nil {
-		return nil, fmt.Errorf("oc is not installed — install the OpenShift CLI")
+		return fmt.Errorf("oc is not installed — install the OpenShift CLI")
 	}
 
 	apiServer := runOC("whoami", "--show-server")
 	if apiServer == "" {
-		return nil, fmt.Errorf("not logged in to OpenShift cluster — run 'oc login' first")
+		return fmt.Errorf("not logged in to OpenShift cluster — run 'oc login' first")
 	}
 
 	bearerToken := runOC("whoami", "--show-token")
@@ -89,7 +88,7 @@ func (s *ClusterConfigStrategy) Build(_ context.Context, comp *component.Compone
 	rc.Set("console", "thanos-url", thanosURL)
 	rc.Set("console", "alertmanager-url", alertmanagerURL)
 
-	return nil, nil
+	return nil
 }
 
 func buildEnv(rc *runcontext.RunContext, plugins []pluginInfo, proxies []proxyInfo, hostRef string) map[string]string {
@@ -229,8 +228,8 @@ func runOC(args ...string) string {
 
 func init() {
 	strategy.RegisterSelector(func(comp *component.Component, mode string) (strategy.BuildStrategy, strategy.RunStrategy) {
-		if comp.Name == "console" {
-			return &ClusterConfigStrategy{}, &ContainerStrategy{}
+		if comp.Name == Console.Name {
+			return nil, &ContainerStrategy{}
 		}
 		return nil, nil
 	})

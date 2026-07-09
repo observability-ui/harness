@@ -72,7 +72,16 @@ type RequirementsError struct {
 
 func (e *RequirementsError) Error() string { return e.Err.Error() }
 
-func (m *Mixer) Mix(ctx context.Context, componentNames []string, mode string) ([]*component.Step, *runcontext.RunContext, error) {
+type MissingFlagError struct {
+	Flag  string
+	Usage string
+}
+
+func (e *MissingFlagError) Error() string {
+	return fmt.Sprintf("--%s is required — %s", e.Flag, e.Usage)
+}
+
+func (m *Mixer) Mix(ctx context.Context, componentNames []string, mode string, flagValues map[string]string) ([]*component.Step, *runcontext.RunContext, error) {
 	rc := runcontext.New(mode)
 
 	components, err := resolveComponents(componentNames)
@@ -82,6 +91,22 @@ func (m *Mixer) Mix(ctx context.Context, componentNames []string, mode string) (
 
 	if err := m.checkRequirements(components, mode); err != nil {
 		return nil, nil, &RequirementsError{Err: err}
+	}
+
+	if err := m.checkRequiredFlags(components, flagValues); err != nil {
+		return nil, nil, err
+	}
+
+	for k, v := range flagValues {
+		rc.Set("_flags", k, v)
+	}
+
+	for _, comp := range components {
+		for _, rf := range comp.RequiredFlags {
+			if v := flagValues[rf.Name]; v != "" {
+				rc.Set(comp.Name, rf.Name, v)
+			}
+		}
 	}
 
 	var allSteps []*component.Step
@@ -160,33 +185,53 @@ func (m *Mixer) checkRequirements(components []*component.Component, mode string
 	return nil
 }
 
+func (m *Mixer) checkRequiredFlags(components []*component.Component, flagValues map[string]string) error {
+	for _, comp := range components {
+		for _, rf := range comp.RequiredFlags {
+			if flagValues[rf.Name] == "" {
+				return &MissingFlagError{Flag: rf.Name, Usage: rf.Usage}
+			}
+		}
+	}
+	return nil
+}
+
 func resolveComponents(names []string) ([]*component.Component, error) {
-	seen := make(map[string]bool)
+	resolved := make(map[string]bool)
+	visiting := make(map[string]bool)
 	var result []*component.Component
 
-	for _, name := range names {
-		if seen[name] {
-			continue
+	var visit func(name string) error
+	visit = func(name string) error {
+		if resolved[name] {
+			return nil
 		}
-		seen[name] = true
+		if visiting[name] {
+			return fmt.Errorf("circular dependency detected: %s", name)
+		}
+		visiting[name] = true
 
 		comp, ok := component.Get(name)
 		if !ok {
-			return nil, fmt.Errorf("unknown component %q", name)
+			return fmt.Errorf("unknown component %q", name)
 		}
 
 		for _, dep := range comp.DependsOn {
-			if !seen[dep] {
-				depComp, ok := component.Get(dep)
-				if !ok {
-					return nil, fmt.Errorf("component %q depends on unknown component %q", name, dep)
-				}
-				seen[dep] = true
-				result = append(result, depComp)
+			if err := visit(dep); err != nil {
+				return err
 			}
 		}
 
+		visiting[name] = false
+		resolved[name] = true
 		result = append(result, comp)
+		return nil
+	}
+
+	for _, name := range names {
+		if err := visit(name); err != nil {
+			return nil, err
+		}
 	}
 	return result, nil
 }

@@ -5,14 +5,20 @@ type Output struct {
 	Value string
 }
 
+type RequiredFlag struct {
+	Name  string
+	Usage string
+}
+
 type Component struct {
-	Name         string
-	Description  string
-	DependsOn    []string
-	Capabilities []string
-	Dir          string
-	Outputs      []Output
-	Config       map[string]string
+	Name          string
+	Description   string
+	DependsOn     []string
+	Capabilities  []string
+	Dir           string
+	Outputs       []Output
+	Config        map[string]string
+	RequiredFlags []RequiredFlag
 }
 
 var registry = make(map[string]*Component)

@@ -12,10 +12,10 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func RunInteractive(ctx context.Context, mgr *process.Manager, prepare func() ([]*component.Step, error), updates chan<- component.StepUpdate) error {
+func RunInteractive(ctx context.Context, mgr *process.Manager, prepare func() ([]*component.Step, error), updates chan<- component.StepUpdate, inputValues map[string]string) error {
 	internalUpdates := make(chan component.StepUpdate, 100)
 	retryCh := make(chan struct{}, 1)
-	model := ui.NewModel(mgr, internalUpdates, retryCh)
+	model := ui.NewModel(mgr, internalUpdates, retryCh, inputValues)
 
 	p := tea.NewProgram(model, tea.WithAltScreen())
 

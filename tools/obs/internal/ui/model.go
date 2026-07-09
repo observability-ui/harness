@@ -2,14 +2,18 @@ package ui
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"time"
 
 	"obs/internal/component"
+	"obs/internal/mixer"
 	"obs/internal/process"
 
 	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/spinner"
+	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
@@ -58,22 +62,31 @@ type Model struct {
 	reqErr              error
 	retryCh             chan<- struct{}
 	cachedContentHeight int
+	inputMode           bool
+	inputField          textinput.Model
+	inputFlag           string
+	inputValues         map[string]string
 }
 
-func NewModel(mgr *process.Manager, updates <-chan component.StepUpdate, retryCh chan<- struct{}) Model {
+func NewModel(mgr *process.Manager, updates <-chan component.StepUpdate, retryCh chan<- struct{}, inputValues map[string]string) Model {
 	tabs := []string{"main"}
 	mt := NewMainTab()
 	h := help.New()
 	h.ShortSeparator = " · "
 
+	ti := textinput.New()
+	ti.CharLimit = 256
+
 	return Model{
-		tabBar:    NewTabBar(tabs),
-		mainTab:   mt,
-		manager:   mgr,
-		help:      h,
-		updates:   updates,
-		reqStatus: reqChecking,
-		retryCh:   retryCh,
+		tabBar:      NewTabBar(tabs),
+		mainTab:     mt,
+		manager:     mgr,
+		help:        h,
+		updates:     updates,
+		reqStatus:   reqChecking,
+		retryCh:     retryCh,
+		inputField:  ti,
+		inputValues: inputValues,
 	}
 }
 
@@ -95,6 +108,36 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.recomputeLayout()
 
 	case tea.KeyMsg:
+		if m.inputMode {
+			switch msg.Type {
+			case tea.KeyEnter:
+				val := m.inputField.Value()
+				if val != "" {
+					m.inputValues[m.inputFlag] = val
+					m.inputMode = false
+					m.inputField.Blur()
+					m.reqStatus = reqChecking
+					m.reqErr = nil
+					m.mainTab = NewMainTab()
+					m.recomputeLayout()
+					m.statusMsg = fmt.Sprintf("Set --%s=%s", m.inputFlag, val)
+					cmds = append(cmds, m.mainTab.spinner.Tick)
+					select {
+					case m.retryCh <- struct{}{}:
+					default:
+					}
+				}
+			case tea.KeyEsc:
+				m.inputMode = false
+				m.inputField.Blur()
+			default:
+				var cmd tea.Cmd
+				m.inputField, cmd = m.inputField.Update(msg)
+				cmds = append(cmds, cmd)
+			}
+			return m, tea.Batch(cmds...)
+		}
+
 		switch {
 		case key.Matches(msg, keys.Quit):
 			if m.shutdown {
@@ -118,6 +161,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.mainTab = NewMainTab()
 				m.processTabs = nil
 				m.tabBar = NewTabBar([]string{"main"})
+				m.recomputeLayout()
 				cmds = append(cmds, m.mainTab.spinner.Tick)
 				select {
 				case m.retryCh <- struct{}{}:
@@ -234,6 +278,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.mainTab = NewMainTab()
 		m.processTabs = nil
 		m.tabBar = NewTabBar([]string{"main"})
+		m.recomputeLayout()
 		cmds = append(cmds, m.mainTab.spinner.Tick)
 
 	case RequirementsPassedMsg:
@@ -248,11 +293,23 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.tabBar.Add(spec.Name)
 				m.processTabs = append(m.processTabs, pt)
 			}
-			m.mainTab.AddStepWithProcesses(step.Name, procNames)
+			m.mainTab.AddStepWithProcesses(step.Name, procNames, step.DependsOn)
 		}
 		m.recomputeLayout()
 
 	case RequirementsFailedMsg:
+		var mfe *mixer.MissingFlagError
+		if errors.As(msg.Err, &mfe) {
+			m.inputMode = true
+			m.inputFlag = mfe.Flag
+			m.inputField.Placeholder = mfe.Usage
+			m.inputField.SetValue("")
+			m.inputField.Width = m.width - len(m.inputFlag) - 12
+			m.inputField.Focus()
+			m.reqStatus = reqFailed
+			m.reqErr = msg.Err
+			return m, m.inputField.Cursor.BlinkCmd()
+		}
 		m.reqStatus = reqFailed
 		m.reqErr = msg.Err
 
@@ -279,6 +336,10 @@ func (m Model) View() string {
 	var content string
 	if m.tabBar.Active() == 0 {
 		content = m.mainTab.ViewWithRequirements(m.width, ch, m.reqStatus, m.reqErr)
+		if m.inputMode {
+			prompt := fmt.Sprintf("\n  Enter --%s: %s", m.inputFlag, m.inputField.View())
+			content += prompt
+		}
 	} else {
 		idx := m.tabBar.Active() - 1
 		if idx < len(m.processTabs) {

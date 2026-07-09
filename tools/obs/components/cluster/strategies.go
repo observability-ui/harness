@@ -53,9 +53,9 @@ func (s *PermissionsStrategy) Run(_ context.Context, comp *component.Component, 
 func init() {
 	strategy.RegisterSelector(func(comp *component.Component, mode string) (strategy.BuildStrategy, strategy.RunStrategy) {
 		switch comp.Name {
-		case "seed-users":
+		case SeedUsers.Name:
 			return nil, &SeedUsersStrategy{}
-		case "seed-users-permissions":
+		case SeedUsersPermissions.Name:
 			return nil, &PermissionsStrategy{}
 		}
 		return nil, nil

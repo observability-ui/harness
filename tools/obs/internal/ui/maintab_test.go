@@ -9,8 +9,8 @@ import (
 
 func newTestMainTab() MainTab {
 	mt := NewMainTab()
-	mt.AddStepWithProcesses("step1", []string{"proc-a", "proc-b"})
-	mt.AddStepWithProcesses("step2", []string{"proc-c"})
+	mt.AddStepWithProcesses("step1", []string{"proc-a", "proc-b"}, nil)
+	mt.AddStepWithProcesses("step2", []string{"proc-c"}, []string{"step1"})
 	return mt
 }
 
