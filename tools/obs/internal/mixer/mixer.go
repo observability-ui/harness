@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os/exec"
 	"slices"
+	"strconv"
 	"strings"
 
 	"obs/internal/component"
@@ -46,31 +47,22 @@ func GetRecipe(command, nameOrAlias string) (*RecipeEntry, bool) {
 	return nil, false
 }
 
-func ListRecipes(command string) []RecipeEntry {
-	var result []RecipeEntry
-	for _, r := range recipes {
-		if r.Command == command {
-			result = append(result, r)
-		}
-	}
-	return result
-}
-
 func ListAllRecipes() []RecipeEntry {
-	return recipes
+	cp := make([]RecipeEntry, len(recipes))
+	copy(cp, recipes)
+	return cp
 }
 
-type Mixer struct{}
-
-func New() *Mixer {
-	return &Mixer{}
+func ResetRecipes() {
+	recipes = nil
 }
 
 type RequirementsError struct {
 	Err error
 }
 
-func (e *RequirementsError) Error() string { return e.Err.Error() }
+func (e *RequirementsError) Error() string  { return e.Err.Error() }
+func (e *RequirementsError) Unwrap() error { return e.Err }
 
 type MissingFlagError struct {
 	Flag  string
@@ -81,19 +73,25 @@ func (e *MissingFlagError) Error() string {
 	return fmt.Sprintf("--%s is required — %s", e.Flag, e.Usage)
 }
 
-func (m *Mixer) Mix(ctx context.Context, componentNames []string, mode string, flagValues map[string]string) ([]*component.Step, *runcontext.RunContext, error) {
-	rc := runcontext.New(mode)
+func Mix(ctx context.Context, componentNames []string, flagValues map[string]string) ([]*component.Step, *runcontext.RunContext, error) {
+	rc := runcontext.New()
 
 	components, err := resolveComponents(componentNames)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	if err := m.checkRequirements(components, mode); err != nil {
+	names := make([]string, len(components))
+	for i, c := range components {
+		names[i] = c.Name
+	}
+	rc.SetComponents(names)
+
+	if err := checkRequirements(components); err != nil {
 		return nil, nil, &RequirementsError{Err: err}
 	}
 
-	if err := m.checkRequiredFlags(components, flagValues); err != nil {
+	if err := checkRequiredFlags(components, flagValues); err != nil {
 		return nil, nil, err
 	}
 
@@ -112,32 +110,19 @@ func (m *Mixer) Mix(ctx context.Context, componentNames []string, mode string, f
 	var allSteps []*component.Step
 
 	for _, comp := range components {
-		build, run := strategy.Select(comp, mode)
-
-		if build != nil {
-			step, err := build.Build(ctx, comp, rc)
+		strategies := strategy.Resolve(comp)
+		for _, s := range strategies {
+			step, err := s.Execute(ctx, comp, rc)
 			if err != nil {
-				return nil, nil, fmt.Errorf("build %q: %w", comp.Name, err)
+				return nil, nil, fmt.Errorf("execute %q: %w", comp.Name, err)
 			}
 			if step != nil {
 				allSteps = append(allSteps, step)
 			}
 		}
 
-		if run != nil {
-			step, err := run.Run(ctx, comp, rc)
-			if err != nil {
-				return nil, nil, fmt.Errorf("run %q: %w", comp.Name, err)
-			}
-			if step != nil {
-				allSteps = append(allSteps, step)
-			}
-		}
-
-		for _, out := range comp.Outputs {
-			if out.Value != "" {
-				rc.Set(comp.Name, out.Name, out.Value)
-			}
+		for _, p := range comp.Ports {
+			rc.Set(comp.Name, "port", strconv.Itoa(p))
 		}
 	}
 
@@ -149,25 +134,14 @@ func (m *Mixer) Mix(ctx context.Context, componentNames []string, mode string, f
 	return ordered, rc, nil
 }
 
-func (m *Mixer) checkRequirements(components []*component.Component, mode string) error {
+func checkRequirements(components []*component.Component) error {
 	seen := make(map[string]bool)
 	var missing []string
 
 	for _, comp := range components {
-		build, run := strategy.Select(comp, mode)
-		if build != nil {
-			for _, tool := range build.Requires() {
-				if seen[tool] {
-					continue
-				}
-				seen[tool] = true
-				if _, err := exec.LookPath(tool); err != nil {
-					missing = append(missing, tool)
-				}
-			}
-		}
-		if run != nil {
-			for _, tool := range run.Requires() {
+		strategies := strategy.Resolve(comp)
+		for _, s := range strategies {
+			for _, tool := range s.Requires() {
 				if seen[tool] {
 					continue
 				}
@@ -185,7 +159,7 @@ func (m *Mixer) checkRequirements(components []*component.Component, mode string
 	return nil
 }
 
-func (m *Mixer) checkRequiredFlags(components []*component.Component, flagValues map[string]string) error {
+func checkRequiredFlags(components []*component.Component, flagValues map[string]string) error {
 	for _, comp := range components {
 		for _, rf := range comp.RequiredFlags {
 			if flagValues[rf.Name] == "" {
@@ -239,6 +213,9 @@ func resolveComponents(names []string) ([]*component.Component, error) {
 func resolveDependencies(steps []*component.Step) ([]*component.Step, error) {
 	byName := make(map[string]*component.Step, len(steps))
 	for _, s := range steps {
+		if _, exists := byName[s.Name]; exists {
+			return nil, fmt.Errorf("duplicate step name %q", s.Name)
+		}
 		byName[s.Name] = s
 	}
 

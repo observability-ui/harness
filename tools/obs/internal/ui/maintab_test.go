@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"obs/internal/component"
-	"obs/internal/process"
 )
 
 func newTestMainTab() MainTab {
@@ -14,7 +13,7 @@ func newTestMainTab() MainTab {
 	return mt
 }
 
-func TestUpdateStep_PropagatesDone(t *testing.T) {
+func TestUpdateStep_SetsStepStatus(t *testing.T) {
 	mt := newTestMainTab()
 	mt.UpdateStep("step1", component.StatusDone, nil)
 
@@ -23,52 +22,8 @@ func TestUpdateStep_PropagatesDone(t *testing.T) {
 		t.Fatalf("step status: got %v, want Done", step.Status)
 	}
 	for _, p := range step.Processes {
-		if p.Status != component.StatusDone {
-			t.Errorf("process %q: got %v, want Done", p.Name, p.Status)
-		}
-	}
-}
-
-func TestUpdateStep_PropagatesStopped(t *testing.T) {
-	mt := newTestMainTab()
-	mt.UpdateStep("step1", component.StatusStopped, nil)
-
-	for _, p := range mt.GetStep("step1").Processes {
-		if p.Status != component.StatusStopped {
-			t.Errorf("process %q: got %v, want Stopped", p.Name, p.Status)
-		}
-	}
-}
-
-func TestUpdateStep_PropagatesFailed(t *testing.T) {
-	mt := newTestMainTab()
-	mt.UpdateStep("step1", component.StatusFailed, nil)
-
-	for _, p := range mt.GetStep("step1").Processes {
-		if p.Status != component.StatusFailed {
-			t.Errorf("process %q: got %v, want Failed", p.Name, p.Status)
-		}
-	}
-}
-
-func TestUpdateStep_PropagatesReady(t *testing.T) {
-	mt := newTestMainTab()
-	mt.UpdateStep("step1", component.StatusReady, nil)
-
-	for _, p := range mt.GetStep("step1").Processes {
-		if p.Status != component.StatusReady {
-			t.Errorf("process %q: got %v, want Ready", p.Name, p.Status)
-		}
-	}
-}
-
-func TestUpdateStep_DoesNotPropagateStarted(t *testing.T) {
-	mt := newTestMainTab()
-	mt.UpdateStep("step1", component.StatusStarted, nil)
-
-	for _, p := range mt.GetStep("step1").Processes {
 		if p.Status != component.StatusPending {
-			t.Errorf("process %q: got %v, want Pending (unchanged)", p.Name, p.Status)
+			t.Errorf("process %q: got %v, want Pending (UpdateStep does not change per-process status)", p.Name, p.Status)
 		}
 	}
 }
@@ -80,11 +35,6 @@ func TestUpdateStep_DoesNotAffectOtherSteps(t *testing.T) {
 	step2 := mt.GetStep("step2")
 	if step2.Status != component.StatusPending {
 		t.Errorf("step2 status: got %v, want Pending", step2.Status)
-	}
-	for _, p := range step2.Processes {
-		if p.Status != component.StatusPending {
-			t.Errorf("step2 process %q: got %v, want Pending", p.Name, p.Status)
-		}
 	}
 }
 
@@ -101,20 +51,3 @@ func TestUpdateProcess_IndividualUpdate(t *testing.T) {
 	}
 }
 
-func TestMapProcessStatus(t *testing.T) {
-	tests := []struct {
-		input process.ProcessStatus
-		want  component.Status
-	}{
-		{process.ProcessFailed, component.StatusFailed},
-		{process.ProcessStopped, component.StatusStopped},
-		{process.ProcessDone, component.StatusDone},
-		{process.ProcessPending, component.StatusDone},
-	}
-	for _, tt := range tests {
-		got := MapProcessStatus(tt.input)
-		if got != tt.want {
-			t.Errorf("MapProcessStatus(%v): got %v, want %v", tt.input, got, tt.want)
-		}
-	}
-}

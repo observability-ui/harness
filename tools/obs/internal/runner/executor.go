@@ -4,10 +4,28 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"sync"
 
 	"obs/internal/component"
 	"obs/internal/process"
 )
+
+type stepErrors struct {
+	mu   sync.Mutex
+	errs map[string]error
+}
+
+func (se *stepErrors) set(name string, err error) {
+	se.mu.Lock()
+	defer se.mu.Unlock()
+	se.errs[name] = err
+}
+
+func (se *stepErrors) get(name string) error {
+	se.mu.Lock()
+	defer se.mu.Unlock()
+	return se.errs[name]
+}
 
 type StartedProc struct {
 	StepName string
@@ -28,7 +46,7 @@ func ExecuteSteps(ctx context.Context, mgr *process.Manager, steps []*component.
 	}
 
 	ready := make(map[string]chan struct{})
-	stepErr := make(map[string]error)
+	stepErr := &stepErrors{errs: make(map[string]error)}
 	for _, step := range steps {
 		ready[step.Name] = make(chan struct{})
 	}
@@ -42,7 +60,7 @@ func ExecuteSteps(ctx context.Context, mgr *process.Manager, steps []*component.
 		}
 		if skip {
 			cb.OnUpdate(component.StepUpdate{StepName: step.Name, Status: component.StatusSkipped})
-			stepErr[step.Name] = fmt.Errorf("dependency failed")
+			stepErr.set(step.Name, fmt.Errorf("dependency failed"))
 			close(ready[step.Name])
 			continue
 		}

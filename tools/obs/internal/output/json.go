@@ -7,13 +7,10 @@ import (
 )
 
 type Event struct {
-	Type    string `json:"type"`
-	Step    string `json:"step,omitempty"`
-	Process string `json:"process,omitempty"`
-	Status  string `json:"status,omitempty"`
-	Message string `json:"message,omitempty"`
-	Error   string `json:"error,omitempty"`
-	PID     int    `json:"pid,omitempty"`
+	Type   string `json:"type"`
+	Step   string `json:"step,omitempty"`
+	Status string `json:"status,omitempty"`
+	Error  string `json:"error,omitempty"`
 }
 
 type JSONEmitter struct {
@@ -25,8 +22,8 @@ func NewJSONEmitter(w io.Writer) *JSONEmitter {
 	return &JSONEmitter{enc: json.NewEncoder(w)}
 }
 
-func (e *JSONEmitter) Emit(ev Event) {
+func (e *JSONEmitter) Emit(ev Event) error {
 	e.mu.Lock()
 	defer e.mu.Unlock()
-	e.enc.Encode(ev)
+	return e.enc.Encode(ev)
 }

@@ -46,31 +46,39 @@ type FileRef struct {
 	Path string
 }
 
+type Lifecycle int
+
+const (
+	LifecycleOneShot     Lifecycle = iota // runs to completion
+	LifecycleLongRunning                  // stays running; readiness via port probing
+)
+
+func (l Lifecycle) String() string {
+	switch l {
+	case LifecycleOneShot:
+		return "one-shot"
+	case LifecycleLongRunning:
+		return "long-running"
+	default:
+		return "unknown"
+	}
+}
+
 type ProcessSpec struct {
 	Name      string
 	Command   string
 	Args      []string
 	Dir       string
 	Env       map[string]string
-	Ports     []int
-	Stdin     string
-	StdinFile string
-	Files     map[string]FileRef
+	Ports []int
+	Files map[string]FileRef
 }
 
 type Step struct {
 	Name      string
+	Lifecycle Lifecycle
 	Processes []ProcessSpec
 	DependsOn []string
-}
-
-func (s *Step) HasPorts() bool {
-	for _, p := range s.Processes {
-		if len(p.Ports) > 0 {
-			return true
-		}
-	}
-	return false
 }
 
 type StepUpdate struct {

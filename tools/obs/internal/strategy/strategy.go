@@ -7,32 +7,24 @@ import (
 	"obs/internal/runcontext"
 )
 
-type BuildStrategy interface {
-	Name() string
+type Strategy interface {
 	Requires() []string
-	Build(ctx context.Context, comp *component.Component, rc *runcontext.RunContext) (*component.Step, error)
+	Execute(ctx context.Context, comp *component.Component, rc *runcontext.RunContext) (*component.Step, error)
 }
 
-type RunStrategy interface {
-	Name() string
-	Requires() []string
-	Run(ctx context.Context, comp *component.Component, rc *runcontext.RunContext) (*component.Step, error)
+var registry = map[string][]Strategy{}
+
+func Register(componentName string, strategies ...Strategy) {
+	registry[componentName] = append(registry[componentName], strategies...)
 }
 
-type Selector func(comp *component.Component, mode string) (BuildStrategy, RunStrategy)
-
-var selectors []Selector
-
-func RegisterSelector(sel Selector) {
-	selectors = append(selectors, sel)
-}
-
-func Select(comp *component.Component, mode string) (BuildStrategy, RunStrategy) {
-	for _, sel := range selectors {
-		build, run := sel(comp, mode)
-		if build != nil || run != nil {
-			return build, run
-		}
+func Resolve(comp *component.Component) []Strategy {
+	if s, ok := registry[comp.Name]; ok {
+		return s
 	}
-	return nil, nil
+	return resolveByConfig(comp)
+}
+
+func ResetRegistry() {
+	registry = map[string][]Strategy{}
 }

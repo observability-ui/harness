@@ -1,20 +1,19 @@
 package runcontext
 
 import (
-	"maps"
 	"sync"
 )
 
 type RunContext struct {
-	mu      sync.RWMutex
-	outputs map[string]map[string]string
-	mode    string
+	mu         sync.RWMutex
+	outputs    map[string]map[string]string
+	components map[string]bool
 }
 
-func New(mode string) *RunContext {
+func New() *RunContext {
 	return &RunContext{
-		outputs: make(map[string]map[string]string),
-		mode:    mode,
+		outputs:    make(map[string]map[string]string),
+		components: make(map[string]bool),
 	}
 }
 
@@ -36,20 +35,17 @@ func (rc *RunContext) Get(component, key string) string {
 	return ""
 }
 
-func (rc *RunContext) GetAll(key string) []map[string]string {
-	rc.mu.RLock()
-	defer rc.mu.RUnlock()
-	var results []map[string]string
-	for _, m := range rc.outputs {
-		if _, ok := m[key]; ok {
-			cp := make(map[string]string, len(m))
-			maps.Copy(cp, m)
-			results = append(results, cp)
-		}
+func (rc *RunContext) SetComponents(names []string) {
+	rc.mu.Lock()
+	defer rc.mu.Unlock()
+	rc.components = make(map[string]bool, len(names))
+	for _, n := range names {
+		rc.components[n] = true
 	}
-	return results
 }
 
-func (rc *RunContext) Mode() string {
-	return rc.mode
+func (rc *RunContext) HasComponent(name string) bool {
+	rc.mu.RLock()
+	defer rc.mu.RUnlock()
+	return rc.components[name]
 }

@@ -9,12 +9,12 @@ import (
 	"obs/internal/process"
 )
 
-func waitDeps(ctx context.Context, step *component.Step, ready map[string]chan struct{}, stepErr map[string]error) (skip bool, err error) {
+func waitDeps(ctx context.Context, step *component.Step, ready map[string]chan struct{}, stepErr *stepErrors) (skip bool, err error) {
 	for _, dep := range step.DependsOn {
 		if ch, ok := ready[dep]; ok {
 			select {
 			case <-ch:
-				if stepErr[dep] != nil {
+				if stepErr.get(dep) != nil {
 					return true, nil
 				}
 			case <-ctx.Done():
@@ -25,57 +25,64 @@ func waitDeps(ctx context.Context, step *component.Step, ready map[string]chan s
 	return false, nil
 }
 
-func watchStepReady(ctx context.Context, step *component.Step, procs []*process.Process, ch chan struct{}, stepErr map[string]error, onReady func(string, component.Status)) {
-	if step.HasPorts() {
+func watchStepReady(ctx context.Context, step *component.Step, procs []*process.Process, ch chan struct{}, stepErr *stepErrors, onReady func(string, component.Status)) {
+	defer close(ch)
+
+	allDone := process.WaitAll(procs)
+
+	if step.Lifecycle == component.LifecycleLongRunning {
 		var allPorts []int
 		for _, spec := range step.Processes {
 			allPorts = append(allPorts, spec.Ports...)
 		}
 
-		allDone := make(chan struct{})
-		go func() {
-			for _, proc := range procs {
-				<-proc.Wait()
-			}
-			close(allDone)
-		}()
-
 		for {
 			if process.ProbePorts(allPorts) {
 				onReady(step.Name, component.StatusReady)
-				close(ch)
-				return
+				break
 			}
 			select {
 			case <-time.After(time.Second):
 			case <-allDone:
-				stepErr[step.Name] = fmt.Errorf("process exited before ports were ready")
-				close(ch)
+				stepErr.set(step.Name, fmt.Errorf("process exited before ports were ready"))
+				onReady(step.Name, component.StatusFailed)
 				return
 			case <-ctx.Done():
+				<-allDone
+				reportExitStatus(step.Name, procs, stepErr, onReady)
 				return
 			}
 		}
+
+		<-allDone
+		reportExitStatus(step.Name, procs, stepErr, onReady)
+		return
 	}
 
 	for _, proc := range procs {
-		select {
-		case <-proc.Wait():
-		case <-ctx.Done():
-			return
-		}
+		<-proc.Wait()
 	}
+	reportExitStatus(step.Name, procs, stepErr, onReady)
+}
+
+func reportExitStatus(stepName string, procs []*process.Process, stepErr *stepErrors, onReady func(string, component.Status)) {
+	status := aggregateExitStatus(procs)
+	if status == component.StatusFailed || status == component.StatusStopped {
+		stepErr.set(stepName, fmt.Errorf("step %q: %s", stepName, status))
+	}
+	onReady(stepName, status)
+}
+
+func aggregateExitStatus(procs []*process.Process) component.Status {
+	worst := component.StatusDone
 	for _, proc := range procs {
-		if proc.Status == process.ProcessFailed {
-			stepErr[step.Name] = fmt.Errorf("process %q failed: %v", proc.Spec.Name, proc.Err)
-			close(ch)
-			return
+		s := process.MapExitStatus(proc)
+		if s == component.StatusFailed {
+			return component.StatusFailed
 		}
-		if proc.Status == process.ProcessStopped {
-			stepErr[step.Name] = fmt.Errorf("process %q was stopped", proc.Spec.Name)
-			close(ch)
-			return
+		if s == component.StatusStopped {
+			worst = component.StatusStopped
 		}
 	}
-	close(ch)
+	return worst
 }

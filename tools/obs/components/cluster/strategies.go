@@ -10,12 +10,12 @@ import (
 
 type SeedUsersStrategy struct{}
 
-func (s *SeedUsersStrategy) Name() string        { return "seed-users" }
 func (s *SeedUsersStrategy) Requires() []string { return []string{"oc"} }
 
-func (s *SeedUsersStrategy) Run(_ context.Context, comp *component.Component, _ *runcontext.RunContext) (*component.Step, error) {
+func (s *SeedUsersStrategy) Execute(_ context.Context, comp *component.Component, _ *runcontext.RunContext) (*component.Step, error) {
 	return &component.Step{
 		Name:      comp.Name,
+		Lifecycle: component.LifecycleOneShot,
 		DependsOn: comp.DependsOn,
 		Processes: []component.ProcessSpec{{
 			Name:    "seed-users",
@@ -32,12 +32,12 @@ func (s *SeedUsersStrategy) Run(_ context.Context, comp *component.Component, _ 
 
 type PermissionsStrategy struct{}
 
-func (s *PermissionsStrategy) Name() string        { return "seed-users-permissions" }
 func (s *PermissionsStrategy) Requires() []string { return []string{"oc"} }
 
-func (s *PermissionsStrategy) Run(_ context.Context, comp *component.Component, _ *runcontext.RunContext) (*component.Step, error) {
+func (s *PermissionsStrategy) Execute(_ context.Context, comp *component.Component, _ *runcontext.RunContext) (*component.Step, error) {
 	return &component.Step{
 		Name:      comp.Name,
+		Lifecycle: component.LifecycleOneShot,
 		DependsOn: comp.DependsOn,
 		Processes: []component.ProcessSpec{{
 			Name:    "seed-users-permissions",
@@ -51,13 +51,6 @@ func (s *PermissionsStrategy) Run(_ context.Context, comp *component.Component, 
 }
 
 func init() {
-	strategy.RegisterSelector(func(comp *component.Component, mode string) (strategy.BuildStrategy, strategy.RunStrategy) {
-		switch comp.Name {
-		case SeedUsers.Name:
-			return nil, &SeedUsersStrategy{}
-		case SeedUsersPermissions.Name:
-			return nil, &PermissionsStrategy{}
-		}
-		return nil, nil
-	})
+	strategy.Register(SeedUsers.Name, &SeedUsersStrategy{})
+	strategy.Register(SeedUsersPermissions.Name, &PermissionsStrategy{})
 }

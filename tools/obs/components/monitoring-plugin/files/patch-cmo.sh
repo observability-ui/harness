@@ -1,5 +1,10 @@
-set -e
+#!/bin/bash
+set -e -o pipefail
 INDEX=$(oc get deploy cluster-monitoring-operator -n openshift-monitoring -o json | \
   jq -r '.spec.template.spec.containers[0].args | to_entries[] | select(.value | contains("monitoring-plugin")) | .key')
+if [ -z "$INDEX" ]; then
+  echo "ERROR: could not find monitoring-plugin arg in CMO deployment" >&2
+  exit 1
+fi
 oc patch deploy cluster-monitoring-operator -n openshift-monitoring --type=json \
   -p "[{\"op\":\"replace\",\"path\":\"/spec/template/spec/containers/0/args/$INDEX\",\"value\":\"--images=monitoring-plugin=$MP_IMAGE\"}]"

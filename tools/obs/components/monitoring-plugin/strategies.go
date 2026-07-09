@@ -10,30 +10,20 @@ import (
 )
 
 func init() {
-	strategy.RegisterSelector(deploySelector)
-}
-
-func deploySelector(comp *component.Component, mode string) (strategy.BuildStrategy, strategy.RunStrategy) {
-	switch comp.Name {
-	case SetMCOUnmanaged.Name:
-		return nil, &setMCOStrategy{}
-	case ScaleDownMP.Name:
-		return nil, &scaleDownMPStrategy{}
-	case PatchCMO.Name:
-		return nil, &patchCMOStrategy{}
-	case ScaleUpMP.Name:
-		return nil, &scaleUpMPStrategy{}
-	}
-	return nil, nil
+	strategy.Register(InstallDeps.Name, &strategy.LocalNPM{Cmd: "install", Args: []string{"--no-save"}})
+	strategy.Register(SetMCOUnmanaged.Name, &setMCOStrategy{})
+	strategy.Register(ScaleDownMP.Name, &scaleDownMPStrategy{})
+	strategy.Register(PatchCMO.Name, &patchCMOStrategy{})
+	strategy.Register(ScaleUpMP.Name, &scaleUpMPStrategy{})
 }
 
 type setMCOStrategy struct{}
 
-func (s *setMCOStrategy) Name() string        { return "set-mco-unmanaged" }
 func (s *setMCOStrategy) Requires() []string { return []string{"oc"} }
-func (s *setMCOStrategy) Run(_ context.Context, comp *component.Component, _ *runcontext.RunContext) (*component.Step, error) {
+func (s *setMCOStrategy) Execute(_ context.Context, comp *component.Component, _ *runcontext.RunContext) (*component.Step, error) {
 	return &component.Step{
 		Name:      comp.Name,
+		Lifecycle: component.LifecycleOneShot,
 		DependsOn: comp.DependsOn,
 		Processes: []component.ProcessSpec{{
 			Name:    comp.Name,
@@ -48,11 +38,11 @@ func (s *setMCOStrategy) Run(_ context.Context, comp *component.Component, _ *ru
 
 type scaleDownMPStrategy struct{}
 
-func (s *scaleDownMPStrategy) Name() string        { return "scale-down-mp" }
 func (s *scaleDownMPStrategy) Requires() []string { return []string{"oc"} }
-func (s *scaleDownMPStrategy) Run(_ context.Context, comp *component.Component, _ *runcontext.RunContext) (*component.Step, error) {
+func (s *scaleDownMPStrategy) Execute(_ context.Context, comp *component.Component, _ *runcontext.RunContext) (*component.Step, error) {
 	return &component.Step{
 		Name:      comp.Name,
+		Lifecycle: component.LifecycleOneShot,
 		DependsOn: comp.DependsOn,
 		Processes: []component.ProcessSpec{
 			{
@@ -71,9 +61,8 @@ func (s *scaleDownMPStrategy) Run(_ context.Context, comp *component.Component, 
 
 type patchCMOStrategy struct{}
 
-func (s *patchCMOStrategy) Name() string        { return "patch-cmo" }
 func (s *patchCMOStrategy) Requires() []string { return []string{"oc", "jq", "bash"} }
-func (s *patchCMOStrategy) Run(_ context.Context, comp *component.Component, rc *runcontext.RunContext) (*component.Step, error) {
+func (s *patchCMOStrategy) Execute(_ context.Context, comp *component.Component, rc *runcontext.RunContext) (*component.Step, error) {
 	image := rc.Get("mp-build-push", "image")
 	if image == "" {
 		return nil, fmt.Errorf("mp-build-push image not found in RunContext")
@@ -81,6 +70,7 @@ func (s *patchCMOStrategy) Run(_ context.Context, comp *component.Component, rc 
 
 	return &component.Step{
 		Name:      comp.Name,
+		Lifecycle: component.LifecycleOneShot,
 		DependsOn: comp.DependsOn,
 		Processes: []component.ProcessSpec{{
 			Name:    comp.Name,
@@ -96,11 +86,11 @@ func (s *patchCMOStrategy) Run(_ context.Context, comp *component.Component, rc 
 
 type scaleUpMPStrategy struct{}
 
-func (s *scaleUpMPStrategy) Name() string        { return "scale-up-mp" }
 func (s *scaleUpMPStrategy) Requires() []string { return []string{"oc"} }
-func (s *scaleUpMPStrategy) Run(_ context.Context, comp *component.Component, _ *runcontext.RunContext) (*component.Step, error) {
+func (s *scaleUpMPStrategy) Execute(_ context.Context, comp *component.Component, _ *runcontext.RunContext) (*component.Step, error) {
 	return &component.Step{
 		Name:      comp.Name,
+		Lifecycle: component.LifecycleOneShot,
 		DependsOn: comp.DependsOn,
 		Processes: []component.ProcessSpec{
 			{

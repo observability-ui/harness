@@ -41,7 +41,6 @@ func newCleanupCmd() *cobra.Command {
 					fmt.Printf("Stopping %s (PID %d)…\n", p.Name, p.PID)
 					process.KillGroup(p.PID)
 				}
-				store.RemovePID(p.Name)
 			}
 			store.Clean()
 			fmt.Println("Cleanup complete.")

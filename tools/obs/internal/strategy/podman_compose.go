@@ -2,7 +2,7 @@ package strategy
 
 import (
 	"context"
-	"strconv"
+	"fmt"
 
 	"obs/internal/component"
 	"obs/internal/runcontext"
@@ -10,30 +10,24 @@ import (
 
 type PodmanCompose struct{}
 
-func (s *PodmanCompose) Name() string        { return "podman-compose" }
 func (s *PodmanCompose) Requires() []string { return []string{"podman"} }
 
-func (s *PodmanCompose) Run(_ context.Context, comp *component.Component, _ *runcontext.RunContext) (*component.Step, error) {
+func (s *PodmanCompose) Execute(_ context.Context, comp *component.Component, _ *runcontext.RunContext) (*component.Step, error) {
 	composeFile := comp.Config["compose-file"]
-
-	var ports []int
-	for _, out := range comp.Outputs {
-		if out.Name == "port" {
-			if p, err := strconv.Atoi(out.Value); err == nil {
-				ports = append(ports, p)
-			}
-		}
+	if composeFile == "" {
+		return nil, fmt.Errorf("component %q: missing compose-file config", comp.Name)
 	}
 
 	return &component.Step{
 		Name:      comp.Name,
+		Lifecycle: component.LifecycleLongRunning,
 		DependsOn: comp.DependsOn,
 		Processes: []component.ProcessSpec{{
 			Name:    comp.Name,
 			Command: "podman",
 			Args:    []string{"compose", "-f", composeFile, "up"},
 			Dir:     comp.Dir,
-			Ports:   ports,
+			Ports:   comp.Ports,
 		}},
 	}, nil
 }

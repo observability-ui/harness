@@ -53,25 +53,75 @@ CONSOLE_IMAGE=quay.io/my/console:dev ./bin/obs start mp
 - Exit codes: 0 = success, 1 = failure, 2 = requirements not met.
 - JSON output emits one JSON object per line with fields: `type`, `step`, `status`, `error`.
 - Pass `--key=value` flags for recipe-specific configuration (e.g., `--image=...` for deploy).
+- Boolean flags accept `--flag`, `--flag=true`, or `--flag=false` forms.
+- Unknown `--flag` args without `=` are rejected with a helpful error.
+- First Ctrl+C triggers graceful shutdown; second Ctrl+C force-kills all processes.
 
 ## Adding New Components
 
 1. Create a directory under `components/` (e.g., `components/my-project/`).
-2. Define components as `component.Component` structs in `component.go`.
-3. Implement strategy files (e.g., `local.go`) or use built-in strategies via `Config` keys.
+2. Define components as `component.Component` structs in `components.go`.
+3. Optionally define custom strategies in `strategies.go`, or rely on built-in strategies via `Config` keys.
 4. Register components via `init()` with `component.Register()`.
-5. Add a recipe entry in `components/register.go` with `mixer.RegisterRecipe()`.
-6. Build: `make obs`
+5. Register strategies via `init()` with `strategy.Register(componentName, &MyStrategy{})` if using custom strategies.
+6. Add a recipe entry in `components/register.go` with `mixer.RegisterRecipe()`.
+7. Build: `make obs`
+
+### Component struct fields
+
+| Field           | Purpose                                                                              |
+| --------------- | ------------------------------------------------------------------------------------ |
+| `Name`          | Unique identifier used in recipes, DependsOn, and RunContext                         |
+| `DependsOn`     | List of component names that must complete before this one starts                    |
+| `Dir`           | Working directory for process execution                                              |
+| `Ports`         | TCP ports the component listens on (used for readiness probing and plugin discovery) |
+| `Config`        | Strategy selection hints and configuration values                                    |
+| `RequiredFlags` | Flags the user must provide (prompted interactively if missing)                      |
 
 ### Built-in Strategy Config Keys
 
-| Config key | Strategy | What it does |
-|-----------|----------|-------------|
-| `make-target` | LocalMakeRun | Runs `make <target>` in component Dir |
-| `npm-cmd` | LocalNPMInstall | Runs `npm <cmd>` (default: install) |
-| `compose-file` | PodmanCompose | Runs `podman compose -f <file> up` |
-| `oc-args` | OCCommand | Runs `oc <args>` |
-| `dockerfile` | ContainerBuild | Builds and pushes container image |
-| `console-plugin` | (console strategy) | Registers component as a console plugin |
+| Config key           | Strategy           | What it does                                    |
+| -------------------- | ------------------ | ----------------------------------------------- |
+| `make-target`        | LocalMakeRun       | Runs `make <target>` in component Dir           |
+| `compose-file`       | PodmanCompose      | Runs `podman compose -f <file> up`              |
+| `dockerfile`         | ContainerBuild     | Builds and pushes container image via `podman`  |
+| `console-plugin`     | (console strategy) | Registers component as a console dynamic plugin |
+| `console-proxy-path` | (console strategy) | Registers a proxy endpoint on the console       |
 
-See `components/monitoring-plugin/component.go` for a complete example.
+`LocalNPM` is registered explicitly per component (not via config keys) with `Cmd` and `Args` fields, e.g., `&strategy.LocalNPM{Cmd: "install", Args: []string{"--no-save"}}`.
+
+### Strategy interface
+
+All strategies implement a unified `Strategy` interface:
+
+```go
+type Strategy interface {
+    Requires() []string
+    Execute(ctx context.Context, comp *component.Component, rc *runcontext.RunContext) (*component.Step, error)
+}
+```
+
+Each strategy's `Execute()` returns a `*component.Step` with an explicit `Lifecycle` field:
+
+- `LifecycleOneShot` — process runs to completion (builds, deploys, setup scripts)
+- `LifecycleLongRunning` — process stays running; readiness determined by port probing (dev servers, compose stacks, containers)
+
+Strategies are bound to components by name via `strategy.Register(componentName, &MyStrategy{})` in each component package's `init()`. Components
+without explicit registrations are resolved by config keys (e.g., `make-target` → `LocalMakeRun`). The mixer calls `strategy.Resolve(comp)` to get the
+strategies for a component and executes each one.
+
+### Available recipes
+
+**Start (development):**
+
+- `monitoring-plugin` (alias: `mp`) — Frontend + backend dev servers + console
+- `logging-view-plugin` (alias: `lp`) — Frontend + backend dev servers + console + local Loki
+- `perses` (alias: `perses`) — Build Perses API + run server
+
+**Deploy (cluster):**
+
+- `monitoring-plugin` (alias: `mp`) — Build/push image + patch cluster (requires `--image=...`)
+- `seed-users` (alias: `users`) — Create HTPasswd users on cluster
+- `seed-users-permissions` (alias: `users-perms`) — Create users + set RBAC permissions
+
+See `components/register.go` and individual `components/*/components.go` files for full definitions.

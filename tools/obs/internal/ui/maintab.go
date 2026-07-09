@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"obs/internal/component"
-	"obs/internal/process"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/viewport"
@@ -47,19 +46,6 @@ func StatusIcon(status component.Status, spinnerView string) string {
 		return def.Style.Render(def.Icon)
 	}
 	return def.Icon
-}
-
-func MapProcessStatus(ps process.ProcessStatus) component.Status {
-	switch ps {
-	case process.ProcessFailed:
-		return component.StatusFailed
-	case process.ProcessStopped:
-		return component.StatusStopped
-	case process.ProcessDone:
-		return component.StatusDone
-	default:
-		return component.StatusDone
-	}
 }
 
 type ProcessInfo struct {
@@ -128,26 +114,14 @@ func (mt *MainTab) UpdateStep(name string, status component.Status, err error) {
 		if mt.steps[i].Name == name {
 			mt.steps[i].Status = status
 			mt.steps[i].Err = err
-			if status == component.StatusDone || status == component.StatusStopped ||
-				status == component.StatusFailed || status == component.StatusSkipped ||
-				status == component.StatusReady {
-				for j := range mt.steps[i].Processes {
-					mt.steps[i].Processes[j].Status = status
-				}
-			}
 			return
 		}
 	}
 }
 
-func (mt MainTab) View(width, height int) string {
-	return mt.ViewWithRequirements(width, height, 1, nil) // reqPassed = 1
-}
-
-func (mt MainTab) ViewWithRequirements(width, height int, reqStatus reqState, reqErr error) string {
+func (mt *MainTab) RefreshContent(width int, reqStatus reqState, reqErr error) {
 	var lines []string
 
-	// Requirements section
 	switch reqStatus {
 	case reqChecking:
 		lines = append(lines, lipgloss.NewStyle().Bold(true).Render("Requirements:"))
@@ -155,8 +129,12 @@ func (mt MainTab) ViewWithRequirements(width, height int, reqStatus reqState, re
 		lines = append(lines, "")
 	case reqFailed:
 		lines = append(lines, lipgloss.NewStyle().Bold(true).Render("Requirements:"))
+		errMsg := "unknown error"
+		if reqErr != nil {
+			errMsg = reqErr.Error()
+		}
 		errStyle := failStyle.Width(width - 6)
-		lines = append(lines, fmt.Sprintf("  %s %s", failStyle.Render("✗"), errStyle.Render(reqErr.Error())))
+		lines = append(lines, fmt.Sprintf("  %s %s", failStyle.Render("✗"), errStyle.Render(errMsg)))
 		lines = append(lines, "")
 	case reqPassed:
 		lines = append(lines, lipgloss.NewStyle().Bold(true).Render("Requirements:"))
@@ -192,10 +170,13 @@ func (mt MainTab) ViewWithRequirements(width, height int, reqStatus reqState, re
 	}
 
 	mt.viewport.SetContent(strings.Join(lines, "\n"))
+}
+
+func (mt *MainTab) ViewWithRequirements() string {
 	return mt.viewport.View()
 }
 
-func (mt MainTab) renderStepTree(name string, depth int, spinnerView string, children map[string][]string, rendered map[string]bool) []string {
+func (mt *MainTab) renderStepTree(name string, depth int, spinnerView string, children map[string][]string, rendered map[string]bool) []string {
 	rendered[name] = true
 	step := mt.GetStep(name)
 	if step == nil {
@@ -203,7 +184,7 @@ func (mt MainTab) renderStepTree(name string, depth int, spinnerView string, chi
 	}
 
 	prefix := "  "
-	for i := 0; i < depth; i++ {
+	for range depth {
 		prefix += dimStyle.Render("│") + " "
 	}
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"time"
 
 	"obs/internal/component"
@@ -29,9 +30,20 @@ func (r *DetachRunner) Run(ctx context.Context, mgr *process.Manager, steps []*c
 	}
 
 	inner := NewNonInteractive(io.Discard)
-	go inner.Run(ctx, mgr, steps, updates)
+	errCh := make(chan error, 1)
+	go func() {
+		err := inner.Run(ctx, mgr, steps, updates)
+		errCh <- err
+		r.lock.Release()
+	}()
 
-	time.Sleep(500 * time.Millisecond)
+	select {
+	case err := <-errCh:
+		if err != nil {
+			return fmt.Errorf("background run failed: %w", err)
+		}
+	case <-time.After(1 * time.Second):
+	}
 
 	var procs []state.ProcessState
 	for _, p := range mgr.All() {
@@ -39,9 +51,13 @@ func (r *DetachRunner) Run(ctx context.Context, mgr *process.Manager, steps []*c
 			Name: p.Spec.Name,
 			PID:  p.PID(),
 		})
-		r.store.WritePID(p.Spec.Name, p.PID())
+		if err := r.store.WritePID(p.Spec.Name, p.PID()); err != nil {
+			fmt.Fprintf(os.Stderr, "warning: failed to write PID for %s: %v\n", p.Spec.Name, err)
+		}
 	}
-	r.store.Save(&state.RunState{Processes: procs})
+	if err := r.store.Save(&state.RunState{Processes: procs}); err != nil {
+		fmt.Fprintf(os.Stderr, "warning: failed to save state: %v\n", err)
+	}
 
 	fmt.Println("Processes started in background:")
 	state.PrintStatus(&state.RunState{Processes: procs})

@@ -33,10 +33,7 @@ func TestManager_StartAndStop(t *testing.T) {
 		t.Fatal("duplicate start should fail")
 	}
 
-	err = mgr.StopProcess("sleeper")
-	if err != nil {
-		t.Fatalf("StopProcess failed: %v", err)
-	}
+	mgr.StopAll()
 
 	select {
 	case <-proc.Wait():

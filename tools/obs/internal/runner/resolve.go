@@ -15,22 +15,12 @@ func ResolveSpec(spec component.ProcessSpec) (component.ProcessSpec, func(), err
 
 	args, tempDir, err := resolveFiles(spec.Args, spec.Files)
 	if err != nil {
+		if tempDir != "" {
+			os.RemoveAll(tempDir)
+		}
 		return spec, nil, err
 	}
 	resolved.Args = args
-
-	if spec.StdinFile != "" && len(spec.Files) > 0 {
-		_, content, err := readFileRef(spec.StdinFile, spec.Files)
-		if err != nil {
-			if tempDir != "" {
-				os.RemoveAll(tempDir)
-			}
-			return spec, nil, err
-		}
-		resolved.Stdin = string(content)
-		resolved.StdinFile = ""
-	}
-
 	resolved.Files = nil
 
 	cleanup := func() {
@@ -66,14 +56,14 @@ func resolveFiles(args []string, files map[string]component.FileRef) ([]string, 
 			name := arg[len("{{content:") : len(arg)-2]
 			_, content, err := readFileRef(name, files)
 			if err != nil {
-				return nil, "", err
+				return nil, tempDir, err
 			}
 			resolved[i] = string(content)
 		} else if strings.HasPrefix(arg, "{{path:") && strings.HasSuffix(arg, "}}") {
 			name := arg[len("{{path:") : len(arg)-2]
 			path, content, err := readFileRef(name, files)
 			if err != nil {
-				return nil, "", err
+				return nil, tempDir, err
 			}
 			if tempDir == "" {
 				tempDir, err = os.MkdirTemp("", "obs-files-*")
@@ -81,7 +71,7 @@ func resolveFiles(args []string, files map[string]component.FileRef) ([]string, 
 					return nil, "", fmt.Errorf("create temp dir: %w", err)
 				}
 			}
-			tmpPath := filepath.Join(tempDir, filepath.Base(path))
+			tmpPath := filepath.Join(tempDir, fmt.Sprintf("%d-%s", i, filepath.Base(path)))
 			if err := os.WriteFile(tmpPath, content, 0o644); err != nil {
 				return nil, tempDir, fmt.Errorf("write temp file: %w", err)
 			}

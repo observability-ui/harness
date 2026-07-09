@@ -1,9 +1,6 @@
 package component
 
-type Output struct {
-	Name  string
-	Value string
-}
+import "maps"
 
 type RequiredFlag struct {
 	Name  string
@@ -12,11 +9,9 @@ type RequiredFlag struct {
 
 type Component struct {
 	Name          string
-	Description   string
 	DependsOn     []string
-	Capabilities  []string
 	Dir           string
-	Outputs       []Output
+	Ports         []int
 	Config        map[string]string
 	RequiredFlags []RequiredFlag
 }
@@ -24,6 +19,9 @@ type Component struct {
 var registry = make(map[string]*Component)
 
 func Register(c *Component) {
+	if _, exists := registry[c.Name]; exists {
+		panic("duplicate component registration: " + c.Name)
+	}
 	registry[c.Name] = c
 }
 
@@ -33,5 +31,11 @@ func Get(name string) (*Component, bool) {
 }
 
 func All() map[string]*Component {
-	return registry
+	cp := make(map[string]*Component, len(registry))
+	maps.Copy(cp, registry)
+	return cp
+}
+
+func ResetRegistry() {
+	registry = make(map[string]*Component)
 }

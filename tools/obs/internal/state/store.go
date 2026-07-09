@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 	"sync"
 
 	"obs/internal/process"
@@ -22,8 +21,9 @@ type RunState struct {
 }
 
 type Store struct {
-	dir  string
-	once sync.Once
+	dir         string
+	mu          sync.Mutex
+	initialized bool
 }
 
 func NewStore(dir string) *Store {
@@ -31,16 +31,18 @@ func NewStore(dir string) *Store {
 }
 
 func (s *Store) init() error {
-	var err error
-	s.once.Do(func() {
-		for _, sub := range []string{"", "pids"} {
-			if e := os.MkdirAll(filepath.Join(s.dir, sub), 0755); e != nil {
-				err = e
-				return
-			}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.initialized {
+		return nil
+	}
+	for _, sub := range []string{"", "pids"} {
+		if err := os.MkdirAll(filepath.Join(s.dir, sub), 0755); err != nil {
+			return err
 		}
-	})
-	return err
+	}
+	s.initialized = true
+	return nil
 }
 
 func (s *Store) Save(state *RunState) error {
@@ -73,6 +75,7 @@ func (s *Store) Load() (*RunState, error) {
 func (s *Store) Clean() {
 	os.Remove(filepath.Join(s.dir, "state.json"))
 	os.Remove(filepath.Join(s.dir, "state.json.tmp"))
+	os.Remove(filepath.Join(s.dir, "obs.lock"))
 	os.RemoveAll(filepath.Join(s.dir, "pids"))
 }
 
@@ -81,18 +84,6 @@ func (s *Store) WritePID(name string, pid int) error {
 		return err
 	}
 	return os.WriteFile(filepath.Join(s.dir, "pids", name+".pid"), []byte(strconv.Itoa(pid)), 0644)
-}
-
-func (s *Store) ReadPID(name string) (int, error) {
-	data, err := os.ReadFile(filepath.Join(s.dir, "pids", name+".pid"))
-	if err != nil {
-		return 0, err
-	}
-	return strconv.Atoi(strings.TrimSpace(string(data)))
-}
-
-func (s *Store) RemovePID(name string) {
-	os.Remove(filepath.Join(s.dir, "pids", name+".pid"))
 }
 
 func DefaultStateDir() string {

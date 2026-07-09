@@ -1,6 +1,7 @@
 package ui_test
 
 import (
+	"context"
 	"testing"
 
 	"obs/internal/component"
@@ -14,7 +15,7 @@ func TestModel_Init(t *testing.T) {
 	close(updates)
 
 	retryCh := make(chan struct{}, 1)
-	model := ui.NewModel(mgr, updates, retryCh, nil)
+	model := ui.NewModel(context.Background(), mgr, updates, retryCh, nil)
 	cmd := model.Init()
 	if cmd == nil {
 		t.Fatal("Init should return a Cmd")

@@ -1,8 +1,10 @@
 package process
 
 import (
+	"errors"
 	"fmt"
 	"net"
+	"os"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -12,7 +14,6 @@ import (
 
 func CheckPort(port int) error {
 	addr := fmt.Sprintf(":%d", port)
-	// Check both IPv4 and IPv6
 	ln4, err4 := net.Listen("tcp4", addr)
 	if err4 != nil {
 		return fmt.Errorf("port %d is already in use", port)
@@ -20,19 +21,24 @@ func CheckPort(port int) error {
 	ln4.Close()
 	ln6, err6 := net.Listen("tcp6", addr)
 	if err6 != nil {
-		return fmt.Errorf("port %d is already in use", port)
+		if !isAddrFamilyUnsupported(err6) {
+			return fmt.Errorf("port %d is already in use", port)
+		}
+	} else {
+		ln6.Close()
 	}
-	ln6.Close()
 	return nil
 }
 
-func CheckPorts(ports []int) error {
-	for _, p := range ports {
-		if err := CheckPort(p); err != nil {
-			return err
+func isAddrFamilyUnsupported(err error) bool {
+	var opErr *net.OpError
+	if errors.As(err, &opErr) {
+		var sysErr *os.SyscallError
+		if errors.As(opErr.Err, &sysErr) {
+			return errors.Is(sysErr.Err, syscall.EAFNOSUPPORT) || errors.Is(sysErr.Err, syscall.ENOPROTOOPT)
 		}
 	}
-	return nil
+	return false
 }
 
 func FreePorts(ports []int) error {
@@ -52,11 +58,11 @@ func freePort(port int) error {
 		return err
 	}
 	for _, pid := range pids {
-		fmt.Printf("Killing process %d on port %d\n", pid, port)
+		// SIGTERM the process holding the port
 		syscall.Kill(pid, syscall.SIGTERM)
 	}
 	// Wait for port to become available
-	for i := 0; i < 20; i++ {
+	for range 20 {
 		time.Sleep(250 * time.Millisecond)
 		if err := CheckPort(port); err == nil {
 			return nil

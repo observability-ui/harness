@@ -4,9 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"maps"
 	"os"
 	"os/exec"
 	"runtime"
+	"slices"
+	"strconv"
 	"strings"
 
 	"obs/internal/component"
@@ -16,11 +19,10 @@ import (
 
 type ContainerStrategy struct{}
 
-func (s *ContainerStrategy) Name() string        { return "console-container" }
 func (s *ContainerStrategy) Requires() []string { return []string{"oc"} }
 
-func (s *ContainerStrategy) Run(_ context.Context, comp *component.Component, rc *runcontext.RunContext) (*component.Step, error) {
-	if err := extractClusterConfig(rc); err != nil {
+func (s *ContainerStrategy) Execute(ctx context.Context, comp *component.Component, rc *runcontext.RunContext) (*component.Step, error) {
+	if err := extractClusterConfig(ctx, rc); err != nil {
 		return nil, err
 	}
 
@@ -42,21 +44,22 @@ func (s *ContainerStrategy) Run(_ context.Context, comp *component.Component, rc
 	}
 	hostRef := hostReference(rt)
 	plugins := discoverPlugins(rc)
-	proxies := discoverProxies()
+	proxies := discoverProxies(rc)
 
 	env := buildEnv(rc, plugins, proxies, hostRef)
 
 	args := []string{"run", "--pull", "always", "--platform", platform, "--rm"}
 	args = append(args, networkArgs(rt)...)
 
-	for k, v := range env {
-		args = append(args, "-e", fmt.Sprintf("%s=%s", k, v))
+	for _, k := range slices.Sorted(maps.Keys(env)) {
+		args = append(args, "-e", fmt.Sprintf("%s=%s", k, env[k]))
 	}
 
 	args = append(args, image)
 
 	return &component.Step{
 		Name:      comp.Name,
+		Lifecycle: component.LifecycleLongRunning,
 		DependsOn: comp.DependsOn,
 		Processes: []component.ProcessSpec{{
 			Name:    "console",
@@ -67,20 +70,19 @@ func (s *ContainerStrategy) Run(_ context.Context, comp *component.Component, rc
 	}, nil
 }
 
-func extractClusterConfig(rc *runcontext.RunContext) error {
-	if _, err := exec.LookPath("oc"); err != nil {
-		return fmt.Errorf("oc is not installed — install the OpenShift CLI")
-	}
-
-	apiServer := runOC("whoami", "--show-server")
+func extractClusterConfig(ctx context.Context, rc *runcontext.RunContext) error {
+	apiServer := runOC(ctx, "whoami", "--show-server")
 	if apiServer == "" {
 		return fmt.Errorf("not logged in to OpenShift cluster — run 'oc login' first")
 	}
 
-	bearerToken := runOC("whoami", "--show-token")
-	thanosURL := runOC("-n", "openshift-config-managed", "get", "configmap",
+	bearerToken := runOC(ctx, "whoami", "--show-token")
+	if bearerToken == "" {
+		fmt.Fprintln(os.Stderr, "warning: could not retrieve bearer token — console may not authenticate to the cluster")
+	}
+	thanosURL := runOC(ctx, "-n", "openshift-config-managed", "get", "configmap",
 		"monitoring-shared-config", "-o", "jsonpath={.data.thanosPublicURL}")
-	alertmanagerURL := runOC("-n", "openshift-config-managed", "get", "configmap",
+	alertmanagerURL := runOC(ctx, "-n", "openshift-config-managed", "get", "configmap",
 		"monitoring-shared-config", "-o", "jsonpath={.data.alertmanagerPublicURL}")
 
 	rc.Set("console", "api-server", apiServer)
@@ -133,8 +135,12 @@ func buildEnv(rc *runcontext.RunContext, plugins []pluginInfo, proxies []proxyIn
 				"authorize":     true,
 			})
 		}
-		proxyJSON, _ := json.Marshal(map[string]any{"services": proxyServices})
-		env["BRIDGE_PLUGIN_PROXY"] = string(proxyJSON)
+		proxyJSON, err := json.Marshal(map[string]any{"services": proxyServices})
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "warning: failed to marshal proxy config: %v\n", err)
+		} else {
+			env["BRIDGE_PLUGIN_PROXY"] = string(proxyJSON)
+		}
 	}
 
 	return env
@@ -181,18 +187,16 @@ func discoverPlugins(rc *runcontext.RunContext) []pluginInfo {
 	all := component.All()
 	var plugins []pluginInfo
 	for _, comp := range all {
+		if !rc.HasComponent(comp.Name) {
+			continue
+		}
 		pluginName := comp.Config["console-plugin"]
 		if pluginName == "" {
 			continue
 		}
 		port := rc.Get(comp.Name, "port")
-		if port == "" {
-			for _, out := range comp.Outputs {
-				if out.Name == "port" {
-					port = out.Value
-					break
-				}
-			}
+		if port == "" && len(comp.Ports) > 0 {
+			port = strconv.Itoa(comp.Ports[0])
 		}
 		if port != "" {
 			plugins = append(plugins, pluginInfo{name: pluginName, port: port})
@@ -201,10 +205,13 @@ func discoverPlugins(rc *runcontext.RunContext) []pluginInfo {
 	return plugins
 }
 
-func discoverProxies() []proxyInfo {
+func discoverProxies(rc *runcontext.RunContext) []proxyInfo {
 	all := component.All()
 	var proxies []proxyInfo
 	for _, comp := range all {
+		if !rc.HasComponent(comp.Name) {
+			continue
+		}
 		path := comp.Config["console-proxy-path"]
 		if path == "" {
 			continue
@@ -218,8 +225,8 @@ func discoverProxies() []proxyInfo {
 	return proxies
 }
 
-func runOC(args ...string) string {
-	out, err := exec.Command("oc", args...).Output()
+func runOC(ctx context.Context, args ...string) string {
+	out, err := exec.CommandContext(ctx, "oc", args...).Output()
 	if err != nil {
 		return ""
 	}
@@ -227,10 +234,5 @@ func runOC(args ...string) string {
 }
 
 func init() {
-	strategy.RegisterSelector(func(comp *component.Component, mode string) (strategy.BuildStrategy, strategy.RunStrategy) {
-		if comp.Name == Console.Name {
-			return nil, &ContainerStrategy{}
-		}
-		return nil, nil
-	})
+	strategy.Register(Console.Name, &ContainerStrategy{})
 }

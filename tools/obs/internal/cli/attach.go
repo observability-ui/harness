@@ -33,6 +33,7 @@ func newAttachCmd() *cobra.Command {
 			// Wait for interrupt
 			sigCh := make(chan os.Signal, 1)
 			signal.Notify(sigCh, syscall.SIGINT)
+			defer signal.Stop(sigCh)
 
 			ticker := time.NewTicker(2 * time.Second)
 			defer ticker.Stop()
@@ -43,13 +44,15 @@ func newAttachCmd() *cobra.Command {
 					fmt.Println("\nDetached.")
 					return nil
 				case <-ticker.C:
-					rs, _ = store.Load()
-					if rs != nil {
-						rs = store.FilterAlive(rs)
-						if len(rs.Processes) == 0 {
-							fmt.Println("All processes have exited.")
-							return nil
-						}
+					rs, err = store.Load()
+					if err != nil {
+						fmt.Println("All processes have exited.")
+						return nil
+					}
+					rs = store.FilterAlive(rs)
+					if len(rs.Processes) == 0 {
+						fmt.Println("All processes have exited.")
+						return nil
 					}
 				}
 			}

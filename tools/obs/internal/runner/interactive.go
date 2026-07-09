@@ -12,10 +12,13 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func RunInteractive(ctx context.Context, mgr *process.Manager, prepare func() ([]*component.Step, error), updates chan<- component.StepUpdate, inputValues map[string]string) error {
+func RunInteractive(ctx context.Context, mgr *process.Manager, prepare func() ([]*component.Step, error), inputValues map[string]string) error {
+	innerCtx, innerCancel := context.WithCancel(ctx)
+	defer innerCancel()
+
 	internalUpdates := make(chan component.StepUpdate, 100)
 	retryCh := make(chan struct{}, 1)
-	model := ui.NewModel(mgr, internalUpdates, retryCh, inputValues)
+	model := ui.NewModel(innerCtx, mgr, internalUpdates, retryCh, inputValues)
 
 	p := tea.NewProgram(model, tea.WithAltScreen())
 
@@ -30,7 +33,7 @@ func RunInteractive(ctx context.Context, mgr *process.Manager, prepare func() ([
 				case <-retryCh:
 					mgr.StopAll()
 					continue
-				case <-ctx.Done():
+				case <-innerCtx.Done():
 					return
 				}
 			}
@@ -44,13 +47,15 @@ func RunInteractive(ctx context.Context, mgr *process.Manager, prepare func() ([
 				},
 			}
 
-			ExecuteSteps(ctx, mgr, steps, cb)
+			if _, err := ExecuteSteps(innerCtx, mgr, steps, cb); err != nil {
+				p.Send(ui.RequirementsFailedMsg{Err: err})
+			}
 
 			select {
 			case <-retryCh:
 				mgr.StopAll()
 				continue
-			case <-ctx.Done():
+			case <-innerCtx.Done():
 				return
 			}
 		}

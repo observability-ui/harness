@@ -2,7 +2,6 @@ package process
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -33,9 +32,11 @@ type Process struct {
 	Err    error
 	Output *RingBuffer
 
-	cmd  *exec.Cmd
-	mu   sync.Mutex
-	done chan struct{}
+	cmd      *exec.Cmd
+	mu       sync.Mutex
+	done     chan struct{}
+	doneOnce sync.Once
+	stopping bool
 }
 
 func NewProcess(spec component.ProcessSpec, maxLogLines int) *Process {
@@ -51,12 +52,25 @@ func (p *Process) Start(ctx context.Context, extraWriters ...io.Writer) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
+	if p.Status != ProcessPending {
+		return fmt.Errorf("process %q already started", p.Spec.Name)
+	}
+
 	p.cmd = exec.Command(p.Spec.Command, p.Spec.Args...)
 	if p.Spec.Dir != "" {
 		p.cmd.Dir = p.Spec.Dir
 	}
 	if len(p.Spec.Env) > 0 {
-		p.cmd.Env = os.Environ()
+		overrides := make(map[string]bool, len(p.Spec.Env))
+		for k := range p.Spec.Env {
+			overrides[k] = true
+		}
+		for _, e := range os.Environ() {
+			if k, _, ok := strings.Cut(e, "="); ok && overrides[k] {
+				continue
+			}
+			p.cmd.Env = append(p.cmd.Env, e)
+		}
 		for k, v := range p.Spec.Env {
 			p.cmd.Env = append(p.cmd.Env, fmt.Sprintf("%s=%s", k, v))
 		}
@@ -64,10 +78,6 @@ func (p *Process) Start(ctx context.Context, extraWriters ...io.Writer) error {
 
 	// Put child in its own process group for clean shutdown
 	p.cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
-
-	if p.Spec.Stdin != "" {
-		p.cmd.Stdin = strings.NewReader(p.Spec.Stdin)
-	}
 
 	writers := []io.Writer{p.Output}
 	writers = append(writers, extraWriters...)
@@ -78,7 +88,7 @@ func (p *Process) Start(ctx context.Context, extraWriters ...io.Writer) error {
 	if err := p.cmd.Start(); err != nil {
 		p.Status = ProcessFailed
 		p.Err = err
-		close(p.done)
+		p.doneOnce.Do(func() { close(p.done) })
 		return err
 	}
 
@@ -96,19 +106,16 @@ func (p *Process) Start(ctx context.Context, extraWriters ...io.Writer) error {
 	go func() {
 		err := p.cmd.Wait()
 		p.mu.Lock()
-		if err != nil {
-			var exitErr *exec.ExitError
-			if errors.As(err, &exitErr) && exitErr.ExitCode() == -1 {
-				p.Status = ProcessStopped
-			} else {
-				p.Status = ProcessFailed
-				p.Err = err
-			}
+		if p.stopping {
+			p.Status = ProcessStopped
+		} else if err != nil {
+			p.Status = ProcessFailed
+			p.Err = err
 		} else {
 			p.Status = ProcessDone
 		}
 		p.mu.Unlock()
-		close(p.done)
+		p.doneOnce.Do(func() { close(p.done) })
 	}()
 
 	return nil
@@ -120,6 +127,7 @@ func (p *Process) Stop() error {
 		p.mu.Unlock()
 		return nil
 	}
+	p.stopping = true
 	pid := p.cmd.Process.Pid
 	p.mu.Unlock()
 
@@ -131,8 +139,18 @@ func (p *Process) Stop() error {
 		return nil
 	case <-time.After(ShutdownTimeout):
 		syscall.Kill(-pid, syscall.SIGKILL)
-		<-p.done
-		return nil
+		select {
+		case <-p.done:
+			return nil
+		case <-time.After(3 * time.Second):
+			p.mu.Lock()
+			if p.Status == ProcessRunning {
+				p.Status = ProcessStopped
+			}
+			p.mu.Unlock()
+			p.doneOnce.Do(func() { close(p.done) })
+			return fmt.Errorf("process %d did not exit after SIGKILL", pid)
+		}
 	}
 }
 
@@ -144,6 +162,18 @@ func (p *Process) Running() bool {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	return p.Status == ProcessRunning
+}
+
+func (p *Process) GetStatus() ProcessStatus {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.Status
+}
+
+func (p *Process) GetErr() error {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.Err
 }
 
 func (p *Process) PID() int {

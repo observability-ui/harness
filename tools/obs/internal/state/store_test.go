@@ -55,11 +55,11 @@ func TestStore_WritePID(t *testing.T) {
 		t.Fatalf("WritePID failed: %v", err)
 	}
 
-	pid, err := store.ReadPID("test-proc")
+	data, err := os.ReadFile(filepath.Join(dir, "pids", "test-proc.pid"))
 	if err != nil {
-		t.Fatalf("ReadPID failed: %v", err)
+		t.Fatalf("reading PID file failed: %v", err)
 	}
-	if pid != 99999 {
-		t.Fatalf("expected PID 99999, got %d", pid)
+	if string(data) != "99999" {
+		t.Fatalf("expected PID file content '99999', got %q", string(data))
 	}
 }

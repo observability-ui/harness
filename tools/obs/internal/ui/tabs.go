@@ -46,18 +46,12 @@ func (tb *TabBar) Prev() {
 
 func (tb *TabBar) Active() int { return tb.active }
 func (tb *TabBar) Count() int  { return len(tb.tabs) }
-func (tb *TabBar) ActiveName() string {
-	if tb.active < len(tb.tabs) {
-		return tb.tabs[tb.active]
-	}
-	return ""
-}
 
-func (tb TabBar) View(width int) string {
+func (tb *TabBar) View(width int) string {
 	return tb.ViewWithIcons(width, nil)
 }
 
-func (tb TabBar) ViewWithIcons(width int, icons []string) string {
+func (tb *TabBar) ViewWithIcons(width int, icons []string) string {
 	var rendered []string
 	for i, name := range tb.tabs {
 		nameStyle := dimStyle

@@ -11,6 +11,7 @@ type RingBuffer struct {
 	maxSize int
 	start   int
 	count   int
+	total   int
 	partial string
 }
 
@@ -40,6 +41,7 @@ func (rb *RingBuffer) Write(p []byte) (int, error) {
 		} else {
 			rb.start = (rb.start + 1) % rb.maxSize
 		}
+		rb.total++
 	}
 	return len(p), nil
 }
@@ -52,11 +54,14 @@ func (rb *RingBuffer) Lines() []string {
 	for i := 0; i < rb.count; i++ {
 		result[i] = rb.lines[(rb.start+i)%rb.maxSize]
 	}
+	if rb.partial != "" {
+		result = append(result, rb.partial)
+	}
 	return result
 }
 
 func (rb *RingBuffer) Len() int {
 	rb.mu.Lock()
 	defer rb.mu.Unlock()
-	return rb.count
+	return rb.total
 }

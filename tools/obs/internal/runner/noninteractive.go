@@ -9,7 +9,6 @@ import (
 
 	"obs/internal/component"
 	"obs/internal/process"
-	"obs/internal/ui"
 
 	"github.com/charmbracelet/lipgloss"
 )
@@ -46,7 +45,9 @@ func (pw *PrefixWriter) Write(p []byte) (int, error) {
 	pw.partial = lines[len(lines)-1]
 
 	for _, line := range lines[:len(lines)-1] {
-		fmt.Fprintf(pw.w, "%s%s\n", pw.prefix, line)
+		if _, err := fmt.Fprintf(pw.w, "%s%s\n", pw.prefix, line); err != nil {
+			return 0, err
+		}
 	}
 	return len(p), nil
 }
@@ -59,11 +60,35 @@ func NewNonInteractive(out io.Writer) *NonInteractiveRunner {
 	return &NonInteractiveRunner{Out: out}
 }
 
+type safeSender struct {
+	ch   chan<- component.StepUpdate
+	done chan struct{}
+	once sync.Once
+}
+
+func newSafeSender(ch chan<- component.StepUpdate) *safeSender {
+	return &safeSender{ch: ch, done: make(chan struct{})}
+}
+
+func (s *safeSender) send(u component.StepUpdate) {
+	select {
+	case s.ch <- u:
+	case <-s.done:
+	}
+}
+
+func (s *safeSender) close() {
+	s.once.Do(func() {
+		close(s.done)
+	})
+}
+
 func (r *NonInteractiveRunner) Run(ctx context.Context, mgr *process.Manager, steps []*component.Step, updates chan<- component.StepUpdate) error {
 	colorIdx := 0
+	sender := newSafeSender(updates)
 
 	cb := StepCallbacks{
-		OnUpdate: func(u component.StepUpdate) { updates <- u },
+		OnUpdate: func(u component.StepUpdate) { sender.send(u) },
 		Writers: func(specName string) []io.Writer {
 			pw := NewPrefixWriter(r.Out, specName, colorIdx)
 			colorIdx++
@@ -73,7 +98,7 @@ func (r *NonInteractiveRunner) Run(ctx context.Context, mgr *process.Manager, st
 
 	launched, err := ExecuteSteps(ctx, mgr, steps, cb)
 	if err != nil {
-		close(updates)
+		sender.close()
 		return err
 	}
 
@@ -90,11 +115,12 @@ func (r *NonInteractiveRunner) Run(ctx context.Context, mgr *process.Manager, st
 			defer wg.Done()
 			<-s.Proc.Wait()
 
-			status := ui.MapProcessStatus(s.Proc.Status)
-			updates <- component.StepUpdate{StepName: s.StepName, Status: status, Err: s.Proc.Err}
+			status := process.MapExitStatus(s.Proc)
+			procErr := s.Proc.GetErr()
+			sender.send(component.StepUpdate{StepName: s.StepName, Status: status, Err: procErr})
 			var err error
 			if status == component.StatusFailed {
-				err = fmt.Errorf("process %q failed: %v", s.Proc.Spec.Name, s.Proc.Err)
+				err = fmt.Errorf("process %q failed: %w", s.Proc.Spec.Name, procErr)
 			}
 			results <- procResult{s.StepName, err}
 		}(sp)
@@ -117,10 +143,10 @@ func (r *NonInteractiveRunner) Run(ctx context.Context, mgr *process.Manager, st
 		case <-ctx.Done():
 			mgr.StopAll()
 			<-allDone
-			close(updates)
+			sender.close()
 			return nil
 		}
 	}
-	close(updates)
+	sender.close()
 	return firstErr
 }

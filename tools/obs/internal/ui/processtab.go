@@ -53,7 +53,7 @@ func (pt *ProcessTab) SetSize(width, height int) {
 	pt.viewport.Height = height
 }
 
-func (pt ProcessTab) View() string {
+func (pt *ProcessTab) View() string {
 	if pt.proc == nil && len(pt.DependsOn) > 0 {
 		var lines []string
 		lines = append(lines, "")
