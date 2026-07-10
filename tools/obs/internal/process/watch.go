@@ -3,7 +3,7 @@ package process
 import (
 	"time"
 
-	"obs/internal/component"
+	"obs/internal/task"
 )
 
 func WaitAll(procs []*Process) <-chan struct{} {
@@ -17,35 +17,35 @@ func WaitAll(procs []*Process) <-chan struct{} {
 	return ch
 }
 
-func WaitForReady(proc *Process, ports []int) component.Status {
+func WaitForReady(proc *Process, ports []int) task.Status {
 	if len(ports) == 0 {
 		<-proc.Wait()
 		return MapExitStatus(proc)
 	}
 	for {
 		if ProbePorts(ports) {
-			return component.StatusReady
+			return task.StatusReady
 		}
 		select {
 		case <-time.After(time.Second):
 		case <-proc.Wait():
-			return component.StatusFailed
+			return task.StatusFailed
 		}
 	}
 }
 
-func WaitForExit(proc *Process) component.Status {
+func WaitForExit(proc *Process) task.Status {
 	<-proc.Wait()
 	return MapExitStatus(proc)
 }
 
-func MapExitStatus(proc *Process) component.Status {
+func MapExitStatus(proc *Process) task.Status {
 	switch proc.GetStatus() {
-	case ProcessFailed:
-		return component.StatusFailed
-	case ProcessStopped:
-		return component.StatusStopped
+	case processFailed:
+		return task.StatusFailed
+	case processStopped:
+		return task.StatusStopped
 	default:
-		return component.StatusDone
+		return task.StatusDone
 	}
 }

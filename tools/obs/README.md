@@ -16,7 +16,7 @@ make obs
 
 # Start development servers
 ./bin/obs start mp
-./bin/obs start mp lp    # shared components (console) auto-deduplicated
+./bin/obs start mp lp    # shared tasks (console) auto-deduplicated
 
 # Deploy to cluster
 ./bin/obs deploy mp --image=quay.io/user/monitoring-plugin:tag
@@ -37,27 +37,27 @@ CONSOLE_IMAGE=quay.io/my/console:dev ./bin/obs start mp
 
 ## Architecture
 
-obs uses a **Component/Strategy/Mixer** architecture:
+obs uses a **Task/Strategy/Mixer** architecture:
 
-- **Components** define WHAT can run (name, dependencies, ports, config)
-- **Strategies** define HOW to run each component via a unified `Strategy` interface with `Requires()` and `Execute()` methods
-- **Mixer** resolves components into an executable step graph (DAG), checks tool requirements, validates required flags, and propagates flag values through `RunContext`
+- **Tasks** define WHAT to run and HOW — each task embeds its own `Strategy` along with metadata (name, dependencies, ports, labels)
+- **Strategies** implement a unified interface with `Requires()` and `Execute()` methods. Reusable strategies (`MakeRun`, `NPM`, `PodmanCompose`, `ContainerBuild`) live in `internal/strategy/`; project-specific strategies live alongside their tasks
+- **Mixer** resolves tasks into an executable step graph (DAG), checks tool requirements, validates required flags, and propagates flag values through `RunContext`
 - **Runners** execute the step graph (interactive TUI, non-interactive, or detach)
 
 ```
-components/                    — Component definitions + strategies (WHAT + HOW)
-  monitoring-plugin/           — MP components (frontend, backend, build-push) + deploy strategies
-  logging-plugin/              — LP components (frontend, backend, local loki)
-  console/                     — Shared console component + container strategy
+projects/                      — Task definitions per project
+  monitoring-plugin/           — MP tasks (frontend, backend, build-push, deploy steps)
+  logging-plugin/              — LP tasks (frontend, backend, local loki)
+  console/                     — Shared console task + container strategy
   cluster/                     — Cluster operations (seed-users, permissions)
-  perses/                      — Perses dashboard components (build, API server)
-  register.go                  — Declarative recipe definitions (component lists)
+  perses/                      — Perses dashboard tasks (build, API server)
+  recipes.go                   — Declarative recipe definitions (task lists)
 
 internal/
-  component/                   — Component, Step (with Lifecycle), ProcessSpec types + helpers
-  strategy/                    — Strategy interface + built-in strategies (defaults.go)
-  mixer/                       — DAG resolution, strategy selection, recipe registry
-  runcontext/                  — Centralized state for cross-component communication
+  task/                        — Task, Strategy interface, Step, ProcessSpec types
+  strategy/                    — Reusable strategy implementations
+  mixer/                       — DAG resolution, recipe registry
+  runcontext/                  — Centralized state for cross-task communication
   runner/                      — Step execution (interactive, non-interactive, detach)
   process/                     — OS process lifecycle, port management, ring buffer
   ui/                          — Bubbletea TUI (tabs, spinners, main tab tree view)
@@ -68,29 +68,30 @@ internal/
 
 ### Key concepts
 
-**Components** are declarative structs — no imperative code:
+**Tasks** combine metadata and strategy in a single struct:
 ```go
-var Frontend = &component.Component{
+var Frontend = &task.Task{
     Name:      "mp-frontend",
     DependsOn: []string{"mp-install-deps"},
     Dir:       "projects/monitoring-plugin",
     Ports:     []int{9001},
-    Config:    map[string]string{"make-target": "start-frontend"},
+    Labels:    map[string]string{"console-plugin": "monitoring-plugin"},
+    Strategy:  strategy.MakeTarget("start-frontend"),
 }
 ```
 
-Components can declare **RequiredFlags** for values that must be provided at runtime (e.g., `--image` for deploy). The TUI prompts interactively for missing flags.
+Tasks can declare **RequiredFlags** for values that must be provided at runtime (e.g., `--image` for deploy). The TUI prompts interactively for missing flags.
 
-**Strategies** implement a unified `Strategy` interface with `Requires()` and `Execute()` methods. Each strategy produces a `Step` with an explicit `Lifecycle` — either `LifecycleOneShot` (runs to completion) or `LifecycleLongRunning` (stays running, readiness via port probing). Strategies are bound to components by name via `strategy.Register()`. Components without explicit registrations are resolved automatically by config keys (e.g., `make-target` → `LocalMakeRun`).
+**Strategies** implement a unified `Strategy` interface with `Requires()` and `Execute()` methods. Each strategy produces a `Step` with an explicit `Lifecycle` — either `LifecycleOneShot` (runs to completion) or `LifecycleLongRunning` (stays running, readiness via port probing). Every task has an explicit strategy — no magic resolution.
 
-**Recipes** are named component lists:
+**Recipes** are named task lists:
 ```go
 mixer.RegisterRecipe("start", "monitoring-plugin", []string{"mp"}, []string{
     "mp-install-deps", "mp-frontend", "mp-backend", "console",
 })
 ```
 
-Running `obs start mp lp` expands both recipes. Shared components (like `console`) appear once — the Mixer deduplicates them. The console's strategy discovers all active plugins via RunContext and configures itself accordingly.
+Running `obs start mp lp` expands both recipes. Shared tasks (like `console`) appear once — the Mixer deduplicates them. The console's strategy discovers all active plugins via RunContext and configures itself accordingly.
 
 ### Flags
 

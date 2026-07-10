@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"obs/internal/component"
+	"obs/internal/task"
 	"obs/internal/process"
 
 	"github.com/charmbracelet/lipgloss"
@@ -22,21 +22,21 @@ var prefixColors = []lipgloss.Color{
 	lipgloss.Color("1"), // red
 }
 
-type PrefixWriter struct {
+type prefixWriter struct {
 	w       io.Writer
 	prefix  string
 	partial string
 	mu      sync.Mutex
 }
 
-func NewPrefixWriter(w io.Writer, name string, colorIdx int) *PrefixWriter {
+func newPrefixWriter(w io.Writer, name string, colorIdx int) *prefixWriter {
 	color := prefixColors[colorIdx%len(prefixColors)]
 	style := lipgloss.NewStyle().Foreground(color)
 	prefix := style.Render(fmt.Sprintf("%-20s | ", name))
-	return &PrefixWriter{w: w, prefix: prefix}
+	return &prefixWriter{w: w, prefix: prefix}
 }
 
-func (pw *PrefixWriter) Write(p []byte) (int, error) {
+func (pw *prefixWriter) Write(p []byte) (int, error) {
 	pw.mu.Lock()
 	defer pw.mu.Unlock()
 
@@ -61,16 +61,16 @@ func NewNonInteractive(out io.Writer) *NonInteractiveRunner {
 }
 
 type safeSender struct {
-	ch   chan<- component.StepUpdate
+	ch   chan<- task.StepUpdate
 	done chan struct{}
 	once sync.Once
 }
 
-func newSafeSender(ch chan<- component.StepUpdate) *safeSender {
+func newSafeSender(ch chan<- task.StepUpdate) *safeSender {
 	return &safeSender{ch: ch, done: make(chan struct{})}
 }
 
-func (s *safeSender) send(u component.StepUpdate) {
+func (s *safeSender) send(u task.StepUpdate) {
 	select {
 	case s.ch <- u:
 	case <-s.done:
@@ -83,14 +83,14 @@ func (s *safeSender) close() {
 	})
 }
 
-func (r *NonInteractiveRunner) Run(ctx context.Context, mgr *process.Manager, steps []*component.Step, updates chan<- component.StepUpdate) error {
+func (r *NonInteractiveRunner) Run(ctx context.Context, mgr *process.Manager, steps []*task.Step, updates chan<- task.StepUpdate) error {
 	colorIdx := 0
 	sender := newSafeSender(updates)
 
 	cb := StepCallbacks{
-		OnUpdate: func(u component.StepUpdate) { sender.send(u) },
+		OnUpdate: func(u task.StepUpdate) { sender.send(u) },
 		Writers: func(specName string) []io.Writer {
-			pw := NewPrefixWriter(r.Out, specName, colorIdx)
+			pw := newPrefixWriter(r.Out, specName, colorIdx)
 			colorIdx++
 			return []io.Writer{pw}
 		},
@@ -117,9 +117,9 @@ func (r *NonInteractiveRunner) Run(ctx context.Context, mgr *process.Manager, st
 
 			status := process.MapExitStatus(s.Proc)
 			procErr := s.Proc.GetErr()
-			sender.send(component.StepUpdate{StepName: s.StepName, Status: status, Err: procErr})
+			sender.send(task.StepUpdate{StepName: s.StepName, Status: status, Err: procErr})
 			var err error
-			if status == component.StatusFailed {
+			if status == task.StatusFailed {
 				err = fmt.Errorf("process %q failed: %w", s.Proc.Spec.Name, procErr)
 			}
 			results <- procResult{s.StepName, err}

@@ -6,7 +6,7 @@ import (
 	"io"
 	"sync"
 
-	"obs/internal/component"
+	"obs/internal/task"
 	"obs/internal/process"
 )
 
@@ -33,15 +33,15 @@ type StartedProc struct {
 }
 
 type StepCallbacks struct {
-	OnUpdate  func(component.StepUpdate)
-	OnProcess func(step *component.Step, spec component.ProcessSpec, proc *process.Process)
+	OnUpdate  func(task.StepUpdate)
+	OnProcess func(step *task.Step, spec task.ProcessSpec, proc *process.Process)
 	Writers   func(specName string) []io.Writer
 }
 
-func ExecuteSteps(ctx context.Context, mgr *process.Manager, steps []*component.Step, cb StepCallbacks) ([]StartedProc, error) {
+func ExecuteSteps(ctx context.Context, mgr *process.Manager, steps []*task.Step, cb StepCallbacks) ([]StartedProc, error) {
 	for _, step := range steps {
 		if len(step.DependsOn) > 0 {
-			cb.OnUpdate(component.StepUpdate{StepName: step.Name, Status: component.StatusWaiting})
+			cb.OnUpdate(task.StepUpdate{StepName: step.Name, Status: task.StatusWaiting})
 		}
 	}
 
@@ -59,19 +59,19 @@ func ExecuteSteps(ctx context.Context, mgr *process.Manager, steps []*component.
 			return launched, err
 		}
 		if skip {
-			cb.OnUpdate(component.StepUpdate{StepName: step.Name, Status: component.StatusSkipped})
+			cb.OnUpdate(task.StepUpdate{StepName: step.Name, Status: task.StatusSkipped})
 			stepErr.set(step.Name, fmt.Errorf("dependency failed"))
 			close(ready[step.Name])
 			continue
 		}
 
-		cb.OnUpdate(component.StepUpdate{StepName: step.Name, Status: component.StatusRunning})
+		cb.OnUpdate(task.StepUpdate{StepName: step.Name, Status: task.StatusRunning})
 
 		var stepProcs []*process.Process
 		for _, spec := range step.Processes {
 			resolved, cleanup, err := ResolveSpec(spec)
 			if err != nil {
-				cb.OnUpdate(component.StepUpdate{StepName: step.Name, Status: component.StatusFailed, Err: err})
+				cb.OnUpdate(task.StepUpdate{StepName: step.Name, Status: task.StatusFailed, Err: err})
 				return launched, fmt.Errorf("failed to resolve %q: %w", spec.Name, err)
 			}
 
@@ -85,7 +85,7 @@ func ExecuteSteps(ctx context.Context, mgr *process.Manager, steps []*component.
 				if cleanup != nil {
 					cleanup()
 				}
-				cb.OnUpdate(component.StepUpdate{StepName: step.Name, Status: component.StatusFailed, Err: err})
+				cb.OnUpdate(task.StepUpdate{StepName: step.Name, Status: task.StatusFailed, Err: err})
 				return launched, fmt.Errorf("failed to start %q: %w", spec.Name, err)
 			}
 			if cleanup != nil {
@@ -100,10 +100,10 @@ func ExecuteSteps(ctx context.Context, mgr *process.Manager, steps []*component.
 			stepProcs = append(stepProcs, proc)
 		}
 
-		cb.OnUpdate(component.StepUpdate{StepName: step.Name, Status: component.StatusStarted})
+		cb.OnUpdate(task.StepUpdate{StepName: step.Name, Status: task.StatusStarted})
 
-		go watchStepReady(ctx, step, stepProcs, ready[step.Name], stepErr, func(name string, status component.Status) {
-			cb.OnUpdate(component.StepUpdate{StepName: name, Status: status})
+		go watchStepReady(ctx, step, stepProcs, ready[step.Name], stepErr, func(name string, status task.Status) {
+			cb.OnUpdate(task.StepUpdate{StepName: name, Status: status})
 		})
 	}
 

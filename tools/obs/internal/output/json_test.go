@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"obs/internal/output"
-	"obs/internal/component"
+	"obs/internal/task"
 )
 
 func TestJSONEmitter(t *testing.T) {
@@ -17,12 +17,12 @@ func TestJSONEmitter(t *testing.T) {
 	emitter.Emit(output.Event{
 		Type:   "step_status",
 		Step:   "install-clo",
-		Status: component.StatusRunning.String(),
+		Status: task.StatusRunning.String(),
 	})
 	emitter.Emit(output.Event{
 		Type:   "step_status",
 		Step:   "install-clo",
-		Status: component.StatusDone.String(),
+		Status: task.StatusDone.String(),
 	})
 
 	lines := strings.Split(strings.TrimSpace(buf.String()), "\n")

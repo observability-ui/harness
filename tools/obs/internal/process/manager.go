@@ -6,10 +6,10 @@ import (
 	"io"
 	"sync"
 
-	"obs/internal/component"
+	"obs/internal/task"
 )
 
-const DefaultMaxLogLines = 10000
+const defaultMaxLogLines = 10000
 
 type Manager struct {
 	mu        sync.RWMutex
@@ -22,14 +22,14 @@ func NewManager() *Manager {
 	}
 }
 
-func (m *Manager) StartProcess(ctx context.Context, spec component.ProcessSpec, writers ...io.Writer) (*Process, error) {
+func (m *Manager) StartProcess(ctx context.Context, spec task.ProcessSpec, writers ...io.Writer) (*Process, error) {
 	m.mu.Lock()
 	if existing, ok := m.processes[spec.Name]; ok && existing.Running() {
 		m.mu.Unlock()
 		return nil, fmt.Errorf("process %q is already running", spec.Name)
 	}
 
-	proc := NewProcess(spec, DefaultMaxLogLines)
+	proc := newProcess(spec, defaultMaxLogLines)
 	m.processes[spec.Name] = proc
 	m.mu.Unlock()
 
@@ -80,7 +80,7 @@ func (m *Manager) RestartProcess(ctx context.Context, name string, writers ...io
 		m.mu.Unlock()
 		return current, nil
 	}
-	proc := NewProcess(spec, DefaultMaxLogLines)
+	proc := newProcess(spec, defaultMaxLogLines)
 	proc.Output.Write([]byte("── restarting ──\n"))
 	m.processes[name] = proc
 	m.mu.Unlock()

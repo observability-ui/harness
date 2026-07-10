@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func CheckPort(port int) error {
+func checkPort(port int) error {
 	addr := fmt.Sprintf(":%d", port)
 	ln4, err4 := net.Listen("tcp4", addr)
 	if err4 != nil {
@@ -43,7 +43,7 @@ func isAddrFamilyUnsupported(err error) bool {
 
 func FreePorts(ports []int) error {
 	for _, p := range ports {
-		if err := CheckPort(p); err != nil {
+		if err := checkPort(p); err != nil {
 			if freeErr := freePort(p); freeErr != nil {
 				return fmt.Errorf("port %d in use and could not free it: %w", p, freeErr)
 			}
@@ -64,7 +64,7 @@ func freePort(port int) error {
 	// Wait for port to become available
 	for range 20 {
 		time.Sleep(250 * time.Millisecond)
-		if err := CheckPort(port); err == nil {
+		if err := checkPort(port); err == nil {
 			return nil
 		}
 	}
@@ -75,7 +75,7 @@ func freePort(port int) error {
 		}
 	}
 	time.Sleep(500 * time.Millisecond)
-	if err := CheckPort(port); err != nil {
+	if err := checkPort(port); err != nil {
 		return fmt.Errorf("port %d still in use after killing processes", port)
 	}
 	return nil
@@ -105,7 +105,7 @@ func findPIDsOnPort(port int) ([]int, error) {
 	return pids, nil
 }
 
-func ProbePort(port int) bool {
+func probePort(port int) bool {
 	conn, err := net.DialTimeout("tcp", fmt.Sprintf("127.0.0.1:%d", port), 500*time.Millisecond)
 	if err != nil {
 		return false
@@ -116,7 +116,7 @@ func ProbePort(port int) bool {
 
 func ProbePorts(ports []int) bool {
 	for _, p := range ports {
-		if !ProbePort(p) {
+		if !probePort(p) {
 			return false
 		}
 	}

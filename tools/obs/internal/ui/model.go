@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	"obs/internal/component"
+	"obs/internal/task"
 	"obs/internal/mixer"
 	"obs/internal/process"
 
@@ -20,7 +20,7 @@ import (
 )
 
 type stepUpdateMsg struct {
-	component.StepUpdate
+	task.StepUpdate
 	gen        int
 	restartGen int
 }
@@ -40,7 +40,10 @@ type processRestartedMsg struct {
 }
 
 type RequirementsCheckingMsg struct{}
-type RequirementsPassedMsg struct{ Steps []*component.Step }
+type RequirementsPassedMsg struct {
+	Steps    []*task.Step
+	Projects []task.ProjectInfo
+}
 type RequirementsFailedMsg struct{ Err error }
 
 type reqState int
@@ -52,9 +55,9 @@ const (
 )
 
 type Model struct {
-	tabBar              TabBar
-	mainTab             MainTab
-	processTabs         []ProcessTab
+	tabBar              tabBar
+	mainTab             mainTab
+	processTabs         []processTab
 	ctx                 context.Context
 	manager             *process.Manager
 	help                help.Model
@@ -62,7 +65,7 @@ type Model struct {
 	height              int
 	quitting            bool
 	shutdown            bool
-	updates             <-chan component.StepUpdate
+	updates             <-chan task.StepUpdate
 	statusMsg           string
 	reqStatus           reqState
 	reqErr              error
@@ -76,9 +79,9 @@ type Model struct {
 	stepRestartGen map[string]int
 }
 
-func NewModel(ctx context.Context, mgr *process.Manager, updates <-chan component.StepUpdate, retryCh chan<- struct{}, inputValues map[string]string) Model {
+func NewModel(ctx context.Context, mgr *process.Manager, updates <-chan task.StepUpdate, retryCh chan<- struct{}, inputValues map[string]string) Model {
 	tabs := []string{"main"}
-	mt := NewMainTab()
+	mt := newMainTab()
 	h := help.New()
 	h.ShortSeparator = " · "
 
@@ -90,7 +93,7 @@ func NewModel(ctx context.Context, mgr *process.Manager, updates <-chan componen
 	}
 
 	return Model{
-		tabBar:         NewTabBar(tabs),
+		tabBar:         newTabBar(tabs),
 		mainTab:        mt,
 		ctx:            ctx,
 		manager:        mgr,
@@ -175,6 +178,10 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if vp := m.activeViewport(); vp != nil {
 				vp.PageDown()
 			}
+		case key.Matches(msg, keys.WrapToggle):
+			if tab := m.activeProcessTab(); tab != nil {
+				tab.ToggleWrap()
+			}
 		}
 
 	case spinner.TickMsg:
@@ -191,7 +198,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.mainTab.RefreshContent(m.width, m.reqStatus, m.reqErr)
 		if msg.restartGen == 0 {
 			cmds = append(cmds, waitForUpdate(m.updates, m.generation))
-		} else if msg.Status == component.StatusReady {
+		} else if msg.Status == task.StatusReady {
 			if tab := m.findProcessTab(msg.StepName); tab != nil {
 				if proc := tab.Process(); proc != nil {
 					gen := m.generation
@@ -200,7 +207,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					cmds = append(cmds, func() tea.Msg {
 						status := process.WaitForExit(proc)
 						return stepUpdateMsg{
-							StepUpdate: component.StepUpdate{StepName: stepName, Status: status},
+							StepUpdate: task.StepUpdate{StepName: stepName, Status: status},
 							gen:        gen,
 							restartGen: restartGen,
 						}
@@ -245,7 +252,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					stepName := m.processTabs[i].StepName
 					m.processTabs[i].SetProcess(msg.proc)
 					m.stepRestartGen[stepName]++
-					m.mainTab.UpdateStep(stepName, component.StatusStarted, nil)
+					m.mainTab.UpdateStep(stepName, task.StatusStarted, nil)
 					m.mainTab.RefreshContent(m.width, m.reqStatus, m.reqErr)
 					gen := m.generation
 					restartGen := m.stepRestartGen[stepName]
@@ -254,7 +261,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					cmds = append(cmds, func() tea.Msg {
 						status := process.WaitForReady(proc, ports)
 						return stepUpdateMsg{
-							StepUpdate: component.StepUpdate{StepName: stepName, Status: status},
+							StepUpdate: task.StepUpdate{StepName: stepName, Status: status},
 							gen:        gen,
 							restartGen: restartGen,
 						}
@@ -268,9 +275,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.reqStatus = reqChecking
 		m.reqErr = nil
 		if len(m.mainTab.steps) > 0 || len(m.processTabs) > 0 {
-			m.mainTab = NewMainTab()
+			m.mainTab = newMainTab()
 			m.processTabs = nil
-			m.tabBar = NewTabBar([]string{"main"})
+			m.tabBar = newTabBar([]string{"main"})
 		}
 		m.recomputeLayout()
 		m.mainTab.RefreshContent(m.width, m.reqStatus, m.reqErr)
@@ -278,11 +285,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case RequirementsPassedMsg:
 		m.reqStatus = reqPassed
+		m.mainTab.SetProjects(msg.Projects)
 		for _, step := range msg.Steps {
 			procNames := make([]string, 0, len(step.Processes))
 			for _, spec := range step.Processes {
 				procNames = append(procNames, spec.Name)
-				pt := NewProcessTab(spec.Name, nil, m.width, m.contentHeight())
+				pt := newProcessTab(spec.Name, nil, m.width, m.contentHeight())
 				pt.StepName = step.Name
 				pt.DependsOn = step.DependsOn
 				m.tabBar.Add(spec.Name)
@@ -383,7 +391,7 @@ func (m *Model) recomputeLayout() {
 func (m *Model) addProcessTab(name string, proc *process.Process) {
 	m.tabBar.Add(name)
 	ch := m.contentHeight()
-	pt := NewProcessTab(name, proc, m.width, ch)
+	pt := newProcessTab(name, proc, m.width, ch)
 	m.processTabs = append(m.processTabs, pt)
 	m.recomputeLayout()
 }
@@ -404,12 +412,12 @@ func (m Model) tabIcons() []string {
 		if step == nil {
 			continue
 		}
-		icons[tabIdx] = StatusIcon(step.Status, spinnerView)
+		icons[tabIdx] = statusIcon(step.Status, spinnerView)
 	}
 	return icons
 }
 
-func (m *Model) findProcessTab(stepName string) *ProcessTab {
+func (m *Model) findProcessTab(stepName string) *processTab {
 	for i := range m.processTabs {
 		if m.processTabs[i].StepName == stepName {
 			return &m.processTabs[i]
@@ -418,7 +426,7 @@ func (m *Model) findProcessTab(stepName string) *ProcessTab {
 	return nil
 }
 
-func (m *Model) activeProcessTab() *ProcessTab {
+func (m *Model) activeProcessTab() *processTab {
 	if m.tabBar.Active() > 0 {
 		idx := m.tabBar.Active() - 1
 		if idx < len(m.processTabs) {
@@ -435,9 +443,9 @@ func (m *Model) resetForRetry() tea.Cmd {
 	m.shutdown = false
 	m.generation++
 	m.stepRestartGen = make(map[string]int)
-	m.mainTab = NewMainTab()
+	m.mainTab = newMainTab()
 	m.processTabs = nil
-	m.tabBar = NewTabBar([]string{"main"})
+	m.tabBar = newTabBar([]string{"main"})
 	m.recomputeLayout()
 	return m.mainTab.spinner.Tick
 }
@@ -503,7 +511,7 @@ func (m *Model) syncProcessDisplayStatus() {
 				if !proc.Running() {
 					step.Processes[j].Status = process.MapExitStatus(proc)
 				} else {
-					step.Processes[j].Status = component.StatusStarted
+					step.Processes[j].Status = task.StatusStarted
 				}
 				break
 			}
@@ -511,7 +519,7 @@ func (m *Model) syncProcessDisplayStatus() {
 	}
 }
 
-func waitForUpdate(ch <-chan component.StepUpdate, gen int) tea.Cmd {
+func waitForUpdate(ch <-chan task.StepUpdate, gen int) tea.Cmd {
 	return func() tea.Msg {
 		update, ok := <-ch
 		if !ok {

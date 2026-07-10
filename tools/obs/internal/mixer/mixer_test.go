@@ -6,51 +6,47 @@ import (
 	"strings"
 	"testing"
 
-	"obs/internal/component"
 	"obs/internal/mixer"
 	"obs/internal/runcontext"
-	"obs/internal/strategy"
+	"obs/internal/task"
 )
 
 type stubStrategy struct {
-	step *component.Step
+	step *task.Step
 }
 
 func (s *stubStrategy) Requires() []string { return nil }
-func (s *stubStrategy) Execute(_ context.Context, comp *component.Component, _ *runcontext.RunContext) (*component.Step, error) {
+func (s *stubStrategy) Execute(_ context.Context, t *task.Task, _ *runcontext.RunContext) (*task.Step, error) {
 	if s.step != nil {
 		return s.step, nil
 	}
-	return &component.Step{
-		Name:      comp.Name,
-		DependsOn: comp.DependsOn,
-		Processes: []component.ProcessSpec{{
-			Name:    comp.Name,
+	return &task.Step{
+		Name:      t.Name,
+		DependsOn: t.DependsOn,
+		Processes: []task.ProcessSpec{{
+			Name:    t.Name,
 			Command: "echo",
-			Args:    []string{comp.Name},
+			Args:    []string{t.Name},
 		}},
 	}, nil
 }
 
-func setup(t *testing.T, componentNames ...string) {
+func setup(t *testing.T) {
 	t.Helper()
 	t.Cleanup(func() {
-		component.ResetRegistry()
-		strategy.ResetRegistry()
+		task.ResetRegistry()
 		mixer.ResetRecipes()
 	})
-	for _, name := range componentNames {
-		strategy.Register(name, &stubStrategy{})
-	}
 }
 
-func TestMix_SingleComponent(t *testing.T) {
-	setup(t, "test-a")
-	component.Register(&component.Component{
-		Name: "test-a",
+func TestMix_SingleTask(t *testing.T) {
+	setup(t)
+	task.Register(&task.Task{
+		Name:     "test-a",
+		Strategy: &stubStrategy{},
 	})
 
-	steps, _, err := mixer.Mix(context.Background(), []string{"test-a"}, nil)
+	steps, _, _, err := mixer.Mix(context.Background(), []string{"test-a"}, nil)
 	if err != nil {
 		t.Fatalf("Mix failed: %v", err)
 	}
@@ -63,16 +59,18 @@ func TestMix_SingleComponent(t *testing.T) {
 }
 
 func TestMix_DependencyOrder(t *testing.T) {
-	setup(t, "test-dep", "test-main")
-	component.Register(&component.Component{
-		Name: "test-dep",
+	setup(t)
+	task.Register(&task.Task{
+		Name:     "test-dep",
+		Strategy: &stubStrategy{},
 	})
-	component.Register(&component.Component{
+	task.Register(&task.Task{
 		Name:      "test-main",
 		DependsOn: []string{"test-dep"},
+		Strategy:  &stubStrategy{},
 	})
 
-	steps, _, err := mixer.Mix(context.Background(), []string{"test-main"}, nil)
+	steps, _, _, err := mixer.Mix(context.Background(), []string{"test-main"}, nil)
 	if err != nil {
 		t.Fatalf("Mix failed: %v", err)
 	}
@@ -84,21 +82,24 @@ func TestMix_DependencyOrder(t *testing.T) {
 	}
 }
 
-func TestMix_DeduplicatesSharedComponents(t *testing.T) {
-	setup(t, "shared-infra", "app-a", "app-b")
-	component.Register(&component.Component{
-		Name: "shared-infra",
+func TestMix_DeduplicatesSharedTasks(t *testing.T) {
+	setup(t)
+	task.Register(&task.Task{
+		Name:     "shared-infra",
+		Strategy: &stubStrategy{},
 	})
-	component.Register(&component.Component{
+	task.Register(&task.Task{
 		Name:      "app-a",
 		DependsOn: []string{"shared-infra"},
+		Strategy:  &stubStrategy{},
 	})
-	component.Register(&component.Component{
+	task.Register(&task.Task{
 		Name:      "app-b",
 		DependsOn: []string{"shared-infra"},
+		Strategy:  &stubStrategy{},
 	})
 
-	steps, _, err := mixer.Mix(context.Background(), []string{"app-a", "app-b"}, nil)
+	steps, _, _, err := mixer.Mix(context.Background(), []string{"app-a", "app-b"}, nil)
 	if err != nil {
 		t.Fatalf("Mix failed: %v", err)
 	}
@@ -115,13 +116,14 @@ func TestMix_DeduplicatesSharedComponents(t *testing.T) {
 }
 
 func TestMix_PortsWrittenToRunContext(t *testing.T) {
-	setup(t, "svc")
-	component.Register(&component.Component{
-		Name:  "svc",
-		Ports: []int{8080},
+	setup(t)
+	task.Register(&task.Task{
+		Name:     "svc",
+		Ports:    []int{8080},
+		Strategy: &stubStrategy{},
 	})
 
-	_, rc, err := mixer.Mix(context.Background(), []string{"svc"}, nil)
+	_, rc, _, err := mixer.Mix(context.Background(), []string{"svc"}, nil)
 	if err != nil {
 		t.Fatalf("Mix failed: %v", err)
 	}
@@ -131,17 +133,19 @@ func TestMix_PortsWrittenToRunContext(t *testing.T) {
 }
 
 func TestMix_CircularDependency(t *testing.T) {
-	setup(t, "cycle-a", "cycle-b")
-	component.Register(&component.Component{
+	setup(t)
+	task.Register(&task.Task{
 		Name:      "cycle-a",
 		DependsOn: []string{"cycle-b"},
+		Strategy:  &stubStrategy{},
 	})
-	component.Register(&component.Component{
+	task.Register(&task.Task{
 		Name:      "cycle-b",
 		DependsOn: []string{"cycle-a"},
+		Strategy:  &stubStrategy{},
 	})
 
-	_, _, err := mixer.Mix(context.Background(), []string{"cycle-a"}, nil)
+	_, _, _, err := mixer.Mix(context.Background(), []string{"cycle-a"}, nil)
 	if err == nil {
 		t.Fatal("expected error for circular dependency")
 	}
@@ -150,24 +154,26 @@ func TestMix_CircularDependency(t *testing.T) {
 	}
 }
 
-func TestMix_UnknownComponent(t *testing.T) {
-	_, _, err := mixer.Mix(context.Background(), []string{"nonexistent"}, nil)
+func TestMix_UnknownTask(t *testing.T) {
+	setup(t)
+	_, _, _, err := mixer.Mix(context.Background(), []string{"nonexistent"}, nil)
 	if err == nil {
-		t.Fatal("expected error for unknown component")
+		t.Fatal("expected error for unknown task")
 	}
 }
 
-func TestMix_RequiredFlagsPropagatedToComponentScope(t *testing.T) {
-	setup(t, "flagged-comp")
-	component.Register(&component.Component{
-		Name: "flagged-comp",
-		RequiredFlags: []component.RequiredFlag{
+func TestMix_RequiredFlagsPropagatedToTaskScope(t *testing.T) {
+	setup(t)
+	task.Register(&task.Task{
+		Name:     "flagged-task",
+		Strategy: &stubStrategy{},
+		RequiredFlags: []task.RequiredFlag{
 			{Name: "image", Usage: "container image"},
 		},
 	})
 
 	flagValues := map[string]string{"image": "quay.io/test/img:v1"}
-	_, rc, err := mixer.Mix(context.Background(), []string{"flagged-comp"}, flagValues)
+	_, rc, _, err := mixer.Mix(context.Background(), []string{"flagged-task"}, flagValues)
 	if err != nil {
 		t.Fatalf("Mix failed: %v", err)
 	}
@@ -175,21 +181,22 @@ func TestMix_RequiredFlagsPropagatedToComponentScope(t *testing.T) {
 	if v := rc.Get("_flags", "image"); v != "quay.io/test/img:v1" {
 		t.Errorf("expected flag under _flags, got %q", v)
 	}
-	if v := rc.Get("flagged-comp", "image"); v != "quay.io/test/img:v1" {
-		t.Errorf("expected flag under component name, got %q", v)
+	if v := rc.Get("flagged-task", "image"); v != "quay.io/test/img:v1" {
+		t.Errorf("expected flag under task name, got %q", v)
 	}
 }
 
 func TestMix_MissingRequiredFlagReturnsError(t *testing.T) {
-	setup(t, "needs-flag")
-	component.Register(&component.Component{
-		Name: "needs-flag",
-		RequiredFlags: []component.RequiredFlag{
+	setup(t)
+	task.Register(&task.Task{
+		Name:     "needs-flag",
+		Strategy: &stubStrategy{},
+		RequiredFlags: []task.RequiredFlag{
 			{Name: "token", Usage: "auth token"},
 		},
 	})
 
-	_, _, err := mixer.Mix(context.Background(), []string{"needs-flag"}, nil)
+	_, _, _, err := mixer.Mix(context.Background(), []string{"needs-flag"}, nil)
 	if err == nil {
 		t.Fatal("expected error for missing required flag")
 	}

@@ -1,7 +1,7 @@
 package main
 
 import (
-	_ "obs/components" // registers components and mixer recipes
+	_ "obs/projects" // registers tasks and mixer recipes
 	"obs/internal/cli"
 )
 

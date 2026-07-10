@@ -11,31 +11,47 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
-	"obs/internal/component"
 	"obs/internal/runcontext"
-	"obs/internal/strategy"
+	"obs/internal/task"
 )
 
-type ContainerStrategy struct{}
+var Console = &task.Task{
+	Name:  "console",
+	Ports: []int{9000},
+	Labels: map[string]string{
+		"image": "quay.io/openshift/origin-console:latest",
+	},
+	Strategy: &ContainerStrategy{
+		Image:    "quay.io/openshift/origin-console:latest",
+		Platform: "linux/amd64",
+	},
+}
+
+func init() {
+	task.Register(Console)
+}
+
+type ContainerStrategy struct {
+	Image    string
+	Platform string
+}
 
 func (s *ContainerStrategy) Requires() []string { return []string{"oc"} }
 
-func (s *ContainerStrategy) Execute(ctx context.Context, comp *component.Component, rc *runcontext.RunContext) (*component.Step, error) {
+func (s *ContainerStrategy) Execute(ctx context.Context, t *task.Task, rc *runcontext.RunContext) (*task.Step, error) {
 	if err := extractClusterConfig(ctx, rc); err != nil {
 		return nil, err
 	}
 
 	image := os.Getenv("CONSOLE_IMAGE")
 	if image == "" {
-		image = comp.Config["image"]
+		image = s.Image
 	}
 	platform := os.Getenv("CONSOLE_IMAGE_PLATFORM")
 	if platform == "" {
-		platform = comp.Config["platform"]
-	}
-	if platform == "" {
-		platform = "linux/amd64"
+		platform = s.Platform
 	}
 
 	rt := detectRuntime()
@@ -57,11 +73,11 @@ func (s *ContainerStrategy) Execute(ctx context.Context, comp *component.Compone
 
 	args = append(args, image)
 
-	return &component.Step{
-		Name:      comp.Name,
-		Lifecycle: component.LifecycleLongRunning,
-		DependsOn: comp.DependsOn,
-		Processes: []component.ProcessSpec{{
+	return &task.Step{
+		Name:      t.Name,
+		Lifecycle: task.LifecycleLongRunning,
+		DependsOn: t.DependsOn,
+		Processes: []task.ProcessSpec{{
 			Name:    "console",
 			Command: rt,
 			Args:    args,
@@ -71,18 +87,25 @@ func (s *ContainerStrategy) Execute(ctx context.Context, comp *component.Compone
 }
 
 func extractClusterConfig(ctx context.Context, rc *runcontext.RunContext) error {
-	apiServer := runOC(ctx, "whoami", "--show-server")
-	if apiServer == "" {
-		return fmt.Errorf("not logged in to OpenShift cluster — run 'oc login' first")
+	checkCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+
+	if user := runOC(checkCtx, "whoami"); user == "" {
+		return fmt.Errorf("cluster unreachable or session expired — run 'oc login' first")
 	}
 
-	bearerToken := runOC(ctx, "whoami", "--show-token")
+	apiServer := runOC(checkCtx, "whoami", "--show-server")
+	if apiServer == "" {
+		return fmt.Errorf("could not determine cluster API server")
+	}
+
+	bearerToken := runOC(checkCtx, "whoami", "--show-token")
 	if bearerToken == "" {
 		fmt.Fprintln(os.Stderr, "warning: could not retrieve bearer token — console may not authenticate to the cluster")
 	}
-	thanosURL := runOC(ctx, "-n", "openshift-config-managed", "get", "configmap",
+	thanosURL := runOC(checkCtx, "-n", "openshift-config-managed", "get", "configmap",
 		"monitoring-shared-config", "-o", "jsonpath={.data.thanosPublicURL}")
-	alertmanagerURL := runOC(ctx, "-n", "openshift-config-managed", "get", "configmap",
+	alertmanagerURL := runOC(checkCtx, "-n", "openshift-config-managed", "get", "configmap",
 		"monitoring-shared-config", "-o", "jsonpath={.data.alertmanagerPublicURL}")
 
 	rc.Set("console", "api-server", apiServer)
@@ -95,11 +118,11 @@ func extractClusterConfig(ctx context.Context, rc *runcontext.RunContext) error 
 
 func buildEnv(rc *runcontext.RunContext, plugins []pluginInfo, proxies []proxyInfo, hostRef string) map[string]string {
 	env := map[string]string{
-		"BRIDGE_USER_AUTH":                            "disabled",
-		"BRIDGE_K8S_MODE":                             "off-cluster",
-		"BRIDGE_K8S_AUTH":                              "bearer-token",
-		"BRIDGE_K8S_MODE_OFF_CLUSTER_SKIP_VERIFY_TLS": "true",
-		"BRIDGE_USER_SETTINGS_LOCATION":                "localstorage",
+		"BRIDGE_USER_AUTH":                             "disabled",
+		"BRIDGE_K8S_MODE":                              "off-cluster",
+		"BRIDGE_K8S_AUTH":                               "bearer-token",
+		"BRIDGE_K8S_MODE_OFF_CLUSTER_SKIP_VERIFY_TLS":  "true",
+		"BRIDGE_USER_SETTINGS_LOCATION":                 "localstorage",
 	}
 
 	if v := rc.Get("console", "api-server"); v != "" {
@@ -184,19 +207,19 @@ type proxyInfo struct {
 }
 
 func discoverPlugins(rc *runcontext.RunContext) []pluginInfo {
-	all := component.All()
+	all := task.All()
 	var plugins []pluginInfo
-	for _, comp := range all {
-		if !rc.HasComponent(comp.Name) {
+	for _, t := range all {
+		if !rc.HasTask(t.Name) {
 			continue
 		}
-		pluginName := comp.Config["console-plugin"]
+		pluginName := t.Labels["console-plugin"]
 		if pluginName == "" {
 			continue
 		}
-		port := rc.Get(comp.Name, "port")
-		if port == "" && len(comp.Ports) > 0 {
-			port = strconv.Itoa(comp.Ports[0])
+		port := rc.Get(t.Name, "port")
+		if port == "" && len(t.Ports) > 0 {
+			port = strconv.Itoa(t.Ports[0])
 		}
 		if port != "" {
 			plugins = append(plugins, pluginInfo{name: pluginName, port: port})
@@ -206,17 +229,17 @@ func discoverPlugins(rc *runcontext.RunContext) []pluginInfo {
 }
 
 func discoverProxies(rc *runcontext.RunContext) []proxyInfo {
-	all := component.All()
+	all := task.All()
 	var proxies []proxyInfo
-	for _, comp := range all {
-		if !rc.HasComponent(comp.Name) {
+	for _, t := range all {
+		if !rc.HasTask(t.Name) {
 			continue
 		}
-		path := comp.Config["console-proxy-path"]
+		path := t.Labels["console-proxy-path"]
 		if path == "" {
 			continue
 		}
-		port := comp.Config["console-proxy-port"]
+		port := t.Labels["console-proxy-port"]
 		if port == "" {
 			port = "8080"
 		}
@@ -231,8 +254,4 @@ func runOC(ctx context.Context, args ...string) string {
 		return ""
 	}
 	return strings.TrimSpace(string(out))
-}
-
-func init() {
-	strategy.Register(Console.Name, &ContainerStrategy{})
 }

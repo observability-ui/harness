@@ -1,4 +1,4 @@
-package component
+package task
 
 import "io/fs"
 
@@ -65,13 +65,13 @@ func (l Lifecycle) String() string {
 }
 
 type ProcessSpec struct {
-	Name      string
-	Command   string
-	Args      []string
-	Dir       string
-	Env       map[string]string
-	Ports []int
-	Files map[string]FileRef
+	Name    string
+	Command string
+	Args    []string
+	Dir     string
+	Env     map[string]string
+	Ports   []int
+	Files   map[string]FileRef
 }
 
 type Step struct {

@@ -1,19 +1,18 @@
-package process_test
+package process
 
 import (
 	"context"
 	"testing"
 	"time"
 
-	"obs/internal/component"
-	"obs/internal/process"
+	"obs/internal/task"
 )
 
 func TestManager_StartAndStop(t *testing.T) {
-	mgr := process.NewManager()
+	mgr := NewManager()
 	ctx := context.Background()
 
-	spec := component.ProcessSpec{
+	spec := task.ProcessSpec{
 		Name:    "sleeper",
 		Command: "sleep",
 		Args:    []string{"30"},
@@ -43,10 +42,10 @@ func TestManager_StartAndStop(t *testing.T) {
 }
 
 func TestManager_OutputCapture(t *testing.T) {
-	mgr := process.NewManager()
+	mgr := NewManager()
 	ctx := context.Background()
 
-	spec := component.ProcessSpec{
+	spec := task.ProcessSpec{
 		Name:    "echo",
 		Command: "echo",
 		Args:    []string{"hello world"},

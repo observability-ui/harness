@@ -4,14 +4,14 @@ import (
 	"context"
 	"testing"
 
-	"obs/internal/component"
+	"obs/internal/task"
 	"obs/internal/process"
 	"obs/internal/ui"
 )
 
 func TestModel_Init(t *testing.T) {
 	mgr := process.NewManager()
-	updates := make(chan component.StepUpdate)
+	updates := make(chan task.StepUpdate)
 	close(updates)
 
 	retryCh := make(chan struct{}, 1)

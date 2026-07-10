@@ -1,52 +1,67 @@
 package strategy
 
 import (
-	"context"
 	"testing"
 
-	"obs/internal/component"
-	"obs/internal/runcontext"
+	"obs/internal/task"
 )
 
-type testStrategy struct{ label string }
-
-func (s *testStrategy) Requires() []string { return nil }
-func (s *testStrategy) Execute(_ context.Context, _ *component.Component, _ *runcontext.RunContext) (*component.Step, error) {
-	return nil, nil
-}
-
-func TestResolve_ReturnsNilForUnknownComponent(t *testing.T) {
-	t.Cleanup(func() { ResetRegistry() })
-
-	comp := &component.Component{Name: "unknown"}
-	strategies := Resolve(comp)
-	if strategies != nil {
-		t.Fatalf("expected nil for unknown component, got %v", strategies)
+func TestMakeTarget_ReturnsStrategy(t *testing.T) {
+	s := MakeTarget("build")
+	mr, ok := s.(*makeRun)
+	if !ok {
+		t.Fatalf("expected *makeRun, got %T", s)
+	}
+	if mr.Target != "build" {
+		t.Fatalf("expected target 'build', got %q", mr.Target)
 	}
 }
 
-func TestResolve_ExplicitRegistration(t *testing.T) {
-	t.Cleanup(func() { ResetRegistry() })
-
-	s := &testStrategy{label: "explicit"}
-	Register("my-comp", s)
-
-	comp := &component.Component{Name: "my-comp"}
-	strategies := Resolve(comp)
-	if len(strategies) != 1 || strategies[0] != s {
-		t.Fatalf("expected explicitly registered strategy, got %v", strategies)
+func TestNPMRun_ReturnsStrategy(t *testing.T) {
+	s := NPMRun("install", "--no-save")
+	n, ok := s.(*npm)
+	if !ok {
+		t.Fatalf("expected *npm, got %T", s)
+	}
+	if n.Cmd != "install" {
+		t.Fatalf("expected cmd 'install', got %q", n.Cmd)
 	}
 }
 
-func TestResolve_FallsBackToConfig(t *testing.T) {
-	t.Cleanup(func() { ResetRegistry() })
+func TestCompose_ReturnsStrategy(t *testing.T) {
+	s := Compose("docker-compose.yml")
+	pc, ok := s.(*podmanCompose)
+	if !ok {
+		t.Fatalf("expected *podmanCompose, got %T", s)
+	}
+	if pc.File != "docker-compose.yml" {
+		t.Fatalf("expected file 'docker-compose.yml', got %q", pc.File)
+	}
+}
 
-	comp := &component.Component{
-		Name:   "unregistered",
-		Config: map[string]string{"make-target": "build"},
+func TestDockerBuild_ReturnsStrategy(t *testing.T) {
+	s := DockerBuild("Dockerfile.dev")
+	cb, ok := s.(*containerBuild)
+	if !ok {
+		t.Fatalf("expected *containerBuild, got %T", s)
 	}
-	strategies := Resolve(comp)
-	if len(strategies) != 1 {
-		t.Fatalf("expected config-based fallback to return 1 strategy, got %d", len(strategies))
+	if cb.Dockerfile != "Dockerfile.dev" {
+		t.Fatalf("expected dockerfile 'Dockerfile.dev', got %q", cb.Dockerfile)
 	}
+}
+
+func TestMakeRun_ImplementsStrategy(t *testing.T) {
+	var _ task.Strategy = &makeRun{}
+}
+
+func TestNPM_ImplementsStrategy(t *testing.T) {
+	var _ task.Strategy = &npm{}
+}
+
+func TestPodmanCompose_ImplementsStrategy(t *testing.T) {
+	var _ task.Strategy = &podmanCompose{}
+}
+
+func TestContainerBuild_ImplementsStrategy(t *testing.T) {
+	var _ task.Strategy = &containerBuild{}
 }

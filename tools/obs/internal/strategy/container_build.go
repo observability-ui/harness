@@ -4,43 +4,44 @@ import (
 	"context"
 	"fmt"
 
-	"obs/internal/component"
 	"obs/internal/runcontext"
+	"obs/internal/task"
 )
 
-type ContainerBuild struct{}
+type containerBuild struct {
+	Dockerfile string
+	Platform   string
+}
 
-func (s *ContainerBuild) Requires() []string { return []string{"podman", "bash"} }
+func (s *containerBuild) Requires() []string { return []string{"podman", "bash"} }
 
-func (s *ContainerBuild) Execute(_ context.Context, comp *component.Component, rc *runcontext.RunContext) (*component.Step, error) {
-	image := comp.Config["image"]
+func (s *containerBuild) Execute(_ context.Context, t *task.Task, rc *runcontext.RunContext) (*task.Step, error) {
+	image := rc.Get(t.Name, "image")
 	if image == "" {
-		image = rc.Get(comp.Name, "image")
+		return nil, fmt.Errorf("task %q: no image specified (provide --image flag)", t.Name)
 	}
-	if image == "" {
-		return nil, fmt.Errorf("component %q: no image specified (set Config[\"image\"] or provide --image flag)", comp.Name)
-	}
-	dockerfile := comp.Config["dockerfile"]
+
+	dockerfile := s.Dockerfile
 	if dockerfile == "" {
 		dockerfile = "Dockerfile"
 	}
-	platform := comp.Config["platform"]
+	platform := s.Platform
 	if platform == "" {
 		platform = "linux/amd64"
 	}
 
 	script := "podman build -f \"$DOCKERFILE\" --platform=\"$PLATFORM\" -t \"$IMAGE\" . && podman push \"$IMAGE\""
 
-	return &component.Step{
-		Name:      comp.Name,
-		Lifecycle: component.LifecycleOneShot,
-		DependsOn: comp.DependsOn,
-		Processes: []component.ProcessSpec{
+	return &task.Step{
+		Name:      t.Name,
+		Lifecycle: task.LifecycleOneShot,
+		DependsOn: t.DependsOn,
+		Processes: []task.ProcessSpec{
 			{
-				Name:    comp.Name,
+				Name:    t.Name,
 				Command: "bash",
 				Args:    []string{"-c", script},
-				Dir:     comp.Dir,
+				Dir:     t.Dir,
 				Env: map[string]string{
 					"IMAGE":      image,
 					"DOCKERFILE": dockerfile,
@@ -49,4 +50,8 @@ func (s *ContainerBuild) Execute(_ context.Context, comp *component.Component, r
 			},
 		},
 	}, nil
+}
+
+func DockerBuild(dockerfile string) task.Strategy {
+	return &containerBuild{Dockerfile: dockerfile}
 }

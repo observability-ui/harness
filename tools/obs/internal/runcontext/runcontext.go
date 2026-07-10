@@ -5,47 +5,47 @@ import (
 )
 
 type RunContext struct {
-	mu         sync.RWMutex
-	outputs    map[string]map[string]string
-	components map[string]bool
+	mu      sync.RWMutex
+	outputs map[string]map[string]string
+	tasks   map[string]bool
 }
 
 func New() *RunContext {
 	return &RunContext{
-		outputs:    make(map[string]map[string]string),
-		components: make(map[string]bool),
+		outputs: make(map[string]map[string]string),
+		tasks:   make(map[string]bool),
 	}
 }
 
-func (rc *RunContext) Set(component, key, value string) {
+func (rc *RunContext) Set(taskName, key, value string) {
 	rc.mu.Lock()
 	defer rc.mu.Unlock()
-	if rc.outputs[component] == nil {
-		rc.outputs[component] = make(map[string]string)
+	if rc.outputs[taskName] == nil {
+		rc.outputs[taskName] = make(map[string]string)
 	}
-	rc.outputs[component][key] = value
+	rc.outputs[taskName][key] = value
 }
 
-func (rc *RunContext) Get(component, key string) string {
+func (rc *RunContext) Get(taskName, key string) string {
 	rc.mu.RLock()
 	defer rc.mu.RUnlock()
-	if m, ok := rc.outputs[component]; ok {
+	if m, ok := rc.outputs[taskName]; ok {
 		return m[key]
 	}
 	return ""
 }
 
-func (rc *RunContext) SetComponents(names []string) {
+func (rc *RunContext) SetTasks(names []string) {
 	rc.mu.Lock()
 	defer rc.mu.Unlock()
-	rc.components = make(map[string]bool, len(names))
+	rc.tasks = make(map[string]bool, len(names))
 	for _, n := range names {
-		rc.components[n] = true
+		rc.tasks[n] = true
 	}
 }
 
-func (rc *RunContext) HasComponent(name string) bool {
+func (rc *RunContext) HasTask(name string) bool {
 	rc.mu.RLock()
 	defer rc.mu.RUnlock()
-	return rc.components[name]
+	return rc.tasks[name]
 }

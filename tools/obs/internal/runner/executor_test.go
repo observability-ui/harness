@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"obs/internal/component"
+	"obs/internal/task"
 	"obs/internal/process"
 )
 
@@ -18,20 +18,20 @@ func TestExecuteSteps_RunsStepsInOrder(t *testing.T) {
 	var order []string
 	var mu sync.Mutex
 
-	steps := []*component.Step{
-		{Name: "step-a", Processes: []component.ProcessSpec{{Name: "a", Command: "echo", Args: []string{"a"}}}},
-		{Name: "step-b", DependsOn: []string{"step-a"}, Processes: []component.ProcessSpec{{Name: "b", Command: "echo", Args: []string{"b"}}}},
+	steps := []*task.Step{
+		{Name: "step-a", Processes: []task.ProcessSpec{{Name: "a", Command: "echo", Args: []string{"a"}}}},
+		{Name: "step-b", DependsOn: []string{"step-a"}, Processes: []task.ProcessSpec{{Name: "b", Command: "echo", Args: []string{"b"}}}},
 	}
 
 	cb := StepCallbacks{
-		OnUpdate: func(u component.StepUpdate) {
-			if u.Status == component.StatusStarted {
+		OnUpdate: func(u task.StepUpdate) {
+			if u.Status == task.StatusStarted {
 				mu.Lock()
 				order = append(order, u.StepName)
 				mu.Unlock()
 			}
 		},
-		OnProcess: func(_ *component.Step, _ component.ProcessSpec, _ *process.Process) {},
+		OnProcess: func(_ *task.Step, _ task.ProcessSpec, _ *process.Process) {},
 	}
 
 	_, err := ExecuteSteps(ctx, mgr, steps, cb)

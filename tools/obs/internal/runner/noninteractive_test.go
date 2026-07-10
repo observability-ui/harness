@@ -1,16 +1,14 @@
-package runner_test
+package runner
 
 import (
 	"bytes"
 	"strings"
 	"testing"
-
-	"obs/internal/runner"
 )
 
 func TestPrefixWriter(t *testing.T) {
 	var buf bytes.Buffer
-	pw := runner.NewPrefixWriter(&buf, "backend", 0)
+	pw := newPrefixWriter(&buf, "backend", 0)
 
 	pw.Write([]byte("starting server\n"))
 	pw.Write([]byte("listening on :8080\n"))

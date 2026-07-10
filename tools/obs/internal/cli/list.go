@@ -24,8 +24,8 @@ func newListCmd() *cobra.Command {
 				if len(entry.Aliases) > 0 {
 					aliases = " (" + strings.Join(entry.Aliases, ", ") + ")"
 				}
-				components := strings.Join(entry.Components, ", ")
-				fmt.Printf("  %-8s %-25s%s  [%s]\n", entry.Command, entry.Name, aliases, components)
+				tasks := strings.Join(entry.Tasks, ", ")
+				fmt.Printf("  %-8s %-25s%s  [%s]\n", entry.Command, entry.Name, aliases, tasks)
 			}
 		},
 	}

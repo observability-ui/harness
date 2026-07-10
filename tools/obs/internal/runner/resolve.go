@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"obs/internal/component"
+	"obs/internal/task"
 )
 
-func ResolveSpec(spec component.ProcessSpec) (component.ProcessSpec, func(), error) {
+func ResolveSpec(spec task.ProcessSpec) (task.ProcessSpec, func(), error) {
 	resolved := spec
 
 	args, tempDir, err := resolveFiles(spec.Args, spec.Files)
@@ -31,7 +31,7 @@ func ResolveSpec(spec component.ProcessSpec) (component.ProcessSpec, func(), err
 	return resolved, cleanup, nil
 }
 
-func readFileRef(name string, files map[string]component.FileRef) (string, []byte, error) {
+func readFileRef(name string, files map[string]task.FileRef) (string, []byte, error) {
 	ref, ok := files[name]
 	if !ok {
 		return "", nil, fmt.Errorf("file %q not found in Files map", name)
@@ -43,7 +43,7 @@ func readFileRef(name string, files map[string]component.FileRef) (string, []byt
 	return ref.Path, content, nil
 }
 
-func resolveFiles(args []string, files map[string]component.FileRef) ([]string, string, error) {
+func resolveFiles(args []string, files map[string]task.FileRef) ([]string, string, error) {
 	if len(files) == 0 {
 		return args, "", nil
 	}

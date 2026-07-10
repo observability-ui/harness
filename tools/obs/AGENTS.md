@@ -1,6 +1,6 @@
 # obs — Agent Guide
 
-obs is a CLI tool that orchestrates development and deployment workflows for Observability UI projects using a component/strategy architecture.
+obs is a CLI tool that orchestrates development and deployment workflows for Observability UI projects using a task/strategy architecture.
 
 ## Quick Reference
 
@@ -11,7 +11,7 @@ obs is a CLI tool that orchestrates development and deployment workflows for Obs
 # Start a recipe (interactive TUI)
 ./bin/obs start mp
 
-# Start multiple recipes (shared components are deduplicated)
+# Start multiple recipes (shared tasks are deduplicated)
 ./bin/obs start mp lp
 
 # Start in non-interactive mode (for agents/CI)
@@ -57,38 +57,73 @@ CONSOLE_IMAGE=quay.io/my/console:dev ./bin/obs start mp
 - Unknown `--flag` args without `=` are rejected with a helpful error.
 - First Ctrl+C triggers graceful shutdown; second Ctrl+C force-kills all processes.
 
-## Adding New Components
+## Adding a New Project
 
-1. Create a directory under `components/` (e.g., `components/my-project/`).
-2. Define components as `component.Component` structs in `components.go`.
-3. Optionally define custom strategies in `strategies.go`, or rely on built-in strategies via `Config` keys.
-4. Register components via `init()` with `component.Register()`.
-5. Register strategies via `init()` with `strategy.Register(componentName, &MyStrategy{})` if using custom strategies.
-6. Add a recipe entry in `components/register.go` with `mixer.RegisterRecipe()`.
-7. Build: `make obs`
+1. Create a directory under `projects/` (e.g., `projects/my-project/`).
+2. Define tasks as `task.Task` structs with an explicit `Strategy` in a single Go file.
+3. Register tasks via `init()` with `task.Register()`.
+4. Add a recipe entry in `projects/recipes.go` with `mixer.RegisterRecipe()`.
+5. Add a blank import in `projects/recipes.go`: `_ "obs/projects/my-project"`.
+6. Build: `make obs`
 
-### Component struct fields
+### Example project file
+
+```go
+package myproject
+
+import (
+    "obs/internal/strategy"
+    "obs/internal/task"
+)
+
+var Build = &task.Task{
+    Name:     "my-build",
+    Dir:      "projects/my-project",
+    Strategy: strategy.MakeTarget("build"),
+}
+
+var Server = &task.Task{
+    Name:      "my-server",
+    DependsOn: []string{"my-build"},
+    Dir:       "projects/my-project",
+    Ports:     []int{8080},
+    Strategy:  strategy.MakeTarget("run"),
+}
+
+func init() {
+    task.Register(Build)
+    task.Register(Server)
+}
+```
+
+### Task struct fields
 
 | Field           | Purpose                                                                              |
 | --------------- | ------------------------------------------------------------------------------------ |
 | `Name`          | Unique identifier used in recipes, DependsOn, and RunContext                         |
-| `DependsOn`     | List of component names that must complete before this one starts                    |
+| `DependsOn`     | List of task names that must complete before this one starts                          |
 | `Dir`           | Working directory for process execution                                              |
-| `Ports`         | TCP ports the component listens on (used for readiness probing and plugin discovery) |
-| `Config`        | Strategy selection hints and configuration values                                    |
+| `Ports`         | TCP ports the task listens on (used for readiness probing and plugin discovery)       |
+| `Labels`        | Metadata for cross-task discovery (e.g., `console-plugin`, `console-proxy-path`)     |
 | `RequiredFlags` | Flags the user must provide (prompted interactively if missing)                      |
+| `Strategy`      | How to execute this task — a built-in or custom `Strategy` implementation            |
 
-### Built-in Strategy Config Keys
+### Built-in strategies
 
-| Config key           | Strategy           | What it does                                    |
-| -------------------- | ------------------ | ----------------------------------------------- |
-| `make-target`        | LocalMakeRun       | Runs `make <target>` in component Dir           |
-| `compose-file`       | PodmanCompose      | Runs `podman compose -f <file> up`              |
-| `dockerfile`         | ContainerBuild     | Builds and pushes container image via `podman`  |
-| `console-plugin`     | (console strategy) | Registers component as a console dynamic plugin |
-| `console-proxy-path` | (console strategy) | Registers a proxy endpoint on the console       |
+| Constructor                        | Strategy         | What it does                                    |
+| ---------------------------------- | ---------------- | ----------------------------------------------- |
+| `strategy.MakeTarget("target")`    | `MakeRun`        | Runs `make <target>` in task Dir                |
+| `strategy.NPMRun("cmd", args...)`  | `NPM`            | Runs `npm <cmd> <args>` in task Dir             |
+| `strategy.Compose("file")`         | `PodmanCompose`  | Runs `podman compose -f <file> up`              |
+| `strategy.DockerBuild("file")`     | `ContainerBuild` | Builds and pushes container image via `podman`  |
 
-`LocalNPM` is registered explicitly per component (not via config keys) with `Cmd` and `Args` fields, e.g., `&strategy.LocalNPM{Cmd: "install", Args: []string{"--no-save"}}`.
+### Labels for console integration
+
+| Label key            | Purpose                                             |
+| -------------------- | --------------------------------------------------- |
+| `console-plugin`     | Registers task as a console dynamic plugin          |
+| `console-proxy-path` | Registers a proxy endpoint on the console           |
+| `console-proxy-port` | Port for the proxy endpoint (defaults to `8080`)    |
 
 ### Strategy interface
 
@@ -97,18 +132,14 @@ All strategies implement a unified `Strategy` interface:
 ```go
 type Strategy interface {
     Requires() []string
-    Execute(ctx context.Context, comp *component.Component, rc *runcontext.RunContext) (*component.Step, error)
+    Execute(ctx context.Context, t *task.Task, rc *runcontext.RunContext) (*task.Step, error)
 }
 ```
 
-Each strategy's `Execute()` returns a `*component.Step` with an explicit `Lifecycle` field:
+Each strategy's `Execute()` returns a `*task.Step` with an explicit `Lifecycle` field:
 
 - `LifecycleOneShot` — process runs to completion (builds, deploys, setup scripts)
 - `LifecycleLongRunning` — process stays running; readiness determined by port probing (dev servers, compose stacks, containers)
-
-Strategies are bound to components by name via `strategy.Register(componentName, &MyStrategy{})` in each component package's `init()`. Components
-without explicit registrations are resolved by config keys (e.g., `make-target` → `LocalMakeRun`). The mixer calls `strategy.Resolve(comp)` to get the
-strategies for a component and executes each one.
 
 ### Available recipes
 
@@ -124,4 +155,4 @@ strategies for a component and executes each one.
 - `seed-users` (alias: `users`) — Create HTPasswd users on cluster
 - `seed-users-permissions` (alias: `users-perms`) — Create users + set RBAC permissions
 
-See `components/register.go` and individual `components/*/components.go` files for full definitions.
+See `projects/recipes.go` and individual `projects/*/` files for full definitions.

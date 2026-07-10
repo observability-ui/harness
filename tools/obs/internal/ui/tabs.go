@@ -19,39 +19,39 @@ var (
 			BorderForeground(lipgloss.Color("8"))
 )
 
-type TabBar struct {
+type tabBar struct {
 	tabs   []string
 	active int
 }
 
-func NewTabBar(tabs []string) TabBar {
-	return TabBar{tabs: tabs, active: 0}
+func newTabBar(tabs []string) tabBar {
+	return tabBar{tabs: tabs, active: 0}
 }
 
-func (tb *TabBar) Add(name string) {
+func (tb *tabBar) Add(name string) {
 	tb.tabs = append(tb.tabs, name)
 }
 
-func (tb *TabBar) Next() {
+func (tb *tabBar) Next() {
 	if len(tb.tabs) > 0 {
 		tb.active = (tb.active + 1) % len(tb.tabs)
 	}
 }
 
-func (tb *TabBar) Prev() {
+func (tb *tabBar) Prev() {
 	if len(tb.tabs) > 0 {
 		tb.active = (tb.active - 1 + len(tb.tabs)) % len(tb.tabs)
 	}
 }
 
-func (tb *TabBar) Active() int { return tb.active }
-func (tb *TabBar) Count() int  { return len(tb.tabs) }
+func (tb *tabBar) Active() int { return tb.active }
+func (tb *tabBar) Count() int  { return len(tb.tabs) }
 
-func (tb *TabBar) View(width int) string {
+func (tb *tabBar) View(width int) string {
 	return tb.ViewWithIcons(width, nil)
 }
 
-func (tb *TabBar) ViewWithIcons(width int, icons []string) string {
+func (tb *tabBar) ViewWithIcons(width int, icons []string) string {
 	var rendered []string
 	for i, name := range tb.tabs {
 		nameStyle := dimStyle

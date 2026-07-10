@@ -1,13 +1,13 @@
-package components
+package projects
 
 import (
 	"obs/internal/mixer"
 
-	_ "obs/components/cluster"
-	_ "obs/components/console"
-	_ "obs/components/logging-plugin"
-	_ "obs/components/monitoring-plugin"
-	_ "obs/components/perses"
+	_ "obs/projects/cluster"
+	_ "obs/projects/console"
+	_ "obs/projects/logging-plugin"
+	_ "obs/projects/monitoring-plugin"
+	_ "obs/projects/perses"
 )
 
 func init() {

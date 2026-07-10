@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"obs/internal/component"
+	"obs/internal/task"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/viewport"
@@ -22,19 +22,19 @@ type statusDef struct {
 	UseSpinner bool
 }
 
-var statusDefs = map[component.Status]statusDef{
-	component.StatusPending: {Icon: "○"},
-	component.StatusWaiting: {Icon: "◷", Style: lipgloss.NewStyle().Foreground(lipgloss.Color("3"))},
-	component.StatusRunning: {UseSpinner: true},
-	component.StatusStarted: {UseSpinner: true},
-	component.StatusReady:   {Icon: "●", Style: lipgloss.NewStyle().Foreground(lipgloss.Color("2"))},
-	component.StatusDone:    {Icon: "✓", Style: lipgloss.NewStyle().Foreground(lipgloss.Color("2"))},
-	component.StatusStopped: {Icon: "■", Style: lipgloss.NewStyle().Foreground(lipgloss.Color("8"))},
-	component.StatusFailed:  {Icon: "✗", Style: failStyle},
-	component.StatusSkipped: {Icon: "⊘"},
+var statusDefs = map[task.Status]statusDef{
+	task.StatusPending: {Icon: "○"},
+	task.StatusWaiting: {Icon: "◷", Style: lipgloss.NewStyle().Foreground(lipgloss.Color("3"))},
+	task.StatusRunning: {UseSpinner: true},
+	task.StatusStarted: {UseSpinner: true},
+	task.StatusReady:   {Icon: "●", Style: lipgloss.NewStyle().Foreground(lipgloss.Color("2"))},
+	task.StatusDone:    {Icon: "✓", Style: lipgloss.NewStyle().Foreground(lipgloss.Color("2"))},
+	task.StatusStopped: {Icon: "■", Style: lipgloss.NewStyle().Foreground(lipgloss.Color("8"))},
+	task.StatusFailed:  {Icon: "✗", Style: failStyle},
+	task.StatusSkipped: {Icon: "⊘"},
 }
 
-func StatusIcon(status component.Status, spinnerView string) string {
+func statusIcon(status task.Status, spinnerView string) string {
 	def := statusDefs[status]
 	if def.UseSpinner {
 		return spinnerView
@@ -48,46 +48,51 @@ func StatusIcon(status component.Status, spinnerView string) string {
 	return def.Icon
 }
 
-type ProcessInfo struct {
+type processInfo struct {
 	Name   string
-	Status component.Status
+	Status task.Status
 }
 
-type StepState struct {
+type stepState struct {
 	Name      string
-	Status    component.Status
+	Status    task.Status
 	Err       error
-	Processes []ProcessInfo
+	Processes []processInfo
 	DependsOn []string
 }
 
-type MainTab struct {
-	steps    []StepState
+type mainTab struct {
+	steps    []stepState
+	projects []task.ProjectInfo
 	spinner  spinner.Model
 	viewport viewport.Model
 }
 
-func NewMainTab() MainTab {
+func newMainTab() mainTab {
 	s := spinner.New()
 	s.Spinner = spinner.Dot
 	s.Style = lipgloss.NewStyle().Foreground(lipgloss.Color("6"))
-	return MainTab{spinner: s}
+	return mainTab{spinner: s}
 }
 
-func (mt *MainTab) SetSize(width, height int) {
+func (mt *mainTab) SetSize(width, height int) {
 	mt.viewport.Width = width
 	mt.viewport.Height = height
 }
 
-func (mt *MainTab) AddStepWithProcesses(name string, processNames []string, dependsOn []string) {
-	var procs []ProcessInfo
-	for _, pn := range processNames {
-		procs = append(procs, ProcessInfo{Name: pn, Status: component.StatusPending})
-	}
-	mt.steps = append(mt.steps, StepState{Name: name, Status: component.StatusPending, Processes: procs, DependsOn: dependsOn})
+func (mt *mainTab) SetProjects(projects []task.ProjectInfo) {
+	mt.projects = projects
 }
 
-func (mt *MainTab) UpdateProcess(stepName, procName string, status component.Status) {
+func (mt *mainTab) AddStepWithProcesses(name string, processNames []string, dependsOn []string) {
+	var procs []processInfo
+	for _, pn := range processNames {
+		procs = append(procs, processInfo{Name: pn, Status: task.StatusPending})
+	}
+	mt.steps = append(mt.steps, stepState{Name: name, Status: task.StatusPending, Processes: procs, DependsOn: dependsOn})
+}
+
+func (mt *mainTab) updateProcess(stepName, procName string, status task.Status) {
 	step := mt.GetStep(stepName)
 	if step == nil {
 		return
@@ -100,7 +105,7 @@ func (mt *MainTab) UpdateProcess(stepName, procName string, status component.Sta
 	}
 }
 
-func (mt *MainTab) GetStep(name string) *StepState {
+func (mt *mainTab) GetStep(name string) *stepState {
 	for i := range mt.steps {
 		if mt.steps[i].Name == name {
 			return &mt.steps[i]
@@ -109,7 +114,7 @@ func (mt *MainTab) GetStep(name string) *StepState {
 	return nil
 }
 
-func (mt *MainTab) UpdateStep(name string, status component.Status, err error) {
+func (mt *mainTab) UpdateStep(name string, status task.Status, err error) {
 	for i := range mt.steps {
 		if mt.steps[i].Name == name {
 			mt.steps[i].Status = status
@@ -119,7 +124,7 @@ func (mt *MainTab) UpdateStep(name string, status component.Status, err error) {
 	}
 }
 
-func (mt *MainTab) RefreshContent(width int, reqStatus reqState, reqErr error) {
+func (mt *mainTab) RefreshContent(width int, reqStatus reqState, reqErr error) {
 	var lines []string
 
 	switch reqStatus {
@@ -138,7 +143,19 @@ func (mt *MainTab) RefreshContent(width int, reqStatus reqState, reqErr error) {
 		lines = append(lines, "")
 	case reqPassed:
 		lines = append(lines, lipgloss.NewStyle().Bold(true).Render("Requirements:"))
-		lines = append(lines, fmt.Sprintf("  %s All requirements met", StatusIcon(component.StatusDone, "")))
+		lines = append(lines, fmt.Sprintf("  %s All requirements met", statusIcon(task.StatusDone, "")))
+		lines = append(lines, "")
+	}
+
+	if len(mt.projects) > 0 {
+		lines = append(lines, lipgloss.NewStyle().Bold(true).Render("Projects:"))
+		for _, p := range mt.projects {
+			label := p.Branch
+			if p.IsImage {
+				label = "image:" + p.Branch
+			}
+			lines = append(lines, fmt.Sprintf("  %-25s %s", p.Name, dimStyle.Render(label)))
+		}
 		lines = append(lines, "")
 	}
 
@@ -172,11 +189,11 @@ func (mt *MainTab) RefreshContent(width int, reqStatus reqState, reqErr error) {
 	mt.viewport.SetContent(strings.Join(lines, "\n"))
 }
 
-func (mt *MainTab) ViewWithRequirements() string {
+func (mt *mainTab) ViewWithRequirements() string {
 	return mt.viewport.View()
 }
 
-func (mt *MainTab) renderStepTree(name string, depth int, spinnerView string, children map[string][]string, rendered map[string]bool) []string {
+func (mt *mainTab) renderStepTree(name string, depth int, spinnerView string, children map[string][]string, rendered map[string]bool) []string {
 	rendered[name] = true
 	step := mt.GetStep(name)
 	if step == nil {
@@ -189,9 +206,9 @@ func (mt *MainTab) renderStepTree(name string, depth int, spinnerView string, ch
 	}
 
 	var lines []string
-	icon := StatusIcon(step.Status, spinnerView)
+	icon := statusIcon(step.Status, spinnerView)
 	line := fmt.Sprintf("%s%s %s", prefix, icon, step.Name)
-	if step.Status == component.StatusFailed && step.Err != nil {
+	if step.Status == task.StatusFailed && step.Err != nil {
 		line += failStyle.Render(fmt.Sprintf(" — %v", step.Err))
 	}
 	lines = append(lines, line)
@@ -199,7 +216,7 @@ func (mt *MainTab) renderStepTree(name string, depth int, spinnerView string, ch
 	if len(step.Processes) > 1 || (len(step.Processes) == 1 && step.Processes[0].Name != step.Name) {
 		procPrefix := prefix + dimStyle.Render("│") + " "
 		for _, proc := range step.Processes {
-			procIcon := StatusIcon(proc.Status, spinnerView)
+			procIcon := statusIcon(proc.Status, spinnerView)
 			lines = append(lines, fmt.Sprintf("%s%s %s", procPrefix, procIcon, proc.Name))
 		}
 	}

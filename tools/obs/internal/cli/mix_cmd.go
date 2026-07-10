@@ -9,7 +9,7 @@ import (
 	"strings"
 	"syscall"
 
-	"obs/internal/component"
+	"obs/internal/task"
 	"obs/internal/mixer"
 	"obs/internal/output"
 	"obs/internal/process"
@@ -20,7 +20,7 @@ import (
 )
 
 type runOptions struct {
-	components     []string
+	tasks          []string
 	flagValues     map[string]string
 	dryRun         bool
 	nonInteractive bool
@@ -31,7 +31,7 @@ type runOptions struct {
 
 func newMixerCmd(command, shortDesc string) *cobra.Command {
 	cmd := &cobra.Command{
-		Use:                command + " [component...] [flags]",
+		Use:                command + " [task...] [flags]",
 		Short:              shortDesc,
 		DisableFlagParsing: true,
 		RunE: func(_ *cobra.Command, args []string) error {
@@ -60,7 +60,7 @@ func parseArgs(command string, args []string) (runOptions, error) {
 	var setFlags []string
 	for _, arg := range args {
 		if arg == "--help" || arg == "-h" {
-			return opts, fmt.Errorf("usage: obs %s <recipe|component> [flags]\n\nFlags:\n  --dry-run          Show steps without executing\n  --non-interactive  Disable TUI mode\n  --detach           Run in background\n  --output-json      Output JSON events\n  --force            Free occupied ports\n  --<key>=<value>    Pass custom flag to strategies", command)
+			return opts, fmt.Errorf("usage: obs %s <recipe|task> [flags]\n\nFlags:\n  --dry-run          Show steps without executing\n  --non-interactive  Disable TUI mode\n  --detach           Run in background\n  --output-json      Output JSON events\n  --force            Free occupied ports\n  --<key>=<value>    Pass custom flag to strategies", command)
 		}
 		if !strings.HasPrefix(arg, "--") {
 			filteredArgs = append(filteredArgs, arg)
@@ -86,25 +86,25 @@ func parseArgs(command string, args []string) (runOptions, error) {
 	for _, name := range filteredArgs {
 		entry, ok := mixer.GetRecipe(command, name)
 		if ok {
-			opts.components = append(opts.components, entry.Components...)
+			opts.tasks = append(opts.tasks, entry.Tasks...)
 			continue
 		}
-		opts.components = append(opts.components, name)
+		opts.tasks = append(opts.tasks, name)
 	}
 
-	if len(opts.components) == 0 {
+	if len(opts.tasks) == 0 {
 		return opts, fmt.Errorf("no recipe specified — run 'obs list' to see available recipes")
 	}
 
 	seen := make(map[string]bool)
 	var deduped []string
-	for _, n := range opts.components {
+	for _, n := range opts.tasks {
 		if !seen[n] {
 			seen[n] = true
 			deduped = append(deduped, n)
 		}
 	}
-	opts.components = deduped
+	opts.tasks = deduped
 
 	opts.flagValues = make(map[string]string)
 	for _, flag := range setFlags {
@@ -117,7 +117,7 @@ func parseArgs(command string, args []string) (runOptions, error) {
 	return opts, nil
 }
 
-func printDryRun(steps []*component.Step) {
+func printDryRun(steps []*task.Step) {
 	fmt.Println("Dry run — steps that would execute:")
 	for i, step := range steps {
 		fmt.Printf("  %d. %s [%s]\n", i+1, step.Name, step.Lifecycle)
@@ -133,22 +133,22 @@ func printDryRun(steps []*component.Step) {
 func runMixer(command string, opts runOptions) error {
 	ctx, cancel := context.WithCancel(context.Background())
 
-	prepare := func() ([]*component.Step, error) {
-		steps, _, err := mixer.Mix(ctx, opts.components, opts.flagValues)
+	prepare := func() ([]*task.Step, []task.ProjectInfo, error) {
+		steps, _, projects, err := mixer.Mix(ctx, opts.tasks, opts.flagValues)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		if opts.force {
 			if err := checkAndFreePorts(steps); err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 		}
-		return steps, nil
+		return steps, projects, nil
 	}
 
 	if opts.dryRun {
 		defer cancel()
-		steps, err := prepare()
+		steps, _, err := prepare()
 		if err != nil {
 			return err
 		}
@@ -181,9 +181,9 @@ func runMixer(command string, opts runOptions) error {
 		return runner.RunInteractive(ctx, mgr, prepare, opts.flagValues)
 	}
 
-	updates := make(chan component.StepUpdate, 100)
+	updates := make(chan task.StepUpdate, 100)
 
-	steps, err := prepare()
+	steps, _, err := prepare()
 	if err != nil {
 		var reqErr *mixer.RequirementsError
 		if errors.As(err, &reqErr) {
@@ -237,7 +237,7 @@ func runMixer(command string, opts runOptions) error {
 	return err
 }
 
-func checkAndFreePorts(steps []*component.Step) error {
+func checkAndFreePorts(steps []*task.Step) error {
 	var ports []int
 	seen := make(map[int]bool)
 	for _, step := range steps {

@@ -5,7 +5,7 @@ import (
 	"sync"
 )
 
-type RingBuffer struct {
+type ringBuffer struct {
 	mu      sync.Mutex
 	lines   []string
 	maxSize int
@@ -15,14 +15,14 @@ type RingBuffer struct {
 	partial string
 }
 
-func NewRingBuffer(maxLines int) *RingBuffer {
-	return &RingBuffer{
+func newRingBuffer(maxLines int) *ringBuffer {
+	return &ringBuffer{
 		lines:   make([]string, maxLines),
 		maxSize: maxLines,
 	}
 }
 
-func (rb *RingBuffer) Write(p []byte) (int, error) {
+func (rb *ringBuffer) Write(p []byte) (int, error) {
 	rb.mu.Lock()
 	defer rb.mu.Unlock()
 
@@ -46,7 +46,7 @@ func (rb *RingBuffer) Write(p []byte) (int, error) {
 	return len(p), nil
 }
 
-func (rb *RingBuffer) Lines() []string {
+func (rb *ringBuffer) Lines() []string {
 	rb.mu.Lock()
 	defer rb.mu.Unlock()
 
@@ -60,7 +60,7 @@ func (rb *RingBuffer) Lines() []string {
 	return result
 }
 
-func (rb *RingBuffer) Len() int {
+func (rb *ringBuffer) Len() int {
 	rb.mu.Lock()
 	defer rb.mu.Unlock()
 	return rb.total

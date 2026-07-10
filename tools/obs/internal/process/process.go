@@ -11,26 +11,26 @@ import (
 	"syscall"
 	"time"
 
-	"obs/internal/component"
+	"obs/internal/task"
 )
 
-type ProcessStatus int
+type processStatus int
 
 const (
-	ProcessPending ProcessStatus = iota
-	ProcessRunning
-	ProcessDone
-	ProcessStopped
-	ProcessFailed
+	processPending processStatus = iota
+	processRunning
+	processDone
+	processStopped
+	processFailed
 )
 
-const ShutdownTimeout = 5 * time.Second
+const shutdownTimeout = 5 * time.Second
 
 type Process struct {
-	Spec   component.ProcessSpec
-	Status ProcessStatus
+	Spec   task.ProcessSpec
+	Status processStatus
 	Err    error
-	Output *RingBuffer
+	Output *ringBuffer
 
 	cmd      *exec.Cmd
 	mu       sync.Mutex
@@ -39,11 +39,11 @@ type Process struct {
 	stopping bool
 }
 
-func NewProcess(spec component.ProcessSpec, maxLogLines int) *Process {
+func newProcess(spec task.ProcessSpec, maxLogLines int) *Process {
 	return &Process{
 		Spec:   spec,
-		Status: ProcessPending,
-		Output: NewRingBuffer(maxLogLines),
+		Status: processPending,
+		Output: newRingBuffer(maxLogLines),
 		done:   make(chan struct{}),
 	}
 }
@@ -52,7 +52,7 @@ func (p *Process) Start(ctx context.Context, extraWriters ...io.Writer) error {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	if p.Status != ProcessPending {
+	if p.Status != processPending {
 		return fmt.Errorf("process %q already started", p.Spec.Name)
 	}
 
@@ -86,13 +86,13 @@ func (p *Process) Start(ctx context.Context, extraWriters ...io.Writer) error {
 	p.cmd.Stderr = mw
 
 	if err := p.cmd.Start(); err != nil {
-		p.Status = ProcessFailed
+		p.Status = processFailed
 		p.Err = err
 		p.doneOnce.Do(func() { close(p.done) })
 		return err
 	}
 
-	p.Status = ProcessRunning
+	p.Status = processRunning
 
 	go func() {
 		// Stop the process group when context is cancelled
@@ -107,12 +107,12 @@ func (p *Process) Start(ctx context.Context, extraWriters ...io.Writer) error {
 		err := p.cmd.Wait()
 		p.mu.Lock()
 		if p.stopping {
-			p.Status = ProcessStopped
+			p.Status = processStopped
 		} else if err != nil {
-			p.Status = ProcessFailed
+			p.Status = processFailed
 			p.Err = err
 		} else {
-			p.Status = ProcessDone
+			p.Status = processDone
 		}
 		p.mu.Unlock()
 		p.doneOnce.Do(func() { close(p.done) })
@@ -123,7 +123,7 @@ func (p *Process) Start(ctx context.Context, extraWriters ...io.Writer) error {
 
 func (p *Process) Stop() error {
 	p.mu.Lock()
-	if p.cmd == nil || p.cmd.Process == nil || p.Status != ProcessRunning {
+	if p.cmd == nil || p.cmd.Process == nil || p.Status != processRunning {
 		p.mu.Unlock()
 		return nil
 	}
@@ -137,15 +137,15 @@ func (p *Process) Stop() error {
 	select {
 	case <-p.done:
 		return nil
-	case <-time.After(ShutdownTimeout):
+	case <-time.After(shutdownTimeout):
 		syscall.Kill(-pid, syscall.SIGKILL)
 		select {
 		case <-p.done:
 			return nil
 		case <-time.After(3 * time.Second):
 			p.mu.Lock()
-			if p.Status == ProcessRunning {
-				p.Status = ProcessStopped
+			if p.Status == processRunning {
+				p.Status = processStopped
 			}
 			p.mu.Unlock()
 			p.doneOnce.Do(func() { close(p.done) })
@@ -161,10 +161,10 @@ func (p *Process) Wait() <-chan struct{} {
 func (p *Process) Running() bool {
 	p.mu.Lock()
 	defer p.mu.Unlock()
-	return p.Status == ProcessRunning
+	return p.Status == processRunning
 }
 
-func (p *Process) GetStatus() ProcessStatus {
+func (p *Process) GetStatus() processStatus {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	return p.Status

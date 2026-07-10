@@ -3,31 +3,31 @@ package mixer
 import (
 	"context"
 	"fmt"
+	"os"
 	"os/exec"
 	"slices"
 	"strconv"
 	"strings"
 
-	"obs/internal/component"
 	"obs/internal/runcontext"
-	"obs/internal/strategy"
+	"obs/internal/task"
 )
 
 type RecipeEntry struct {
 	Command    string
 	Name       string
 	Aliases    []string
-	Components []string
+	Tasks []string
 }
 
 var recipes []RecipeEntry
 
-func RegisterRecipe(command, name string, aliases []string, components []string) {
+func RegisterRecipe(command, name string, aliases []string, tasks []string) {
 	recipes = append(recipes, RecipeEntry{
 		Command:    command,
 		Name:       name,
 		Aliases:    aliases,
-		Components: components,
+		Tasks: tasks,
 	})
 }
 
@@ -73,82 +73,93 @@ func (e *MissingFlagError) Error() string {
 	return fmt.Sprintf("--%s is required — %s", e.Flag, e.Usage)
 }
 
-func Mix(ctx context.Context, componentNames []string, flagValues map[string]string) ([]*component.Step, *runcontext.RunContext, error) {
+func Mix(ctx context.Context, taskNames []string, flagValues map[string]string) ([]*task.Step, *runcontext.RunContext, []task.ProjectInfo, error) {
 	rc := runcontext.New()
 
-	components, err := resolveComponents(componentNames)
+	tasks, err := resolveTasks(taskNames)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
-	names := make([]string, len(components))
-	for i, c := range components {
-		names[i] = c.Name
+	names := make([]string, len(tasks))
+	for i, t := range tasks {
+		names[i] = t.Name
 	}
-	rc.SetComponents(names)
+	rc.SetTasks(names)
 
-	if err := checkRequirements(components); err != nil {
-		return nil, nil, &RequirementsError{Err: err}
+	projects := task.DetectProjects(tasks)
+	for _, t := range tasks {
+		if t.Dir == "" && t.Labels["image"] != "" {
+			image := os.Getenv(strings.ToUpper(strings.ReplaceAll(t.Name, "-", "_")) + "_IMAGE")
+			if image == "" {
+				image = t.Labels["image"]
+			}
+			tag := image
+			if idx := strings.LastIndex(image, ":"); idx >= 0 {
+				tag = image[idx+1:]
+			}
+			projects = append(projects, task.ProjectInfo{
+				Name: t.Name, Branch: tag, IsImage: true,
+			})
+		}
 	}
 
-	if err := checkRequiredFlags(components, flagValues); err != nil {
-		return nil, nil, err
+	if err := checkRequirements(tasks); err != nil {
+		return nil, nil, nil, &RequirementsError{Err: err}
+	}
+
+	if err := checkRequiredFlags(tasks, flagValues); err != nil {
+		return nil, nil, nil, err
 	}
 
 	for k, v := range flagValues {
 		rc.Set("_flags", k, v)
 	}
 
-	for _, comp := range components {
-		for _, rf := range comp.RequiredFlags {
+	for _, t := range tasks {
+		for _, rf := range t.RequiredFlags {
 			if v := flagValues[rf.Name]; v != "" {
-				rc.Set(comp.Name, rf.Name, v)
+				rc.Set(t.Name, rf.Name, v)
 			}
 		}
 	}
 
-	var allSteps []*component.Step
+	var allSteps []*task.Step
 
-	for _, comp := range components {
-		strategies := strategy.Resolve(comp)
-		for _, s := range strategies {
-			step, err := s.Execute(ctx, comp, rc)
-			if err != nil {
-				return nil, nil, fmt.Errorf("execute %q: %w", comp.Name, err)
-			}
-			if step != nil {
-				allSteps = append(allSteps, step)
-			}
+	for _, t := range tasks {
+		step, err := t.Strategy.Execute(ctx, t, rc)
+		if err != nil {
+			return nil, nil, nil, fmt.Errorf("execute %q: %w", t.Name, err)
+		}
+		if step != nil {
+			allSteps = append(allSteps, step)
 		}
 
-		for _, p := range comp.Ports {
-			rc.Set(comp.Name, "port", strconv.Itoa(p))
+		for _, p := range t.Ports {
+			rc.Set(t.Name, "port", strconv.Itoa(p))
 		}
 	}
 
 	ordered, err := resolveDependencies(allSteps)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, nil, err
 	}
 
-	return ordered, rc, nil
+	return ordered, rc, projects, nil
 }
 
-func checkRequirements(components []*component.Component) error {
+func checkRequirements(tasks []*task.Task) error {
 	seen := make(map[string]bool)
 	var missing []string
 
-	for _, comp := range components {
-		strategies := strategy.Resolve(comp)
-		for _, s := range strategies {
-			for _, tool := range s.Requires() {
-				if seen[tool] {
-					continue
-				}
-				seen[tool] = true
-				if _, err := exec.LookPath(tool); err != nil {
-					missing = append(missing, tool)
-				}
+	for _, t := range tasks {
+		for _, tool := range t.Strategy.Requires() {
+			if seen[tool] {
+				continue
+			}
+			seen[tool] = true
+			if _, err := exec.LookPath(tool); err != nil {
+				missing = append(missing, tool)
 			}
 		}
 	}
@@ -159,9 +170,9 @@ func checkRequirements(components []*component.Component) error {
 	return nil
 }
 
-func checkRequiredFlags(components []*component.Component, flagValues map[string]string) error {
-	for _, comp := range components {
-		for _, rf := range comp.RequiredFlags {
+func checkRequiredFlags(tasks []*task.Task, flagValues map[string]string) error {
+	for _, t := range tasks {
+		for _, rf := range t.RequiredFlags {
 			if flagValues[rf.Name] == "" {
 				return &MissingFlagError{Flag: rf.Name, Usage: rf.Usage}
 			}
@@ -170,10 +181,10 @@ func checkRequiredFlags(components []*component.Component, flagValues map[string
 	return nil
 }
 
-func resolveComponents(names []string) ([]*component.Component, error) {
+func resolveTasks(names []string) ([]*task.Task, error) {
 	resolved := make(map[string]bool)
 	visiting := make(map[string]bool)
-	var result []*component.Component
+	var result []*task.Task
 
 	var visit func(name string) error
 	visit = func(name string) error {
@@ -185,12 +196,12 @@ func resolveComponents(names []string) ([]*component.Component, error) {
 		}
 		visiting[name] = true
 
-		comp, ok := component.Get(name)
+		t, ok := task.Get(name)
 		if !ok {
-			return fmt.Errorf("unknown component %q", name)
+			return fmt.Errorf("unknown task %q", name)
 		}
 
-		for _, dep := range comp.DependsOn {
+		for _, dep := range t.DependsOn {
 			if err := visit(dep); err != nil {
 				return err
 			}
@@ -198,7 +209,7 @@ func resolveComponents(names []string) ([]*component.Component, error) {
 
 		visiting[name] = false
 		resolved[name] = true
-		result = append(result, comp)
+		result = append(result, t)
 		return nil
 	}
 
@@ -210,8 +221,8 @@ func resolveComponents(names []string) ([]*component.Component, error) {
 	return result, nil
 }
 
-func resolveDependencies(steps []*component.Step) ([]*component.Step, error) {
-	byName := make(map[string]*component.Step, len(steps))
+func resolveDependencies(steps []*task.Step) ([]*task.Step, error) {
+	byName := make(map[string]*task.Step, len(steps))
 	for _, s := range steps {
 		if _, exists := byName[s.Name]; exists {
 			return nil, fmt.Errorf("duplicate step name %q", s.Name)
@@ -238,7 +249,7 @@ func resolveDependencies(steps []*component.Step) ([]*component.Step, error) {
 		}
 	}
 
-	var ordered []*component.Step
+	var ordered []*task.Step
 	for len(queue) > 0 {
 		name := queue[0]
 		queue = queue[1:]

@@ -3,27 +3,31 @@ package strategy
 import (
 	"context"
 
-	"obs/internal/component"
 	"obs/internal/runcontext"
+	"obs/internal/task"
 )
 
-type LocalNPM struct {
+type npm struct {
 	Cmd  string
 	Args []string
 }
 
-func (s *LocalNPM) Requires() []string { return []string{"node", "npm"} }
+func (s *npm) Requires() []string { return []string{"node", "npm"} }
 
-func (s *LocalNPM) Execute(_ context.Context, comp *component.Component, _ *runcontext.RunContext) (*component.Step, error) {
-	return &component.Step{
-		Name:      comp.Name,
-		Lifecycle: component.LifecycleOneShot,
-		DependsOn: comp.DependsOn,
-		Processes: []component.ProcessSpec{{
-			Name:    comp.Name,
+func (s *npm) Execute(_ context.Context, t *task.Task, _ *runcontext.RunContext) (*task.Step, error) {
+	return &task.Step{
+		Name:      t.Name,
+		Lifecycle: task.LifecycleOneShot,
+		DependsOn: t.DependsOn,
+		Processes: []task.ProcessSpec{{
+			Name:    t.Name,
 			Command: "npm",
 			Args:    append([]string{s.Cmd}, s.Args...),
-			Dir:     comp.Dir,
+			Dir:     t.Dir,
 		}},
 	}, nil
+}
+
+func NPMRun(cmd string, args ...string) task.Strategy {
+	return &npm{Cmd: cmd, Args: args}
 }

@@ -5,18 +5,18 @@ import (
 	"fmt"
 	"os"
 
-	"obs/internal/component"
+	"obs/internal/task"
 	"obs/internal/process"
 	"obs/internal/ui"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func RunInteractive(ctx context.Context, mgr *process.Manager, prepare func() ([]*component.Step, error), inputValues map[string]string) error {
+func RunInteractive(ctx context.Context, mgr *process.Manager, prepare func() ([]*task.Step, []task.ProjectInfo, error), inputValues map[string]string) error {
 	innerCtx, innerCancel := context.WithCancel(ctx)
 	defer innerCancel()
 
-	internalUpdates := make(chan component.StepUpdate, 100)
+	internalUpdates := make(chan task.StepUpdate, 100)
 	retryCh := make(chan struct{}, 1)
 	model := ui.NewModel(innerCtx, mgr, internalUpdates, retryCh, inputValues)
 
@@ -26,7 +26,7 @@ func RunInteractive(ctx context.Context, mgr *process.Manager, prepare func() ([
 		for {
 			p.Send(ui.RequirementsCheckingMsg{})
 
-			steps, err := prepare()
+			steps, projects, err := prepare()
 			if err != nil {
 				p.Send(ui.RequirementsFailedMsg{Err: err})
 				select {
@@ -38,11 +38,11 @@ func RunInteractive(ctx context.Context, mgr *process.Manager, prepare func() ([
 				}
 			}
 
-			p.Send(ui.RequirementsPassedMsg{Steps: steps})
+			p.Send(ui.RequirementsPassedMsg{Steps: steps, Projects: projects})
 
 			cb := StepCallbacks{
-				OnUpdate: func(u component.StepUpdate) { internalUpdates <- u },
-				OnProcess: func(step *component.Step, spec component.ProcessSpec, proc *process.Process) {
+				OnUpdate: func(u task.StepUpdate) { internalUpdates <- u },
+				OnProcess: func(step *task.Step, spec task.ProcessSpec, proc *process.Process) {
 					p.Send(ui.AddProcessTabMsg{StepName: step.Name, Name: spec.Name, Proc: proc})
 				},
 			}
