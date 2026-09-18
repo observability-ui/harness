@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: test-runbook-file-protocol-1
+  namespace: openshift-monitoring
+spec:
+  groups:
+  - name: test-runbook-sanitization
+    interval: 30s
+    rules:
+    - alert: TestAlertFileProtocol
+      expr: vector(1)
+      for: 0m
+      labels:
+        severity: warning
+        test: runbook-sanitization
+        runbook_url: file:///etc/passwd
+      annotations:
+        runbook_url: "file:///etc/passwd"
+        summary: "file:///etc/passwd"
+        description: "file:///etc/passwd"

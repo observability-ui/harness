@@ -1,0 +1,8 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: log-9015-numeric-sorting
+  labels:
+    app.kubernetes.io/name: log-generator
+    app.kubernetes.io/part-of: log-9015

@@ -1,0 +1,15 @@
+
+[1m[0;36m=== COO 1.5.0 Smoke Test — Resource Consumption + COO-1014 Validation ===[0m
+
+[0;36m[INFO][0m  Report: /Users/emurasak/workspace/harness/tasks/OU-1326-smoke-test-coo-1.5.0/smoke-results-20260811-165650.log
+[0;36m[INFO][0m  Started: Tue Aug 11 16:56:50 -03 2026
+
+[1m[0;36m=== Preflight Checks ===[0m
+
+[0;36m[INFO][0m  Logged in as: kube:admin
+[0;36m[INFO][0m  COO CRD found
+[0;31m[FAIL][0m  No running operator pods in openshift-cluster-observability-operator
+
+[1m[0;36m=== Cleanup ===[0m
+
+[0;33m[WARN][0m  Skipping cleanup (--skip-cleanup). Resources remain on cluster.

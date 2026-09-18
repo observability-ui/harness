@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: test-runbook-mailto
+  namespace: openshift-monitoring
+spec:
+  groups:
+  - name: test-runbook-sanitization
+    interval: 30s
+    rules:
+    - alert: TestAlertMailto
+      expr: vector(1)
+      for: 0m
+      labels:
+        severity: warning
+        test: runbook-sanitization
+        runbook_url: "mailto:security@example.com"
+      annotations:
+        runbook_url: "mailto:security@example.com"
+        summary: "mailto:security@example.com"
+        description: "mailto:security@example.com"

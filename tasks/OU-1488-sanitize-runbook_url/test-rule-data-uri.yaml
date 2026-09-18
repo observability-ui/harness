@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: test-runbook-data-uri-1
+  namespace: openshift-monitoring
+spec:
+  groups:
+  - name: test-runbook-sanitization
+    interval: 30s
+    rules:
+    - alert: TestAlertDataURI
+      expr: vector(1)
+      for: 0m
+      labels:
+        severity: warning
+        test: runbook-sanitization
+        runbook_url: "data:text/html,<script>alert('XSS')</script>"
+      annotations:
+        runbook_url: "data:text/html,<script>alert('XSS')</script>"
+        summary: "data:text/html,<script>alert('XSS')</script>"
+        description: "data:text/html,<script>alert('XSS')</script>"

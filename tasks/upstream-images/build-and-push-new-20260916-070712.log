@@ -1,0 +1,99 @@
+Logging to /Users/emurasak/workspace/harness-official/tasks/upstream-images/build-and-push-new-20260916-070712.log
+Fetching all branches for each repo...
+  Fetching distributed-tracing-plugin...
+From https://github.com/openshift/distributed-tracing-console-plugin
+   601ecd8..ddfba12  main       -> origin/main
+  Fetching logging-view-plugin...
+From https://github.com/openshift/logging-view-plugin
+   860f23c..a9ce713  release-coo-ocp-4.22 -> origin/release-coo-ocp-4.22
+   42ea055..e86c61c  main                 -> origin/main
+   43d9d27..f750b04  release-coo-1.5-ocp-4.12 -> origin/release-coo-1.5-ocp-4.12
+   22a9ee0..f11af19  release-coo-1.5-ocp-4.15 -> origin/release-coo-1.5-ocp-4.15
+   860f23c..c7d0219  release-coo-1.5-ocp-4.22 -> origin/release-coo-1.5-ocp-4.22
+   43d9d27..bebc1f4  release-coo-ocp-4.12 -> origin/release-coo-ocp-4.12
+   22a9ee0..ff6a7cf  release-coo-ocp-4.15 -> origin/release-coo-ocp-4.15
+  Fetching monitoring-plugin...
+From https://github.com/openshift/monitoring-plugin
+ - [deleted]           (none)                 -> origin/remove-incidents
+ - [deleted]           (none)                 -> origin/swap-tags-to-backend-features
+   0192dbb3..61286e1a  release-coo-ocp-4.22   -> origin/release-coo-ocp-4.22
+ * [new branch]        idempotent-setup       -> origin/idempotent-setup
+ * [new branch]        lint-tags              -> origin/lint-tags
+   0ec83454..293030ed  main                   -> origin/main
+   05b9f601..7f93850e  main-alerts-management-api -> origin/main-alerts-management-api
+ * [new branch]        move-features          -> origin/move-features
+ + 3a91dc29...0c0a67be move-fixtures          -> origin/move-fixtures  (forced update)
+ + 701a5131...396970b2 move-support           -> origin/move-support  (forced update)
+ + e57372f3...2560e954 move-views             -> origin/move-views  (forced update)
+ * [new branch]        perses-version-upgrade -> origin/perses-version-upgrade
+ + 1799e7c5...10a8ac7f refactor-variables     -> origin/refactor-variables  (forced update)
+   2e534963..bf208e0a  release-4.18           -> origin/release-4.18
+   993c9a70..97c9a838  release-4.23           -> origin/release-4.23
+   993c9a70..97c9a838  release-5.0            -> origin/release-5.0
+   0ec83454..293030ed  release-5.1            -> origin/release-5.1
+   0ec83454..293030ed  release-5.2            -> origin/release-5.2
+   a4543bac..b26018ec  release-coo-1.5-ocp-4.15 -> origin/release-coo-1.5-ocp-4.15
+   b24f6f4f..aea5be4e  release-coo-1.5-ocp-4.19 -> origin/release-coo-1.5-ocp-4.19
+   618e1a59..bc04cd79  release-coo-1.5-ocp-4.22 -> origin/release-coo-1.5-ocp-4.22
+   3eff6514..869b404b  release-coo-ocp-4.15   -> origin/release-coo-ocp-4.15
+   b7bad858..93d344bf  release-coo-ocp-4.19   -> origin/release-coo-ocp-4.19
+ + 300c4766...8e8feca9 run-changes            -> origin/run-changes  (forced update)
+  Fetching troubleshooting-panel-plugin...
+From https://github.com/openshift/troubleshooting-panel-console-plugin
+   14c9465..ad94083  release-coo-ocp-4.22 -> origin/release-coo-ocp-4.22
+   7548b9a..7ce439f  main                 -> origin/main
+   add4697..e876f89  release-coo-1.5-ocp-4.19 -> origin/release-coo-1.5-ocp-4.19
+   aadb9ea..81c98ae  release-coo-1.5-ocp-4.22 -> origin/release-coo-1.5-ocp-4.22
+   add4697..558b686  release-coo-ocp-4.19 -> origin/release-coo-ocp-4.19
+Fetch complete.
+==========================================
+Building distributed-tracing-plugin @ release-coo-ocp-4.12 with VERSION=v0.3.4 ORG=openshift-observability-ui
+==========================================
+Switched to branch 'release-coo-ocp-4.12'
+Your branch is up to date with 'origin/release-coo-ocp-4.12'.
+From https://github.com/openshift/distributed-tracing-console-plugin
+ * branch            release-coo-ocp-4.12 -> FETCH_HEAD
+Already up to date.
+--- Attempt 1/3 ---
+podman manifest rm quay.io/openshift-observability-ui/distributed-tracing-console-plugin:v0.3.4 || true
+Cannot connect to Podman. Please verify your connection to the Linux system using `podman system connection list`, or try `podman machine init` and `podman machine start` to manage a new Linux VM
+Error: unable to connect to Podman socket: failed to connect: dial tcp 127.0.0.1:52629: connect: connection refused
+podman manifest create quay.io/openshift-observability-ui/distributed-tracing-console-plugin:v0.3.4
+Cannot connect to Podman. Please verify your connection to the Linux system using `podman system connection list`, or try `podman machine init` and `podman machine start` to manage a new Linux VM
+Error: unable to connect to Podman socket: failed to connect: dial tcp 127.0.0.1:52629: connect: connection refused
+make: *** [podman-cross-build] Error 125
+WARNING: Attempt 1 failed for distributed-tracing-plugin @ release-coo-ocp-4.12 (exit code 2)
+--- Attempt 2/3 ---
+podman manifest rm quay.io/openshift-observability-ui/distributed-tracing-console-plugin:v0.3.4 || true
+Cannot connect to Podman. Please verify your connection to the Linux system using `podman system connection list`, or try `podman machine init` and `podman machine start` to manage a new Linux VM
+Error: unable to connect to Podman socket: failed to connect: dial tcp 127.0.0.1:52629: connect: connection refused
+podman manifest create quay.io/openshift-observability-ui/distributed-tracing-console-plugin:v0.3.4
+Cannot connect to Podman. Please verify your connection to the Linux system using `podman system connection list`, or try `podman machine init` and `podman machine start` to manage a new Linux VM
+Error: unable to connect to Podman socket: failed to connect: dial tcp 127.0.0.1:52629: connect: connection refused
+make: *** [podman-cross-build] Error 125
+WARNING: Attempt 2 failed for distributed-tracing-plugin @ release-coo-ocp-4.12 (exit code 2)
+--- Attempt 3/3 ---
+podman manifest rm quay.io/openshift-observability-ui/distributed-tracing-console-plugin:v0.3.4 || true
+Cannot connect to Podman. Please verify your connection to the Linux system using `podman system connection list`, or try `podman machine init` and `podman machine start` to manage a new Linux VM
+Error: unable to connect to Podman socket: failed to connect: dial tcp 127.0.0.1:52629: connect: connection refused
+podman manifest create quay.io/openshift-observability-ui/distributed-tracing-console-plugin:v0.3.4
+Cannot connect to Podman. Please verify your connection to the Linux system using `podman system connection list`, or try `podman machine init` and `podman machine start` to manage a new Linux VM
+Error: unable to connect to Podman socket: failed to connect: dial tcp 127.0.0.1:52629: connect: connection refused
+make: *** [podman-cross-build] Error 125
+WARNING: Attempt 3 failed for distributed-tracing-plugin @ release-coo-ocp-4.12 (exit code 2)
+WARNING: Build failed for distributed-tracing-plugin @ release-coo-ocp-4.12 after 3 attempts, continuing...
+==========================================
+Building logging-view-plugin @ release-coo-ocp-4.12 with VERSION=v6.0.6 ORG=openshift-observability-ui
+==========================================
+Switched to branch 'release-coo-ocp-4.12'
+Your branch is behind 'origin/release-coo-ocp-4.12' by 2 commits, and can be fast-forwarded.
+  (use "git pull" to update your local branch)
+From https://github.com/openshift/logging-view-plugin
+ * branch            release-coo-ocp-4.12 -> FETCH_HEAD
+Updating 43d9d27..bebc1f4
+Fast-forward
+ OWNERS | 2 ++
+ 1 file changed, 2 insertions(+)
+--- Attempt 1/3 ---
+podman manifest rm quay.io/openshift-observability-ui/logging-view-plugin:v6.0.6 || true
+make: *** [podman-cross-build] Interrupt: 2

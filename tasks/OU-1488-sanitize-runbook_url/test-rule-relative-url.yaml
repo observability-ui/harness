@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: test-runbook-relative-url
+  namespace: openshift-monitoring
+spec:
+  groups:
+  - name: test-runbook-sanitization
+    interval: 30s
+    rules:
+    - alert: TestAlertRelativeURL
+      expr: vector(1)
+      for: 0m
+      labels:
+        severity: warning
+        test: runbook-sanitization
+        runbook_url: "/runbooks/alert"
+      annotations:
+        runbook_url: "/runbooks/alert"
+        summary: "/runbooks/alert"
+        description: "/runbooks/alert"

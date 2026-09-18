@@ -1,0 +1,1677 @@
+Logging to /Users/emurasak/workspace/harness-official/tasks/upstream-images/build-and-push-20260901-092557.log
+Fetching all branches for each repo...
+  Fetching dashboards-plugin...
+  Fetching distributed-tracing-plugin...
+  Fetching logging-view-plugin...
+  Fetching monitoring-plugin...
+  Fetching troubleshooting-panel-plugin...
+Fetch complete.
+==========================================
+Building dashboards-plugin @ release-coo-1.5-ocp-4.12 with VERSION=v0.4.3 ORG=openshift-observability-ui
+==========================================
+Already on 'release-coo-1.5-ocp-4.12'
+Your branch is up to date with 'origin/release-coo-1.5-ocp-4.12'.
+From https://github.com/openshift/console-dashboards-plugin
+ * branch            release-coo-1.5-ocp-4.12 -> FETCH_HEAD
+Already up to date.
+--- Attempt 1/3 ---
+podman manifest rm quay.io/openshift-observability-ui/console-dashboards-plugin:v0.4.3 || true
+Untagged: quay.io/openshift-observability-ui/console-dashboards-plugin:v0.4.3
+Deleted: d7d562cee9c2f09a4948ff11249380d68eb56023acfee133dbb3ac231811b125
+podman manifest create quay.io/openshift-observability-ui/console-dashboards-plugin:v0.4.3
+5272893866ed70f6135d7fb78c992aef26c4a872270760751a82342557793aee
+podman build --platform=linux/arm64,linux/amd64 --manifest quay.io/openshift-observability-ui/console-dashboards-plugin:v0.4.3 -f Dockerfile
+[linux/amd64] [1/3] STEP 1/8: FROM registry.redhat.io/ubi8/nodejs-18:latest AS web-builder
+Trying to pull registry.redhat.io/ubi8/nodejs-18:latest...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:046eb6416170db2ab33e464d04c6f7c0c8c6cc8563597aca8e9fb7736dff00f9
+Copying blob sha256:43ddc3bd12b8691687c9f6c273331ca07e3a89b50a619e0db9b040a8a629386d
+Copying blob sha256:b610fd6091ba2163b8943d2214e20665977bc8064dc769d47be9ae868e48a301
+Copying config sha256:ab55058334c5c32969b838cea2db23ee8c69c1b742006a75c031ed4f1b286bc5
+Writing manifest to image destination
+Storing signatures
+[linux/amd64] [1/3] STEP 2/8: WORKDIR /opt/app-root
+--> Using cache 6e91185197c78eb44c0e9e78e7dca3894858ba5a2a88faff10de8edef1168ab3
+--> 6e91185197c7
+[linux/amd64] [1/3] STEP 3/8: USER 0
+--> Using cache fda9199bd745615e60a432b6610d9d52c5f955d728a8e44f1ec414d64425ce50
+--> fda9199bd745
+[linux/amd64] [1/3] STEP 4/8: COPY web/package*.json web/
+--> Using cache 097678828d28fd1d0dacb518ca45aaaa753fece9ae069a6af908196a2e3ebb6f
+--> 097678828d28
+[linux/amd64] [1/3] STEP 5/8: COPY Makefile Makefile
+--> Using cache cfc5c0720e19203e1b93a5a61bea71f5a07deae606ab7f793699f95e0f34e30d
+--> cfc5c0720e19
+[linux/amd64] [1/3] STEP 6/8: RUN make install-frontend-ci-clean
+--> Using cache 436b363a4cc4698bfd76d0e545cb213cc6be660d228557db6f48a23e11743bc0
+--> 436b363a4cc4
+[linux/amd64] [1/3] STEP 7/8: COPY web/ web/
+--> Using cache f1669a978b543985a85dcd2994c31fd3a042a0a3f69977cd6b368942abd9664d
+--> f1669a978b54
+[linux/amd64] [1/3] STEP 8/8: RUN make build-frontend
+--> Using cache 5fa1ba2bb9e6fa809b196552ea03757149d51279b1623fc40491a4e1f528c5c1
+--> 5fa1ba2bb9e6
+[linux/arm64] [1/3] STEP 1/8: FROM registry.redhat.io/ubi8/nodejs-18:latest AS web-builder
+Trying to pull registry.redhat.io/ubi8/nodejs-18:latest...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:c4fff77bc060c02d4f09680032367cb302e83402fc25b7c7ac001cb00238876f
+Copying blob sha256:8fd64178c906794da03bc9b7d2d5e3b70073b47f8aa659230381d7fd897dc11b
+Copying blob sha256:6ad04be99c8f2547888de53fad691136f65cf5a11c7a2567ef29477c3413f587
+Copying config sha256:62a277f6499a7c210a1022190779f4387fc1294a28ea7696fc264248bf328a9b
+Writing manifest to image destination
+Storing signatures
+[linux/arm64] [1/3] STEP 2/8: WORKDIR /opt/app-root
+--> Using cache 1b90515d7a452f412a128be0ee2666e67e2eec3d7edf77bf4d7175260f33dc10
+--> 1b90515d7a45
+[linux/arm64] [1/3] STEP 3/8: USER 0
+--> Using cache 9006a4a57c9d6632f866cd972b8ab690a6fd3d49546ddd94ef3c0abe9ae449b6
+--> 9006a4a57c9d
+[linux/arm64] [1/3] STEP 4/8: COPY web/package*.json web/
+--> Using cache f27321e31788b66e34c9ed265b25f48d1b0412f523b7531fde47426261e76c1c
+--> f27321e31788
+[linux/arm64] [1/3] STEP 5/8: COPY Makefile Makefile
+--> Using cache 45fad1bd40771603144f2f26eca68cba399f1ee5d4398dfeda2877815e074f98
+--> 45fad1bd4077
+[linux/arm64] [1/3] STEP 6/8: RUN make install-frontend-ci-clean
+--> Using cache 375888c0b31ebe52b59324e3d2b5cb0c35c3813a940d8ef61b7a7a36f1fa64da
+--> 375888c0b31e
+[linux/arm64] [1/3] STEP 7/8: COPY web/ web/
+--> Using cache 46484f6d6c6c9ea6eccf187026986edf6edc290f15cd04354222747c0c4e82f6
+--> 46484f6d6c6c
+[linux/arm64] [1/3] STEP 8/8: RUN make build-frontend
+--> Using cache 02db42bfe76c5059d5bab0072a3624db6208706f566aafee3a891bc18037299e
+--> 02db42bfe76c
+[linux/amd64] [2/3] STEP 1/11: FROM registry.redhat.io/ubi9/go-toolset:1.26 AS go-builder
+Trying to pull registry.redhat.io/ubi9/go-toolset:1.26...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:9dd7a54704c5a666e57e3f6efc35e90fc6da8ad2923d77d60d1c573ef3315791
+Copying blob sha256:56649e4df8eddef4709849b46063574b7ddb22fc98fb75409885c838a4c9d381
+Copying blob sha256:d68194b0e4a172e16c5cbb1bc0479d22da58da64d376a5cdb885730c90f6fc5b
+Copying blob sha256:5c9af8529e118dd5a8d55d669c48114bfef7c8f5d743e5e560639dfabca3a5f9
+Copying config sha256:11c3fc29fb378f2b34bbf7921ad5e41b11f9631214b3369f21fc66619a1c7872
+Writing manifest to image destination
+Storing signatures
+[linux/amd64] [2/3] STEP 2/11: WORKDIR /opt/app-root
+--> Using cache d2dcbd246aa782fea70e6e29afa969f6a6c532493909b101bfcb6ac50252a220
+--> d2dcbd246aa7
+[linux/amd64] [2/3] STEP 3/11: COPY Makefile Makefile
+--> fd788061775f
+[linux/amd64] [2/3] STEP 4/11: COPY go.mod go.mod
+--> 47e8e75a489a
+[linux/amd64] [2/3] STEP 5/11: COPY go.sum go.sum
+--> c73f04013aa5
+[linux/amd64] [2/3] STEP 6/11: RUN go mod download
+--> ff01b2dbbcd7
+[linux/amd64] [2/3] STEP 7/11: COPY cmd/ cmd/
+--> 665e6bfc7816
+[linux/amd64] [2/3] STEP 8/11: COPY pkg/ pkg/
+--> 72a5162c010d
+[linux/amd64] [2/3] STEP 9/11: ENV GOEXPERIMENT=strictfipsruntime
+--> e6fa039de56c
+[linux/amd64] [2/3] STEP 10/11: ENV CGO_ENABLED=1
+--> e601fbca7c1d
+[linux/amd64] [2/3] STEP 11/11: RUN make build-backend BUILD_OPTS="-tags strictfipsruntime"
+go build -tags strictfipsruntime -o plugin-backend -mod=readonly cmd/plugin-backend.go
+--> c74fcdbc3546
+[linux/arm64] [2/3] STEP 1/11: FROM registry.redhat.io/ubi9/go-toolset:1.26 AS go-builder
+Trying to pull registry.redhat.io/ubi9/go-toolset:1.26...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:3b33bd74c459c543768665bc4406a7ec75fd6a2de94164c1ad9968e07c895aaf
+Copying blob sha256:3fa2c3ec93bd0d2914f8e021fa5b043ace5a704a440ecd2db626edd260f6a3c8
+Copying blob sha256:96c26ef68d364bcbd8f901e4664d7531ebb74699c6d8a69825e5925d8c6696c2
+Copying blob sha256:852e434154bbab928ec83bdc7061dee5120584a0c35903abf2b024686bc65eb8
+Copying config sha256:c9e40cb14364af57c6c2c0ca7a8afc8b39349b65e751b3062bf52d82bdc297cb
+Writing manifest to image destination
+Storing signatures
+[linux/arm64] [2/3] STEP 2/11: WORKDIR /opt/app-root
+--> Using cache 275d6c9d2bc632d9387ada96ba9c1b8e0ab01f03805ae80cc557c424bcb6808f
+--> 275d6c9d2bc6
+[linux/arm64] [2/3] STEP 3/11: COPY Makefile Makefile
+--> 550fb59529c1
+[linux/arm64] [2/3] STEP 4/11: COPY go.mod go.mod
+--> f2d1af484a08
+[linux/arm64] [2/3] STEP 5/11: COPY go.sum go.sum
+--> f3e731c4ff84
+[linux/arm64] [2/3] STEP 6/11: RUN go mod download
+--> 9e3117df376c
+[linux/arm64] [2/3] STEP 7/11: COPY cmd/ cmd/
+--> 4d98a57a62a5
+[linux/arm64] [2/3] STEP 8/11: COPY pkg/ pkg/
+--> ad068fe6b6d0
+[linux/arm64] [2/3] STEP 9/11: ENV GOEXPERIMENT=strictfipsruntime
+--> f6267f7e72ed
+[linux/arm64] [2/3] STEP 10/11: ENV CGO_ENABLED=1
+--> 241fe4c027f0
+[linux/arm64] [2/3] STEP 11/11: RUN make build-backend BUILD_OPTS="-tags strictfipsruntime"
+go build -tags strictfipsruntime -o plugin-backend -mod=readonly cmd/plugin-backend.go
+--> 70aba6dad971
+[linux/amd64] [3/3] STEP 1/4: FROM registry.access.redhat.com/ubi8/ubi
+Trying to pull registry.access.redhat.com/ubi8/ubi:latest...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:0b7d2b46deb33fa136af133fa9e3aea84434477c0f08aeb011e8c252d650b620
+Copying config sha256:de80467db75a66566fb5930a48c255b3ff1a7fc552e1cb50226b78e1fbe9daa9
+Writing manifest to image destination
+Storing signatures
+[linux/amd64] [3/3] STEP 2/4: COPY --from=web-builder /opt/app-root/web/dist /opt/app-root/web/dist
+--> 95176103117e
+[linux/amd64] [3/3] STEP 3/4: COPY --from=go-builder /opt/app-root/plugin-backend /opt/app-root
+--> cbb218ae7656
+[linux/amd64] [3/3] STEP 4/4: ENTRYPOINT ["/opt/app-root/plugin-backend", "-static-path", "/opt/app-root/web/dist"]
+[linux/amd64] [3/3] COMMIT
+--> 1726bb9a8f54
+[linux/arm64] [3/3] STEP 1/4: FROM registry.access.redhat.com/ubi8/ubi
+1726bb9a8f5465535a88714a9764e6f8788b48f369af10a34b7b49cf4505b1e4
+Trying to pull registry.access.redhat.com/ubi8/ubi:latest...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:931a40c32176d5f9111d0ebb74d8d9a3b17715ef859c3f88560bf72d645f8d68
+Copying config sha256:5d6d07decaee848bf14c7ea1889d7e349c8abcdc90d5957624942df1f18375b5
+Writing manifest to image destination
+Storing signatures
+[linux/arm64] [3/3] STEP 2/4: COPY --from=web-builder /opt/app-root/web/dist /opt/app-root/web/dist
+--> afa2dce98c29
+[linux/arm64] [3/3] STEP 3/4: COPY --from=go-builder /opt/app-root/plugin-backend /opt/app-root
+--> 8ba6a11d7a3e
+[linux/arm64] [3/3] STEP 4/4: ENTRYPOINT ["/opt/app-root/plugin-backend", "-static-path", "/opt/app-root/web/dist"]
+[linux/arm64] [3/3] COMMIT
+--> 123dd8bd6d06
+123dd8bd6d063225de15add023c76a248081456b4e96c504d832293dfc05650b
+podman manifest push quay.io/openshift-observability-ui/console-dashboards-plugin:v0.4.3
+Getting image list signatures
+Copying 2 images generated from 2 images in list
+Copying image sha256:e0c4bed7bfffbe758ed840c752904df84b5ffdd3fb54c80f7f4c3cf727de91a3 (1/2)
+Getting image source signatures
+Copying blob sha256:6e232116dbecc1e67e4ffc5ccfeb54f284f812523729dbe86d8bbfaadefac833
+Copying blob sha256:b39725ecdac31bfa0ec36528615e7865e914127f14aa8287cbd737cb76ded954
+Copying blob sha256:344f855f8cdb1207f4ebb8ecf26d92990fb72cc29954b0ed09d268d956e9cf88
+Copying config sha256:1726bb9a8f5465535a88714a9764e6f8788b48f369af10a34b7b49cf4505b1e4
+Writing manifest to image destination
+Copying image sha256:50f667fd7eee6bc55828d3aceb008a2fdfcfbe36170ba2e27b725ed79c2e1d1b (2/2)
+Getting image source signatures
+Copying blob sha256:64eae3db023e1db7ae33cde68265fabd20a629b28f31b3b3e8d9119c2ccc022f
+Copying blob sha256:d725a00b93c02bd23f687c00f63aa28889776f0987be0a3b38a7a5618728a222
+Copying blob sha256:891157d4341cb3f161e29c1037bb75635f1d93c8a10ba97bcaaf7b60af10f65a
+Copying config sha256:123dd8bd6d063225de15add023c76a248081456b4e96c504d832293dfc05650b
+Writing manifest to image destination
+Writing manifest list to image destination
+Storing list signatures
+==========================================
+Building distributed-tracing-plugin @ release-coo-1.5-ocp-4.12 with VERSION=v0.3.3 ORG=openshift-observability-ui
+==========================================
+Already on 'release-coo-1.5-ocp-4.12'
+Your branch is up to date with 'origin/release-coo-1.5-ocp-4.12'.
+From https://github.com/openshift/distributed-tracing-console-plugin
+ * branch            release-coo-1.5-ocp-4.12 -> FETCH_HEAD
+Already up to date.
+--- Attempt 1/3 ---
+podman manifest rm quay.io/openshift-observability-ui/distributed-tracing-console-plugin:v0.3.3 || true
+Untagged: quay.io/openshift-observability-ui/distributed-tracing-console-plugin:v0.3.3
+Deleted: 6fef9f37f1cc9035267a6f74a6a3f273aa57cc48eea042840e24d0e054365356
+podman manifest create quay.io/openshift-observability-ui/distributed-tracing-console-plugin:v0.3.3
+862cf48b5124b86457011bf5c83f99204240ea9c5ed2a6cb0a088646c3662eb3
+podman build --platform=linux/arm64,linux/amd64 --manifest quay.io/openshift-observability-ui/distributed-tracing-console-plugin:v0.3.3 -f Dockerfile
+[linux/amd64] [1/3] STEP 1/8: FROM registry.redhat.io/ubi9/nodejs-22:latest AS web-builder
+[linux/amd64] [1/3] STEP 2/8: WORKDIR /opt/app-root
+--> Using cache 2774272335457dfc7fe26ecb1616297be89224c077f525a1185ff034b69ef4e8
+--> 277427233545
+[linux/amd64] [1/3] STEP 3/8: USER 0
+--> Using cache 31fb34073a536478d9524cd5c4163fc347415f0be57c50cddcb3a4c2b894f49f
+--> 31fb34073a53
+[linux/amd64] [1/3] STEP 4/8: COPY web/package*.json web/
+--> Using cache 736d58ecd121e1c95eab1d19d5dcdc62623fc7f1efd722faedc2ce18828a7625
+--> 736d58ecd121
+[linux/amd64] [1/3] STEP 5/8: COPY Makefile Makefile
+--> Using cache e4a200785f132774f07db5d604e0c26a39addcdd7e4d00d5717d1fa2391875fe
+--> e4a200785f13
+[linux/amd64] [1/3] STEP 6/8: RUN make install-frontend-ci-clean
+--> Using cache 2e45feeb736cacc70c3d3047a62b2ed16bb7c4e200e5e4d4b3caf2e2f25ce727
+--> 2e45feeb736c
+[linux/amd64] [1/3] STEP 7/8: COPY web/ web/
+--> Using cache f9399dbf4fb55fa3ab241bd38f2a8323f59a349948c2f14d712d72af3f3090c4
+--> f9399dbf4fb5
+[linux/amd64] [1/3] STEP 8/8: RUN make build-frontend
+--> Using cache 888b74bbb2eb773328867660f60b22579421407c3dd727739505af64b6b0cf8e
+--> 888b74bbb2eb
+[linux/amd64] [2/3] STEP 1/11: FROM registry.access.redhat.com/ubi9/go-toolset:1.26 AS go-builder
+[linux/amd64] [2/3] STEP 2/11: WORKDIR /opt/app-root
+--> Using cache d2dcbd246aa782fea70e6e29afa969f6a6c532493909b101bfcb6ac50252a220
+--> d2dcbd246aa7
+[linux/amd64] [2/3] STEP 3/11: COPY Makefile Makefile
+--> Using cache f9522f2caa88c856f0a5e846132c57704cb236ff153a0858b0afe1aedb5f2b75
+--> f9522f2caa88
+[linux/amd64] [2/3] STEP 4/11: COPY go.mod go.mod
+--> Using cache 8011882d74345c84b57ac704f4e7308daeee0595a623e1184ca105a9201a119d
+--> 8011882d7434
+[linux/amd64] [2/3] STEP 5/11: COPY go.sum go.sum
+--> Using cache def710c2b44377338bf53d5e4f4953b518befd740840cd3df033d7421349ccef
+--> def710c2b443
+[linux/amd64] [2/3] STEP 6/11: RUN go mod download
+--> Using cache 19a3862f99bdc8618fe0d1892b1e7fe43c98575f96af9876ef7132bfdc16dd37
+--> 19a3862f99bd
+[linux/amd64] [2/3] STEP 7/11: COPY cmd/ cmd/
+--> Using cache 1acadda071363c3141ca0abe95b980a373014ca28cd78d12b6d0332612a5ba18
+--> 1acadda07136
+[linux/amd64] [2/3] STEP 8/11: COPY pkg/ pkg/
+--> Using cache 4a9551f87005c0c3eba536cb8d0a0ccc3c1f581d958fcb16fcf8cad0a21572bc
+--> 4a9551f87005
+[linux/amd64] [2/3] STEP 9/11: ENV GOEXPERIMENT=strictfipsruntime
+--> Using cache 29b06a35397377508923c0b7dd55ca724c0c8a7675b4aff4cb6f2b2cc97ec989
+--> 29b06a353973
+[linux/amd64] [2/3] STEP 10/11: ENV CGO_ENABLED=1
+--> Using cache 457c7c1e71973df8c95782ee8a51a26caab5a096722e27ea59521713c6d5f97a
+--> 457c7c1e7197
+[linux/amd64] [2/3] STEP 11/11: RUN make build-backend BUILD_OPTS="-tags strictfipsruntime"
+go build -tags strictfipsruntime -o plugin-backend -mod=readonly cmd/plugin-backend.go
+--> 9b7e1bf4cff7
+[linux/arm64] [1/3] STEP 1/8: FROM registry.redhat.io/ubi9/nodejs-22:latest AS web-builder
+Trying to pull registry.redhat.io/ubi9/nodejs-22:latest...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:143df91a054c3d67ed690e7f87f430247e12263d24f8d216e794a40abed4caa8
+Copying blob sha256:3fa2c3ec93bd0d2914f8e021fa5b043ace5a704a440ecd2db626edd260f6a3c8
+Copying blob sha256:96c26ef68d364bcbd8f901e4664d7531ebb74699c6d8a69825e5925d8c6696c2
+Copying config sha256:21c0269160eae1f56763a0def0f20ffead061334731e5fd18ceb2c7eca36dca5
+Writing manifest to image destination
+Storing signatures
+[linux/arm64] [1/3] STEP 2/8: WORKDIR /opt/app-root
+--> Using cache e84408aa3a992453df135bb73955af451c593bb581357dcff71b6f679947b6f5
+--> e84408aa3a99
+[linux/arm64] [1/3] STEP 3/8: USER 0
+--> Using cache 8d7919f7dc1d68d26b1cc16411b589d081e67704f1f77096a57c926cd46fc1c9
+--> 8d7919f7dc1d
+[linux/arm64] [1/3] STEP 4/8: COPY web/package*.json web/
+--> Using cache 6215a726c6822335950cac6cd329755ffda0e2ed6d83ec19581b99fecce95505
+--> 6215a726c682
+[linux/arm64] [1/3] STEP 5/8: COPY Makefile Makefile
+--> Using cache bb316f4a4811d40d24f3c024ac87ea8b48283708ca95283cdbb2ef6db403f374
+--> bb316f4a4811
+[linux/arm64] [1/3] STEP 6/8: RUN make install-frontend-ci-clean
+--> Using cache 6fc4ef7ed6325f72bedd7465be34e0912035ec2e55b695f76925396d5024318f
+--> 6fc4ef7ed632
+[linux/arm64] [1/3] STEP 7/8: COPY web/ web/
+--> Using cache df3c340e3cf482be1c9a20619d876fa5a1bf7f964470413d1628b641202687d7
+--> df3c340e3cf4
+[linux/arm64] [1/3] STEP 8/8: RUN make build-frontend
+--> Using cache a6e7f9bd85f79ba397e08dbdfe75707836d373189faa5498f009731edcd61eaf
+--> a6e7f9bd85f7
+[linux/amd64] [3/3] STEP 1/4: FROM registry.access.redhat.com/ubi9/ubi-minimal
+Trying to pull registry.access.redhat.com/ubi9/ubi-minimal:latest...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:2943616793071e9fa96e298a7454ac45b7a498df6ca5c681004955a177cdf999
+Copying config sha256:e3e6fe3b9c265802d2526c15071f59bd20f2d634fc82b7c633387d2cf2ec1056
+Writing manifest to image destination
+Storing signatures
+[linux/amd64] [3/3] STEP 2/4: COPY --from=web-builder /opt/app-root/web/dist /opt/app-root/web/dist
+--> d0a65eb45dc0
+[linux/amd64] [3/3] STEP 3/4: COPY --from=go-builder /opt/app-root/plugin-backend /opt/app-root
+--> 211621e8cda4
+[linux/amd64] [3/3] STEP 4/4: ENTRYPOINT ["/opt/app-root/plugin-backend", "-static-path", "/opt/app-root/web/dist", "-config-path", "/opt/app-root/web/dist"]
+[linux/amd64] [3/3] COMMIT
+--> afe6ee30c899
+[linux/arm64] [2/3] STEP 1/11: FROM registry.access.redhat.com/ubi9/go-toolset:1.26 AS go-builder
+afe6ee30c899cc64063482c19c553145e2ecd72f0356c1d0997cbfab29076d77
+Trying to pull registry.access.redhat.com/ubi9/go-toolset:1.26...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:3b33bd74c459c543768665bc4406a7ec75fd6a2de94164c1ad9968e07c895aaf
+Copying blob sha256:3fa2c3ec93bd0d2914f8e021fa5b043ace5a704a440ecd2db626edd260f6a3c8
+Copying blob sha256:96c26ef68d364bcbd8f901e4664d7531ebb74699c6d8a69825e5925d8c6696c2
+Copying blob sha256:852e434154bbab928ec83bdc7061dee5120584a0c35903abf2b024686bc65eb8
+Copying config sha256:c9e40cb14364af57c6c2c0ca7a8afc8b39349b65e751b3062bf52d82bdc297cb
+Writing manifest to image destination
+Storing signatures
+[linux/arm64] [2/3] STEP 2/11: WORKDIR /opt/app-root
+--> Using cache 275d6c9d2bc632d9387ada96ba9c1b8e0ab01f03805ae80cc557c424bcb6808f
+--> 275d6c9d2bc6
+[linux/arm64] [2/3] STEP 3/11: COPY Makefile Makefile
+--> Using cache 964ea29136ae51c6c9b477285c41750ca05c1250a187ac09d9e3811aafe5f355
+--> 964ea29136ae
+[linux/arm64] [2/3] STEP 4/11: COPY go.mod go.mod
+--> Using cache b1dc3a2f7ac738c3348cb1ec40f102aa28485594a13d9e23c36da4a01d0fd56f
+--> b1dc3a2f7ac7
+[linux/arm64] [2/3] STEP 5/11: COPY go.sum go.sum
+--> Using cache 01669cdced12ab8c7f8d98a5245ac4a1f3da0ebec7ca1fc91168c2b4f10d91dc
+--> 01669cdced12
+[linux/arm64] [2/3] STEP 6/11: RUN go mod download
+--> Using cache f56281085a84ba1b64e443cbf66167754e697eb902bd74dc5831a085fd8436c4
+--> f56281085a84
+[linux/arm64] [2/3] STEP 7/11: COPY cmd/ cmd/
+--> Using cache 7fd71151d7d1ade9dd48a51b010c673e67b51024762f9586ec6361a39248bd56
+--> 7fd71151d7d1
+[linux/arm64] [2/3] STEP 8/11: COPY pkg/ pkg/
+--> Using cache 026f5f25c3263af9d1c232968e145e45838c555700ad97ccfafb262455896009
+--> 026f5f25c326
+[linux/arm64] [2/3] STEP 9/11: ENV GOEXPERIMENT=strictfipsruntime
+--> Using cache e1b4da1f830dbd14d04cf39a9a78f1c359a782c419ba344c7a38632eff705d08
+--> e1b4da1f830d
+[linux/arm64] [2/3] STEP 10/11: ENV CGO_ENABLED=1
+--> Using cache 15b1f1eb8b2c7f3bac34aff1f471ece507d3718a79ca72a311dbd49dc88472aa
+--> 15b1f1eb8b2c
+[linux/arm64] [2/3] STEP 11/11: RUN make build-backend BUILD_OPTS="-tags strictfipsruntime"
+--> Using cache 7a92faddcad5fb85603a04c7066d32b01da428f32d5ad7c3dd2c7eb3d42b0a9b
+--> 7a92faddcad5
+[linux/arm64] [3/3] STEP 1/4: FROM registry.access.redhat.com/ubi9/ubi-minimal
+Trying to pull registry.access.redhat.com/ubi9/ubi-minimal:latest...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:8289a871631249c9c1a3b2366de832716cd43c77864c245a1c1364a2abeb5704
+Copying config sha256:19a5d5dc0e92607939d631511c68a3b399a200a3bfbe6a1dfe726549e1527ae0
+Writing manifest to image destination
+Storing signatures
+[linux/arm64] [3/3] STEP 2/4: COPY --from=web-builder /opt/app-root/web/dist /opt/app-root/web/dist
+--> dd2cd2486cb6
+[linux/arm64] [3/3] STEP 3/4: COPY --from=go-builder /opt/app-root/plugin-backend /opt/app-root
+--> f46f50df0475
+[linux/arm64] [3/3] STEP 4/4: ENTRYPOINT ["/opt/app-root/plugin-backend", "-static-path", "/opt/app-root/web/dist", "-config-path", "/opt/app-root/web/dist"]
+[linux/arm64] [3/3] COMMIT
+--> a7ec71d50302
+a7ec71d5030227444f417f4aa631c060e276fc4c7b906aa38123a9c301ac4ce6
+podman manifest push quay.io/openshift-observability-ui/distributed-tracing-console-plugin:v0.3.3
+Getting image list signatures
+Copying 2 images generated from 2 images in list
+Copying image sha256:21d0f573c02aef1bdfa6f469d645906030644c958221fa27ff5dc75c2d454cf0 (1/2)
+Getting image source signatures
+Copying blob sha256:b35804e2f61879284b3f47e95f719ffc62eba12cecc1a0cd14f2f0c9703bd413
+Copying blob sha256:56550161697f795bc52c827a70fe1e427be4c6bdf4e3c9b2d560f51c2524b6f3
+Copying blob sha256:516754143109ee3b809e39d4a9fb1750b6000b2a0a07787465bc14d7166e8a08
+Copying config sha256:afe6ee30c899cc64063482c19c553145e2ecd72f0356c1d0997cbfab29076d77
+Writing manifest to image destination
+Copying image sha256:5877923908f1c69338394728df5b7eb83344f41b62a14f80da8fcc6e75c93cf2 (2/2)
+Getting image source signatures
+Copying blob sha256:75fa5e3aa32138f5dec49d6cc78432207519744b33a172bae8f81fbc4f5c52ba
+Copying blob sha256:5e0c0516b794028658ae88ffcfcd76efa540e4fbc1cd5844aeafbcb20488674a
+Copying blob sha256:52033107b5c6379fb7a0b1378fe7b9b0fea7ee39d19fdb6fe74492c9c6476c3f
+Copying config sha256:a7ec71d5030227444f417f4aa631c060e276fc4c7b906aa38123a9c301ac4ce6
+Writing manifest to image destination
+Writing manifest list to image destination
+Storing list signatures
+==========================================
+Building logging-view-plugin @ release-coo-1.5-ocp-4.12 with VERSION=v6.0.5 ORG=openshift-observability-ui
+==========================================
+Already on 'release-coo-1.5-ocp-4.12'
+Your branch is up to date with 'origin/release-coo-1.5-ocp-4.12'.
+From https://github.com/openshift/logging-view-plugin
+ * branch            release-coo-1.5-ocp-4.12 -> FETCH_HEAD
+Already up to date.
+--- Attempt 1/3 ---
+podman manifest rm quay.io/openshift-observability-ui/logging-view-plugin:v6.0.5 || true
+Untagged: quay.io/openshift-observability-ui/logging-view-plugin:v6.0.5
+Deleted: e555e145509a875976b03ceb13a54862de1b349378399c027cacf64c263f0a4b
+podman manifest create quay.io/openshift-observability-ui/logging-view-plugin:v6.0.5
+a3feace69a9565e0515774aac34aaa9472c1b43e503a2f64bfb26359b2d081bf
+podman build --platform=linux/arm64,linux/amd64 --manifest quay.io/openshift-observability-ui/logging-view-plugin:v6.0.5 -f Dockerfile
+[linux/amd64] [1/3] STEP 1/9: FROM registry.redhat.io/ubi9/nodejs-22:latest AS web-builder
+Trying to pull registry.redhat.io/ubi9/nodejs-22:latest...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:d74f03e958176d9f637ef3f0c60d433f7a81709a1fe56c62d203eef3a536739e
+Copying blob sha256:56649e4df8eddef4709849b46063574b7ddb22fc98fb75409885c838a4c9d381
+Copying blob sha256:5c9af8529e118dd5a8d55d669c48114bfef7c8f5d743e5e560639dfabca3a5f9
+Copying config sha256:0f7698e0407d0631a81bf20e78ec1d23de169a3b85762c7d4d6c629fe8f1d963
+Writing manifest to image destination
+Storing signatures
+[linux/amd64] [1/3] STEP 2/9: WORKDIR /opt/app-root
+--> Using cache 2774272335457dfc7fe26ecb1616297be89224c077f525a1185ff034b69ef4e8
+--> 277427233545
+[linux/amd64] [1/3] STEP 3/9: USER 0
+--> Using cache 31fb34073a536478d9524cd5c4163fc347415f0be57c50cddcb3a4c2b894f49f
+--> 31fb34073a53
+[linux/amd64] [1/3] STEP 4/9: ENV HUSKY=0
+--> Using cache 6d508f707eadb014889e8defa807348637f7cbaf5a765b5c918aaed4dbfc3b36
+--> 6d508f707ead
+[linux/amd64] [1/3] STEP 5/9: COPY web/package*.json web/
+--> Using cache 29212d5971fa9602903833599c9dcb117d41f0815679285c7359695fbe54a14c
+--> 29212d5971fa
+[linux/amd64] [1/3] STEP 6/9: COPY Makefile Makefile
+--> Using cache e160f1f08b91dadc842aba346e320f0035f0a0784e14cc74c540e95ecd3e3162
+--> e160f1f08b91
+[linux/amd64] [1/3] STEP 7/9: RUN make install-frontend-ci-clean
+--> Using cache bc8bcc51846e12e0b51e9c1c9246244e01d9610ca425103f20c5ffe2a896cf10
+--> bc8bcc51846e
+[linux/amd64] [1/3] STEP 8/9: COPY web/ web/
+--> Using cache 85cca460ae3b17773208cf9d6b101a0e834e94e88cb7fc5d4fb23e095dc00b50
+--> 85cca460ae3b
+[linux/amd64] [1/3] STEP 9/9: RUN make build-frontend
+cd web && npm run build
+
+> logging-view-plugin@6.0.0 build
+> npm run clean && NODE_ENV=production npm run ts-node node_modules/.bin/webpack
+
+
+> logging-view-plugin@6.0.0 clean
+> rm -rf dist
+
+
+> logging-view-plugin@6.0.0 ts-node
+> ts-node -O '{"module":"commonjs"}' node_modules/.bin/webpack
+
+assets by info 2.55 MiB [immutable]
+  assets by chunk 2.22 MiB (id hint: vendors)
+    asset 198-chunk-6b4b6e74f73724458366.min.js 1.45 MiB [emitted] [immutable] [big] (id hint: vendors) 1 related asset
+    asset 924-chunk-b61cc50348712154c403.min.js 621 KiB [emitted] [immutable] [big] (id hint: vendors) 1 related asset
+    asset 31-chunk-fa29db6230d9ee04494a.min.js 169 KiB [emitted] [immutable] (id hint: vendors) 1 related asset
+  + 9 assets
+asset plugin-entry.js 27.7 KiB [emitted] (name: logging-view-plugin) 1 related asset
+asset locales/en/plugin__logging-view-plugin.json 6.83 KiB [emitted] [from: ../locales/en/plugin__logging-view-plugin.json] [copied]
+asset plugin-manifest.json 2.63 KiB [emitted]
+orphan modules 3.29 MiB [orphan] 2525 modules
+runtime modules 17.5 KiB 14 modules
+built modules 2.31 MiB (javascript) 504 bytes (consume-shared) [built]
+  modules by path ../node_modules/ 2.08 MiB 375 modules
+  modules by path ./ 237 KiB 44 modules
+  consume-shared-module modules 504 bytes
+    modules by path *.0 (singleton) 210 bytes 5 modules
+    modules by path consume shared module (default) @patternfly/ 126 bytes
+      consume shared module (default) @patternfly/react-core@=4.239.0 (singleton) 42 bytes [built] [code generated]
+      + 2 modules
+    + 4 modules
+  container entry 42 bytes [built] [code generated]
+
+WARNING in asset size limit: The following asset(s) exceed the recommended size limit (244 KiB).
+This can impact web performance.
+Assets: 
+  198-chunk-6b4b6e74f73724458366.min.js (1.45 MiB)
+  924-chunk-b61cc50348712154c403.min.js (621 KiB)
+
+webpack 5.105.3 compiled with 1 warning in 19426 ms
+--> 0dc542a4f6d4
+[linux/arm64] [1/3] STEP 1/9: FROM registry.redhat.io/ubi9/nodejs-22:latest AS web-builder
+Trying to pull registry.redhat.io/ubi9/nodejs-22:latest...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:143df91a054c3d67ed690e7f87f430247e12263d24f8d216e794a40abed4caa8
+Copying blob sha256:3fa2c3ec93bd0d2914f8e021fa5b043ace5a704a440ecd2db626edd260f6a3c8
+Copying blob sha256:96c26ef68d364bcbd8f901e4664d7531ebb74699c6d8a69825e5925d8c6696c2
+Copying config sha256:21c0269160eae1f56763a0def0f20ffead061334731e5fd18ceb2c7eca36dca5
+Writing manifest to image destination
+Storing signatures
+[linux/arm64] [1/3] STEP 2/9: WORKDIR /opt/app-root
+--> Using cache e84408aa3a992453df135bb73955af451c593bb581357dcff71b6f679947b6f5
+--> e84408aa3a99
+[linux/arm64] [1/3] STEP 3/9: USER 0
+--> Using cache 8d7919f7dc1d68d26b1cc16411b589d081e67704f1f77096a57c926cd46fc1c9
+--> 8d7919f7dc1d
+[linux/arm64] [1/3] STEP 4/9: ENV HUSKY=0
+--> 1a99785e2488
+[linux/arm64] [1/3] STEP 5/9: COPY web/package*.json web/
+--> ee60cf4f45d2
+[linux/arm64] [1/3] STEP 6/9: COPY Makefile Makefile
+--> 886b24b3e539
+[linux/arm64] [1/3] STEP 7/9: RUN make install-frontend-ci-clean
+cd web && npm ci --omit=optional --ignore-scripts
+npm warn deprecated whatwg-encoding@3.1.1: Use @exodus/bytes instead for a more spec-conformant and faster implementation
+npm warn deprecated i18next-parser@9.3.0: Project is deprecated, use i18next-cli instead
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+
+added 1483 packages, and audited 1484 packages in 30s
+
+285 packages are looking for funding
+  run `npm fund` for details
+
+15 vulnerabilities (1 low, 5 moderate, 8 high, 1 critical)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+cd web && npm cache clean --force
+npm warn using --force Recommended protections disabled.
+--> fd51f1d95e53
+[linux/arm64] [1/3] STEP 8/9: COPY web/ web/
+--> 9ca0c0ce394f
+[linux/arm64] [1/3] STEP 9/9: RUN make build-frontend
+cd web && npm run build
+
+> logging-view-plugin@6.0.0 build
+> npm run clean && NODE_ENV=production npm run ts-node node_modules/.bin/webpack
+
+
+> logging-view-plugin@6.0.0 clean
+> rm -rf dist
+
+
+> logging-view-plugin@6.0.0 ts-node
+> ts-node -O '{"module":"commonjs"}' node_modules/.bin/webpack
+
+assets by info 2.55 MiB [immutable]
+  assets by chunk 2.22 MiB (id hint: vendors)
+    asset 198-chunk-6b4b6e74f73724458366.min.js 1.45 MiB [emitted] [immutable] [big] (id hint: vendors) 1 related asset
+    asset 924-chunk-b61cc50348712154c403.min.js 621 KiB [emitted] [immutable] [big] (id hint: vendors) 1 related asset
+    asset 31-chunk-fa29db6230d9ee04494a.min.js 169 KiB [emitted] [immutable] (id hint: vendors) 1 related asset
+  + 9 assets
+asset plugin-entry.js 27.7 KiB [emitted] (name: logging-view-plugin) 1 related asset
+asset locales/en/plugin__logging-view-plugin.json 6.83 KiB [emitted] [from: ../locales/en/plugin__logging-view-plugin.json] [copied]
+asset plugin-manifest.json 2.63 KiB [emitted]
+orphan modules 3.29 MiB [orphan] 2525 modules
+runtime modules 17.5 KiB 14 modules
+built modules 2.31 MiB (javascript) 504 bytes (consume-shared) [built]
+  modules by path ../node_modules/ 2.08 MiB 375 modules
+  modules by path ./ 237 KiB 44 modules
+  consume-shared-module modules 504 bytes
+    modules by path *.0 (singleton) 210 bytes 5 modules
+    modules by path consume shared module (default) @patternfly/ 126 bytes
+      consume shared module (default) @patternfly/react-core@=4.239.0 (singleton) 42 bytes [built] [code generated]
+      + 2 modules
+    + 4 modules
+  container entry 42 bytes [built] [code generated]
+
+WARNING in asset size limit: The following asset(s) exceed the recommended size limit (244 KiB).
+This can impact web performance.
+Assets: 
+  198-chunk-6b4b6e74f73724458366.min.js (1.45 MiB)
+  924-chunk-b61cc50348712154c403.min.js (621 KiB)
+
+webpack 5.105.3 compiled with 1 warning in 10773 ms
+--> 5df5edfe965a
+[linux/amd64] [2/3] STEP 1/12: FROM registry.access.redhat.com/ubi9/go-toolset:1.26 AS go-builder
+Trying to pull registry.access.redhat.com/ubi9/go-toolset:1.26...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:9dd7a54704c5a666e57e3f6efc35e90fc6da8ad2923d77d60d1c573ef3315791
+Copying blob sha256:56649e4df8eddef4709849b46063574b7ddb22fc98fb75409885c838a4c9d381
+Copying blob sha256:5c9af8529e118dd5a8d55d669c48114bfef7c8f5d743e5e560639dfabca3a5f9
+Copying blob sha256:d68194b0e4a172e16c5cbb1bc0479d22da58da64d376a5cdb885730c90f6fc5b
+Copying config sha256:11c3fc29fb378f2b34bbf7921ad5e41b11f9631214b3369f21fc66619a1c7872
+Writing manifest to image destination
+Storing signatures
+[linux/amd64] [2/3] STEP 2/12: WORKDIR /opt/app-root
+--> Using cache d2dcbd246aa782fea70e6e29afa969f6a6c532493909b101bfcb6ac50252a220
+--> d2dcbd246aa7
+[linux/amd64] [2/3] STEP 3/12: COPY Makefile Makefile
+--> 18b678c41b96
+[linux/amd64] [2/3] STEP 4/12: COPY go.mod go.mod
+--> 9518616a1c53
+[linux/amd64] [2/3] STEP 5/12: COPY go.sum go.sum
+--> 0c2f777d0eb3
+[linux/amd64] [2/3] STEP 6/12: RUN make install-backend
+go mod download
+--> 8c77720a31a7
+[linux/amd64] [2/3] STEP 7/12: COPY config/ config/
+--> 52bc3c7f07cc
+[linux/amd64] [2/3] STEP 8/12: COPY cmd/ cmd/
+--> 4082d7d54a53
+[linux/amd64] [2/3] STEP 9/12: COPY pkg/ pkg/
+--> eaff527ac77d
+[linux/amd64] [2/3] STEP 10/12: ENV GOEXPERIMENT=strictfipsruntime
+--> 872e4ee2f069
+[linux/amd64] [2/3] STEP 11/12: ENV CGO_ENABLED=1
+--> 6305ca47f2af
+[linux/amd64] [2/3] STEP 12/12: RUN make build-backend BUILD_OPTS="-tags strictfipsruntime"
+go build -tags strictfipsruntime -mod=readonly -o plugin-backend -mod=readonly cmd/plugin-backend.go
+--> 89fe16901053
+[linux/arm64] [2/3] STEP 1/12: FROM registry.access.redhat.com/ubi9/go-toolset:1.26 AS go-builder
+Trying to pull registry.access.redhat.com/ubi9/go-toolset:1.26...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:3b33bd74c459c543768665bc4406a7ec75fd6a2de94164c1ad9968e07c895aaf
+Copying blob sha256:3fa2c3ec93bd0d2914f8e021fa5b043ace5a704a440ecd2db626edd260f6a3c8
+Copying blob sha256:96c26ef68d364bcbd8f901e4664d7531ebb74699c6d8a69825e5925d8c6696c2
+Copying blob sha256:852e434154bbab928ec83bdc7061dee5120584a0c35903abf2b024686bc65eb8
+Copying config sha256:c9e40cb14364af57c6c2c0ca7a8afc8b39349b65e751b3062bf52d82bdc297cb
+Writing manifest to image destination
+Storing signatures
+[linux/arm64] [2/3] STEP 2/12: WORKDIR /opt/app-root
+--> Using cache 275d6c9d2bc632d9387ada96ba9c1b8e0ab01f03805ae80cc557c424bcb6808f
+--> 275d6c9d2bc6
+[linux/arm64] [2/3] STEP 3/12: COPY Makefile Makefile
+--> 5e5739abe910
+[linux/arm64] [2/3] STEP 4/12: COPY go.mod go.mod
+--> 04adb476810e
+[linux/arm64] [2/3] STEP 5/12: COPY go.sum go.sum
+--> 9b5babfc7382
+[linux/arm64] [2/3] STEP 6/12: RUN make install-backend
+go mod download
+--> dcf00986205b
+[linux/arm64] [2/3] STEP 7/12: COPY config/ config/
+--> a8777e692a30
+[linux/arm64] [2/3] STEP 8/12: COPY cmd/ cmd/
+--> 23aa074e521d
+[linux/arm64] [2/3] STEP 9/12: COPY pkg/ pkg/
+--> 30dee9af3c7f
+[linux/arm64] [2/3] STEP 10/12: ENV GOEXPERIMENT=strictfipsruntime
+--> 534b01ae2615
+[linux/arm64] [2/3] STEP 11/12: ENV CGO_ENABLED=1
+--> 2485d6abe646
+[linux/arm64] [2/3] STEP 12/12: RUN make build-backend BUILD_OPTS="-tags strictfipsruntime"
+go build -tags strictfipsruntime -mod=readonly -o plugin-backend -mod=readonly cmd/plugin-backend.go
+--> d7904cb1ca51
+[linux/amd64] [3/3] STEP 1/5: FROM registry.access.redhat.com/ubi9/ubi-minimal
+Trying to pull registry.access.redhat.com/ubi9/ubi-minimal:latest...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:2943616793071e9fa96e298a7454ac45b7a498df6ca5c681004955a177cdf999
+Copying config sha256:e3e6fe3b9c265802d2526c15071f59bd20f2d634fc82b7c633387d2cf2ec1056
+Writing manifest to image destination
+Storing signatures
+[linux/amd64] [3/3] STEP 2/5: COPY --from=web-builder /opt/app-root/web/dist /opt/app-root/web/dist
+--> b0f834b573ce
+[linux/amd64] [3/3] STEP 3/5: COPY --from=go-builder /opt/app-root/plugin-backend /opt/app-root
+--> 3f8780869512
+[linux/amd64] [3/3] STEP 4/5: COPY --from=go-builder /opt/app-root/config /opt/app-root/config
+--> b1d13e7b2089
+[linux/amd64] [3/3] STEP 5/5: ENTRYPOINT ["/opt/app-root/plugin-backend", "-config-path", "/opt/app-root/config", "-static-path", "/opt/app-root/web/dist"]
+[linux/amd64] [3/3] COMMIT
+--> e015d16cd533
+[linux/arm64] [3/3] STEP 1/5: FROM registry.access.redhat.com/ubi9/ubi-minimal
+e015d16cd5333cfe92c630536d26e2e534b8eeb33252a5ab2afd6132f10a0219
+Trying to pull registry.access.redhat.com/ubi9/ubi-minimal:latest...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:8289a871631249c9c1a3b2366de832716cd43c77864c245a1c1364a2abeb5704
+Copying config sha256:19a5d5dc0e92607939d631511c68a3b399a200a3bfbe6a1dfe726549e1527ae0
+Writing manifest to image destination
+Storing signatures
+[linux/arm64] [3/3] STEP 2/5: COPY --from=web-builder /opt/app-root/web/dist /opt/app-root/web/dist
+--> 294b7846ef47
+[linux/arm64] [3/3] STEP 3/5: COPY --from=go-builder /opt/app-root/plugin-backend /opt/app-root
+--> ebf3e295cad0
+[linux/arm64] [3/3] STEP 4/5: COPY --from=go-builder /opt/app-root/config /opt/app-root/config
+--> 1b2849c94f5f
+[linux/arm64] [3/3] STEP 5/5: ENTRYPOINT ["/opt/app-root/plugin-backend", "-config-path", "/opt/app-root/config", "-static-path", "/opt/app-root/web/dist"]
+[linux/arm64] [3/3] COMMIT
+--> 114c81eecef9
+114c81eecef994771893deedc1dc78c173edf72033c2359242c617ab621dcb12
+podman manifest push quay.io/openshift-observability-ui/logging-view-plugin:v6.0.5
+Getting image list signatures
+Copying 2 images generated from 2 images in list
+Copying image sha256:82ca0fb9282b4c46d22d37c7f55e1de2d86469191f6badac35252266730a19b8 (1/2)
+Getting image source signatures
+Copying blob sha256:ab8589f34b839b18596abf16077f714472b2a1982673fc387bab68799fa7ba6f
+Copying blob sha256:56550161697f795bc52c827a70fe1e427be4c6bdf4e3c9b2d560f51c2524b6f3
+Copying blob sha256:99cb68a7022f769160ace0ce93eab6ec6ed53268792a62d0c189f1f3566a74ce
+Copying blob sha256:d9316fa46ac6e15d8ea072dc3fc79b842212ed2fd3216378bb70c59e60af6e0a
+Copying config sha256:e015d16cd5333cfe92c630536d26e2e534b8eeb33252a5ab2afd6132f10a0219
+Writing manifest to image destination
+Copying image sha256:a22bf3ab6edbcfa5eeb38412b8b103c7884a51733d7a5722cffe493894574896 (2/2)
+Getting image source signatures
+Copying blob sha256:de4027f4a26b7010a6f1edc4d5ff6fc0f02f857c8ba81b3c14bee6d5e0d16ce2
+Copying blob sha256:5e0c0516b794028658ae88ffcfcd76efa540e4fbc1cd5844aeafbcb20488674a
+Copying blob sha256:4c77a9cdbc8dfcf59002dc4806f767998c914339877483541b69136922a6ee0a
+Copying blob sha256:4ebbe54b441149b74cfa939686c828ea4037352ae65fe809d3eee980d2c96fca
+Copying config sha256:114c81eecef994771893deedc1dc78c173edf72033c2359242c617ab621dcb12
+Writing manifest to image destination
+Writing manifest list to image destination
+Storing list signatures
+==========================================
+Building distributed-tracing-plugin @ release-coo-1.5-ocp-4.15 with VERSION=v0.4.3 ORG=openshift-observability-ui
+==========================================
+Switched to a new branch 'release-coo-1.5-ocp-4.15'
+branch 'release-coo-1.5-ocp-4.15' set up to track 'origin/release-coo-1.5-ocp-4.15'.
+From https://github.com/openshift/distributed-tracing-console-plugin
+ * branch            release-coo-1.5-ocp-4.15 -> FETCH_HEAD
+Already up to date.
+--- Attempt 1/3 ---
+podman manifest rm quay.io/openshift-observability-ui/distributed-tracing-console-plugin:v0.4.3 || true
+Untagged: quay.io/openshift-observability-ui/distributed-tracing-console-plugin:v0.4.3
+Deleted: b873de2f7a35ab584f2139fea49b5d39ce42c3ab056764c0e8d944f6c7cd6f00
+podman manifest create quay.io/openshift-observability-ui/distributed-tracing-console-plugin:v0.4.3
+6cd3a4e394520bdd1b71159e637b7cfb709f137da27d088f1b26865b47f16b64
+podman build --platform=linux/arm64,linux/amd64 --manifest quay.io/openshift-observability-ui/distributed-tracing-console-plugin:v0.4.3 -f Dockerfile
+[linux/amd64] [1/3] STEP 1/8: FROM registry.redhat.io/ubi9/nodejs-22:latest AS web-builder
+Trying to pull registry.redhat.io/ubi9/nodejs-22:latest...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:d74f03e958176d9f637ef3f0c60d433f7a81709a1fe56c62d203eef3a536739e
+Copying blob sha256:56649e4df8eddef4709849b46063574b7ddb22fc98fb75409885c838a4c9d381
+Copying blob sha256:5c9af8529e118dd5a8d55d669c48114bfef7c8f5d743e5e560639dfabca3a5f9
+Copying config sha256:0f7698e0407d0631a81bf20e78ec1d23de169a3b85762c7d4d6c629fe8f1d963
+Writing manifest to image destination
+Storing signatures
+[linux/amd64] [1/3] STEP 2/8: WORKDIR /opt/app-root
+--> Using cache 2774272335457dfc7fe26ecb1616297be89224c077f525a1185ff034b69ef4e8
+--> 277427233545
+[linux/amd64] [1/3] STEP 3/8: USER 0
+--> Using cache 31fb34073a536478d9524cd5c4163fc347415f0be57c50cddcb3a4c2b894f49f
+--> 31fb34073a53
+[linux/amd64] [1/3] STEP 4/8: COPY web/package*.json web/
+--> 07f9fff7e575
+[linux/amd64] [1/3] STEP 5/8: COPY Makefile Makefile
+--> d3715d334e8f
+[linux/amd64] [1/3] STEP 6/8: RUN make install-frontend-ci-clean
+cd web && npm ci --ignore-scripts --omit=optional
+npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+npm warn deprecated popper.js@1.16.1: You can find the new Popper v2 at @popperjs/core, this package is dedicated to the legacy v1
+npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+npm warn deprecated eslint@8.57.1: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+npm warn deprecated @humanwhocodes/config-array@0.13.0: Use @eslint/config-array instead
+npm warn deprecated @humanwhocodes/object-schema@2.0.3: Use @eslint/object-schema instead
+npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+
+added 1815 packages, and audited 1816 packages in 59s
+
+312 packages are looking for funding
+  run `npm fund` for details
+
+38 vulnerabilities (2 low, 19 moderate, 16 high, 1 critical)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues possible (including breaking changes), run:
+  npm audit fix --force
+
+Some issues need review, and may require choosing
+a different dependency.
+
+Run `npm audit` for details.
+cd web && npm cache clean --force
+npm warn using --force Recommended protections disabled.
+--> 9db92c73f17b
+[linux/amd64] [1/3] STEP 7/8: COPY web/ web/
+--> f13aa3a07888
+[linux/amd64] [1/3] STEP 8/8: RUN make build-frontend
+cd web && npm run build
+
+> distributed-tracing-console-plugin@0.4.0 build
+> npm run clean && NODE_ENV=production npm run webpack
+
+
+> distributed-tracing-console-plugin@0.4.0 clean
+> rm -rf dist
+
+
+> distributed-tracing-console-plugin@0.4.0 webpack
+> node -r ts-node/register ./node_modules/.bin/webpack
+
+assets by path assets/ 1.27 MiB
+  assets by path assets/*.woff 740 KiB 42 assets
+  assets by path assets/*.woff2 565 KiB
+    asset assets/inter-latin-ext-600-normal..woff2 35.4 KiB [emitted] [from: ../node_modules/@fontsource/inter/files/inter-latin-ext-600-normal.woff2] (auxiliary id hint: vendors)
+    + 41 assets
+assets by path *.js 3.85 MiB
+  assets by chunk 3.4 MiB (id hint: vendors)
+    asset 1907-chunk-0d22a5aa10d0bc99f3d0.min.js 2.6 MiB [emitted] [immutable] [minimized] [big] (id hint: vendors) 1 related asset
+    asset 6127-chunk-e59d7258fd384804d704.min.js 124 KiB [emitted] [immutable] [minimized] (id hint: vendors) 1 related asset
+    asset 5607-chunk-fcc671a213ca68550d43.min.js 121 KiB [emitted] [immutable] [minimized] (id hint: vendors)
+    + 14 assets
+  + 61 assets
+asset locales/en/plugin__distributed-tracing-console-plugin.json 4.29 KiB [emitted] [from: ../locales/en/plugin__distributed-tracing-console-plugin.json] [copied]
+asset plugin-manifest.json 895 bytes [emitted]
+orphan modules 21.9 MiB [orphan] 13315 modules
+runtime modules 35.2 KiB 14 modules
+built modules 10.7 MiB (javascript) 1.27 MiB (asset) 1.6 KiB (consume-shared) 1.39 KiB (share-init) [built]
+  javascript modules 10.7 MiB 745 modules
+  asset modules 1.27 MiB (asset) 3.45 KiB (javascript)
+    modules by path ../node_modules/@fontsource/inter/files/*.woff2 565 KiB (asset) 1.72 KiB (javascript) 42 modules
+    modules by path ../node_modules/@fontsource/inter/files/*.woff 740 KiB (asset) 1.72 KiB (javascript) 42 modules
+  consume-shared-module modules 1.6 KiB
+    modules by path consume shared module (default) @patternfly/ 1.39 KiB 34 modules
+    + 5 modules
+  provide-module modules 1.39 KiB
+    modules by path provide shared module (default) @patternfly/react-core/dist/dynamic/ 924 bytes 22 modules
+    modules by path provide shared module (default) @patternfly/react-icons/dist/dynamic/icons/ 504 bytes 12 modules
+
+WARNING in asset size limit: The following asset(s) exceed the recommended size limit (244 KiB).
+This can impact web performance.
+Assets: 
+  1907-chunk-0d22a5aa10d0bc99f3d0.min.js (2.6 MiB)
+
+webpack 5.105.3 compiled with 1 warning in 110307 ms
+--> c10bd6cf6d34
+[linux/arm64] [1/3] STEP 1/8: FROM registry.redhat.io/ubi9/nodejs-22:latest AS web-builder
+Trying to pull registry.redhat.io/ubi9/nodejs-22:latest...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:143df91a054c3d67ed690e7f87f430247e12263d24f8d216e794a40abed4caa8
+Copying blob sha256:3fa2c3ec93bd0d2914f8e021fa5b043ace5a704a440ecd2db626edd260f6a3c8
+Copying blob sha256:96c26ef68d364bcbd8f901e4664d7531ebb74699c6d8a69825e5925d8c6696c2
+Copying config sha256:21c0269160eae1f56763a0def0f20ffead061334731e5fd18ceb2c7eca36dca5
+Writing manifest to image destination
+Storing signatures
+[linux/arm64] [1/3] STEP 2/8: WORKDIR /opt/app-root
+--> Using cache e84408aa3a992453df135bb73955af451c593bb581357dcff71b6f679947b6f5
+--> e84408aa3a99
+[linux/arm64] [1/3] STEP 3/8: USER 0
+--> Using cache 8d7919f7dc1d68d26b1cc16411b589d081e67704f1f77096a57c926cd46fc1c9
+--> 8d7919f7dc1d
+[linux/arm64] [1/3] STEP 4/8: COPY web/package*.json web/
+--> abff8655b84b
+[linux/arm64] [1/3] STEP 5/8: COPY Makefile Makefile
+--> d9084385835d
+[linux/arm64] [1/3] STEP 6/8: RUN make install-frontend-ci-clean
+cd web && npm ci --ignore-scripts --omit=optional
+npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+npm warn deprecated popper.js@1.16.1: You can find the new Popper v2 at @popperjs/core, this package is dedicated to the legacy v1
+npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+npm warn deprecated eslint@8.57.1: This version is no longer supported. Please see https://eslint.org/version-support for other options.
+npm warn deprecated @humanwhocodes/object-schema@2.0.3: Use @eslint/object-schema instead
+npm warn deprecated @humanwhocodes/config-array@0.13.0: Use @eslint/config-array instead
+npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+
+added 1815 packages, and audited 1816 packages in 44s
+
+312 packages are looking for funding
+  run `npm fund` for details
+
+38 vulnerabilities (2 low, 19 moderate, 16 high, 1 critical)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues possible (including breaking changes), run:
+  npm audit fix --force
+
+Some issues need review, and may require choosing
+a different dependency.
+
+Run `npm audit` for details.
+cd web && npm cache clean --force
+npm warn using --force Recommended protections disabled.
+--> 3474e007c2c1
+[linux/arm64] [1/3] STEP 7/8: COPY web/ web/
+--> 1e57eb3871e0
+[linux/arm64] [1/3] STEP 8/8: RUN make build-frontend
+cd web && npm run build
+
+> distributed-tracing-console-plugin@0.4.0 build
+> npm run clean && NODE_ENV=production npm run webpack
+
+
+> distributed-tracing-console-plugin@0.4.0 clean
+> rm -rf dist
+
+
+> distributed-tracing-console-plugin@0.4.0 webpack
+> node -r ts-node/register ./node_modules/.bin/webpack
+
+assets by path assets/ 1.27 MiB
+  assets by path assets/*.woff 740 KiB 42 assets
+  assets by path assets/*.woff2 565 KiB
+    asset assets/inter-latin-ext-600-normal..woff2 35.4 KiB [emitted] [from: ../node_modules/@fontsource/inter/files/inter-latin-ext-600-normal.woff2] (auxiliary id hint: vendors)
+    + 41 assets
+assets by path *.js 3.85 MiB
+  assets by chunk 3.4 MiB (id hint: vendors)
+    asset 1907-chunk-0d22a5aa10d0bc99f3d0.min.js 2.6 MiB [emitted] [immutable] [minimized] [big] (id hint: vendors) 1 related asset
+    asset 6127-chunk-e59d7258fd384804d704.min.js 124 KiB [emitted] [immutable] [minimized] (id hint: vendors) 1 related asset
+    asset 5607-chunk-fcc671a213ca68550d43.min.js 121 KiB [emitted] [immutable] [minimized] (id hint: vendors)
+    + 14 assets
+  + 61 assets
+asset locales/en/plugin__distributed-tracing-console-plugin.json 4.29 KiB [emitted] [from: ../locales/en/plugin__distributed-tracing-console-plugin.json] [copied]
+asset plugin-manifest.json 895 bytes [emitted]
+orphan modules 21.9 MiB [orphan] 13315 modules
+runtime modules 35.2 KiB 14 modules
+built modules 10.7 MiB (javascript) 1.27 MiB (asset) 1.6 KiB (consume-shared) 1.39 KiB (share-init) [built]
+  javascript modules 10.7 MiB 745 modules
+  asset modules 1.27 MiB (asset) 3.45 KiB (javascript)
+    modules by path ../node_modules/@fontsource/inter/files/*.woff2 565 KiB (asset) 1.72 KiB (javascript) 42 modules
+    modules by path ../node_modules/@fontsource/inter/files/*.woff 740 KiB (asset) 1.72 KiB (javascript) 42 modules
+  consume-shared-module modules 1.6 KiB
+    modules by path consume shared module (default) @patternfly/ 1.39 KiB 34 modules
+    + 5 modules
+  provide-module modules 1.39 KiB
+    modules by path provide shared module (default) @patternfly/react-core/dist/dynamic/ 924 bytes 22 modules
+    modules by path provide shared module (default) @patternfly/react-icons/dist/dynamic/icons/ 504 bytes 12 modules
+
+WARNING in asset size limit: The following asset(s) exceed the recommended size limit (244 KiB).
+This can impact web performance.
+Assets: 
+  1907-chunk-0d22a5aa10d0bc99f3d0.min.js (2.6 MiB)
+
+webpack 5.105.3 compiled with 1 warning in 76033 ms
+--> d472632cdd0b
+[linux/amd64] [2/3] STEP 1/11: FROM registry.access.redhat.com/ubi9/go-toolset:1.26 AS go-builder
+Trying to pull registry.access.redhat.com/ubi9/go-toolset:1.26...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:9dd7a54704c5a666e57e3f6efc35e90fc6da8ad2923d77d60d1c573ef3315791
+Copying blob sha256:56649e4df8eddef4709849b46063574b7ddb22fc98fb75409885c838a4c9d381
+Copying blob sha256:5c9af8529e118dd5a8d55d669c48114bfef7c8f5d743e5e560639dfabca3a5f9
+Copying blob sha256:d68194b0e4a172e16c5cbb1bc0479d22da58da64d376a5cdb885730c90f6fc5b
+Copying config sha256:11c3fc29fb378f2b34bbf7921ad5e41b11f9631214b3369f21fc66619a1c7872
+Writing manifest to image destination
+Storing signatures
+[linux/amd64] [2/3] STEP 2/11: WORKDIR /opt/app-root
+--> Using cache d2dcbd246aa782fea70e6e29afa969f6a6c532493909b101bfcb6ac50252a220
+--> d2dcbd246aa7
+[linux/amd64] [2/3] STEP 3/11: COPY Makefile Makefile
+--> Using cache f9522f2caa88c856f0a5e846132c57704cb236ff153a0858b0afe1aedb5f2b75
+--> f9522f2caa88
+[linux/amd64] [2/3] STEP 4/11: COPY go.mod go.mod
+--> 99ff39c7e274
+[linux/amd64] [2/3] STEP 5/11: COPY go.sum go.sum
+--> bf6590001406
+[linux/amd64] [2/3] STEP 6/11: RUN go mod download
+--> e2d82c0d448a
+[linux/amd64] [2/3] STEP 7/11: COPY cmd/ cmd/
+--> 0d515ebf56fe
+[linux/amd64] [2/3] STEP 8/11: COPY pkg/ pkg/
+--> 525b15665eab
+[linux/amd64] [2/3] STEP 9/11: ENV GOEXPERIMENT=strictfipsruntime
+--> 40d803749771
+[linux/amd64] [2/3] STEP 10/11: ENV CGO_ENABLED=1
+--> 6349f447f35f
+[linux/amd64] [2/3] STEP 11/11: RUN make build-backend BUILD_OPTS="-tags strictfipsruntime"
+go build -tags strictfipsruntime -o plugin-backend -mod=readonly cmd/plugin-backend.go
+--> 33b1f09724cd
+[linux/arm64] [2/3] STEP 1/11: FROM registry.access.redhat.com/ubi9/go-toolset:1.26 AS go-builder
+Trying to pull registry.access.redhat.com/ubi9/go-toolset:1.26...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:3b33bd74c459c543768665bc4406a7ec75fd6a2de94164c1ad9968e07c895aaf
+Copying blob sha256:3fa2c3ec93bd0d2914f8e021fa5b043ace5a704a440ecd2db626edd260f6a3c8
+Copying blob sha256:96c26ef68d364bcbd8f901e4664d7531ebb74699c6d8a69825e5925d8c6696c2
+Copying blob sha256:852e434154bbab928ec83bdc7061dee5120584a0c35903abf2b024686bc65eb8
+Copying config sha256:c9e40cb14364af57c6c2c0ca7a8afc8b39349b65e751b3062bf52d82bdc297cb
+Writing manifest to image destination
+Storing signatures
+[linux/arm64] [2/3] STEP 2/11: WORKDIR /opt/app-root
+--> Using cache 275d6c9d2bc632d9387ada96ba9c1b8e0ab01f03805ae80cc557c424bcb6808f
+--> 275d6c9d2bc6
+[linux/arm64] [2/3] STEP 3/11: COPY Makefile Makefile
+--> Using cache 964ea29136ae51c6c9b477285c41750ca05c1250a187ac09d9e3811aafe5f355
+--> 964ea29136ae
+[linux/arm64] [2/3] STEP 4/11: COPY go.mod go.mod
+--> 691ee666dabe
+[linux/arm64] [2/3] STEP 5/11: COPY go.sum go.sum
+--> ecb96ebd844e
+[linux/arm64] [2/3] STEP 6/11: RUN go mod download
+--> 3577e343a6ef
+[linux/arm64] [2/3] STEP 7/11: COPY cmd/ cmd/
+--> cf7bb949ede0
+[linux/arm64] [2/3] STEP 8/11: COPY pkg/ pkg/
+--> 9da3bd190d64
+[linux/arm64] [2/3] STEP 9/11: ENV GOEXPERIMENT=strictfipsruntime
+--> d7a380cd6647
+[linux/arm64] [2/3] STEP 10/11: ENV CGO_ENABLED=1
+--> dd47026d9dfd
+[linux/arm64] [2/3] STEP 11/11: RUN make build-backend BUILD_OPTS="-tags strictfipsruntime"
+go build -tags strictfipsruntime -o plugin-backend -mod=readonly cmd/plugin-backend.go
+[linux/amd64] [3/3] STEP 1/4: FROM registry.access.redhat.com/ubi9/ubi-minimal
+Trying to pull registry.access.redhat.com/ubi9/ubi-minimal:latest...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:2943616793071e9fa96e298a7454ac45b7a498df6ca5c681004955a177cdf999
+Copying config sha256:e3e6fe3b9c265802d2526c15071f59bd20f2d634fc82b7c633387d2cf2ec1056
+Writing manifest to image destination
+Storing signatures
+[linux/amd64] [3/3] STEP 2/4: COPY --from=web-builder /opt/app-root/web/dist /opt/app-root/web/dist
+--> 6d8e044211d5
+[linux/amd64] [3/3] STEP 3/4: COPY --from=go-builder /opt/app-root/plugin-backend /opt/app-root
+--> ff246bbfa2f2
+[linux/amd64] [3/3] STEP 4/4: ENTRYPOINT ["/opt/app-root/plugin-backend", "-static-path", "/opt/app-root/web/dist", "-config-path", "/opt/app-root/web/dist"]
+[linux/amd64] [3/3] COMMIT
+--> 789ec5da2a4c
+789ec5da2a4c15469d7c9c41c3826c32990d818045f374c007db2037eed1a672
+Error: [linux/arm64]: committing container for step {Env:[container=oci STI_SCRIPTS_URL=image:///usr/libexec/s2i STI_SCRIPTS_PATH=/usr/libexec/s2i APP_ROOT=/opt/app-root HOME=/opt/app-root/src PATH=/opt/app-root/src/bin:/opt/app-root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin PLATFORM=el9 NODEJS_VER=22 NAME=golang GO_MAJOR_VERSION=1 GO_MINOR_VERSION=26 GO_PATCH_VERSION=7 CONTAINER_NAME=rhel9/go-toolset VERSION=1.26.7 SUMMARY=Platform for building and running Go Applications DESCRIPTION=Go Toolset available as a container is a base platform for building and running various Go applications and frameworks. Go is an easy to learn, powerful, statically typed language in the C/C++ tradition with garbage collection, concurrent programming support, and memory safety features. GOEXPERIMENT=strictfipsruntime CGO_ENABLED=1] Command:run Args:[make build-backend BUILD_OPTS="-tags strictfipsruntime"] Flags:[] Attrs:map[] Message:RUN make build-backend BUILD_OPTS="-tags strictfipsruntime" Heredocs:[] Original:RUN make build-backend BUILD_OPTS="-tags strictfipsruntime"}: copying layers and metadata for container "073fba0c5169aee0403ca2bd0d3bb814124b0c5ab6be63164de7486cb4fdeeb7": writing blob: storing blob to file "/var/tmp/container_images_storage949341357/1": write /var/tmp/container_images_storage949341357/1: no space left on device
+
+make: *** [podman-cross-build] Error 125
+WARNING: Attempt 1 failed for distributed-tracing-plugin @ release-coo-1.5-ocp-4.15 (exit code 2)
+--- Attempt 2/3 ---
+podman manifest rm quay.io/openshift-observability-ui/distributed-tracing-console-plugin:v0.4.3 || true
+Untagged: quay.io/openshift-observability-ui/distributed-tracing-console-plugin:v0.4.3
+Deleted: 6cd3a4e394520bdd1b71159e637b7cfb709f137da27d088f1b26865b47f16b64
+podman manifest create quay.io/openshift-observability-ui/distributed-tracing-console-plugin:v0.4.3
+e88ea0dc575cbed7939cafe4dc1072f3c06cf12a8728a20b2b03766d4a424ee8
+podman build --platform=linux/arm64,linux/amd64 --manifest quay.io/openshift-observability-ui/distributed-tracing-console-plugin:v0.4.3 -f Dockerfile
+[linux/arm64] [1/3] STEP 1/8: FROM registry.redhat.io/ubi9/nodejs-22:latest AS web-builder
+[linux/arm64] [1/3] STEP 2/8: WORKDIR /opt/app-root
+--> Using cache e84408aa3a992453df135bb73955af451c593bb581357dcff71b6f679947b6f5
+--> e84408aa3a99
+[linux/arm64] [1/3] STEP 3/8: USER 0
+--> Using cache 8d7919f7dc1d68d26b1cc16411b589d081e67704f1f77096a57c926cd46fc1c9
+--> 8d7919f7dc1d
+[linux/arm64] [1/3] STEP 4/8: COPY web/package*.json web/
+--> Using cache abff8655b84b9cc0fac953cacbabd3c45305dcbffa70b18d3d6bc7f3a1b17ae5
+--> abff8655b84b
+[linux/arm64] [1/3] STEP 5/8: COPY Makefile Makefile
+--> Using cache d9084385835d0bf468abe7fdbeddbad9a2cfc2d83d3809c05977d60b27702bec
+--> d9084385835d
+[linux/arm64] [1/3] STEP 6/8: RUN make install-frontend-ci-clean
+--> Using cache 3474e007c2c1694246fad4ee5af81b1083d9553c0f5cd842d6b7ebba46cf6a52
+--> 3474e007c2c1
+[linux/arm64] [1/3] STEP 7/8: COPY web/ web/
+--> Using cache 1e57eb3871e0e7edd8f0933789a2c88c80d3c361064270823a5300e24e433bbe
+--> 1e57eb3871e0
+[linux/arm64] [1/3] STEP 8/8: RUN make build-frontend
+--> Using cache d472632cdd0b6662b4493c9ce01bc761e81f0472d28786f4bb35425ac0c51bfe
+--> d472632cdd0b
+[linux/arm64] [2/3] STEP 1/11: FROM registry.access.redhat.com/ubi9/go-toolset:1.26 AS go-builder
+[linux/arm64] [2/3] STEP 2/11: WORKDIR /opt/app-root
+--> Using cache 275d6c9d2bc632d9387ada96ba9c1b8e0ab01f03805ae80cc557c424bcb6808f
+--> 275d6c9d2bc6
+[linux/arm64] [2/3] STEP 3/11: COPY Makefile Makefile
+--> Using cache 964ea29136ae51c6c9b477285c41750ca05c1250a187ac09d9e3811aafe5f355
+--> 964ea29136ae
+[linux/arm64] [2/3] STEP 4/11: COPY go.mod go.mod
+--> Using cache 691ee666dabef15c1b2ae3e7c941b6c531cee062ff892ab3d233ee1d6c9fc467
+--> 691ee666dabe
+[linux/arm64] [2/3] STEP 5/11: COPY go.sum go.sum
+--> Using cache ecb96ebd844e9acd9a6385e2600bf726485762c4aaa6055cbc77128271b0131b
+--> ecb96ebd844e
+[linux/arm64] [2/3] STEP 6/11: RUN go mod download
+--> Using cache 3577e343a6ef0e06cdec315ca446d00cc9973b1d1af267d041dce5d40048d2f8
+--> 3577e343a6ef
+[linux/arm64] [2/3] STEP 7/11: COPY cmd/ cmd/
+--> Using cache cf7bb949ede08a78c8415c322f3abe891736e7ba91bb0a12260022982695bbb7
+--> cf7bb949ede0
+[linux/arm64] [2/3] STEP 8/11: COPY pkg/ pkg/
+--> Using cache 9da3bd190d6426b3d3cda3291a7355152b5429ebab1da4072bb3967406e2ad40
+--> 9da3bd190d64
+[linux/arm64] [2/3] STEP 9/11: ENV GOEXPERIMENT=strictfipsruntime
+--> Using cache d7a380cd66478e2f8baeb0312d58edb6edb1b8eae51cfa0e83edd843eed5a7d4
+--> d7a380cd6647
+[linux/arm64] [2/3] STEP 10/11: ENV CGO_ENABLED=1
+--> Using cache dd47026d9dfd226ada7a45bc503721c71bc1bad484a1c01e0571a2eeab5b4713
+--> dd47026d9dfd
+[linux/arm64] [2/3] STEP 11/11: RUN make build-backend BUILD_OPTS="-tags strictfipsruntime"
+go build -tags strictfipsruntime -o plugin-backend -mod=readonly cmd/plugin-backend.go
+--> f11300863613
+[linux/amd64] [1/3] STEP 1/8: FROM registry.redhat.io/ubi9/nodejs-22:latest AS web-builder
+Trying to pull registry.redhat.io/ubi9/nodejs-22:latest...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:d74f03e958176d9f637ef3f0c60d433f7a81709a1fe56c62d203eef3a536739e
+Copying blob sha256:56649e4df8eddef4709849b46063574b7ddb22fc98fb75409885c838a4c9d381
+Copying blob sha256:5c9af8529e118dd5a8d55d669c48114bfef7c8f5d743e5e560639dfabca3a5f9
+Copying config sha256:0f7698e0407d0631a81bf20e78ec1d23de169a3b85762c7d4d6c629fe8f1d963
+Writing manifest to image destination
+Storing signatures
+[linux/amd64] [1/3] STEP 2/8: WORKDIR /opt/app-root
+--> Using cache 2774272335457dfc7fe26ecb1616297be89224c077f525a1185ff034b69ef4e8
+--> 277427233545
+[linux/amd64] [1/3] STEP 3/8: USER 0
+--> Using cache 31fb34073a536478d9524cd5c4163fc347415f0be57c50cddcb3a4c2b894f49f
+--> 31fb34073a53
+[linux/amd64] [1/3] STEP 4/8: COPY web/package*.json web/
+--> Using cache 07f9fff7e575d5210e48bb1f92d8d029ae326bf14e80d9daea618eee320e9cae
+--> 07f9fff7e575
+[linux/amd64] [1/3] STEP 5/8: COPY Makefile Makefile
+--> Using cache d3715d334e8ff2a3d6bd5a3ba13be4fe815aa1f8d4bc87806c9e2d2bc1b88117
+--> d3715d334e8f
+[linux/amd64] [1/3] STEP 6/8: RUN make install-frontend-ci-clean
+--> Using cache 9db92c73f17bf5b0a771485ec9600a2bfbc5141fc0cb2eb57c6a1e5b0382b92f
+--> 9db92c73f17b
+[linux/amd64] [1/3] STEP 7/8: COPY web/ web/
+--> Using cache f13aa3a0788807b518546ddf4d165da98ad7451b63badb27cd8089373f22c88b
+--> f13aa3a07888
+[linux/amd64] [1/3] STEP 8/8: RUN make build-frontend
+--> Using cache c10bd6cf6d34abb5e8d3a4b232bb15ab232032ff9c311183604b7dec826ef4ec
+--> c10bd6cf6d34
+[linux/arm64] [3/3] STEP 1/4: FROM registry.access.redhat.com/ubi9/ubi-minimal
+Trying to pull registry.access.redhat.com/ubi9/ubi-minimal:latest...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:8289a871631249c9c1a3b2366de832716cd43c77864c245a1c1364a2abeb5704
+Copying config sha256:19a5d5dc0e92607939d631511c68a3b399a200a3bfbe6a1dfe726549e1527ae0
+Writing manifest to image destination
+Storing signatures
+[linux/arm64] [3/3] STEP 2/4: COPY --from=web-builder /opt/app-root/web/dist /opt/app-root/web/dist
+--> 028332c4864c
+[linux/arm64] [3/3] STEP 3/4: COPY --from=go-builder /opt/app-root/plugin-backend /opt/app-root
+--> e6e5a781c3f4
+[linux/arm64] [3/3] STEP 4/4: ENTRYPOINT ["/opt/app-root/plugin-backend", "-static-path", "/opt/app-root/web/dist", "-config-path", "/opt/app-root/web/dist"]
+[linux/arm64] [3/3] COMMIT
+--> 1abca327b18d
+[linux/amd64] [2/3] STEP 1/11: FROM registry.access.redhat.com/ubi9/go-toolset:1.26 AS go-builder
+1abca327b18dd8f871c160e9207e0df712f75ac3f46d6e562235710b379d42d2
+Trying to pull registry.access.redhat.com/ubi9/go-toolset:1.26...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:9dd7a54704c5a666e57e3f6efc35e90fc6da8ad2923d77d60d1c573ef3315791
+Copying blob sha256:56649e4df8eddef4709849b46063574b7ddb22fc98fb75409885c838a4c9d381
+Copying blob sha256:5c9af8529e118dd5a8d55d669c48114bfef7c8f5d743e5e560639dfabca3a5f9
+Copying blob sha256:d68194b0e4a172e16c5cbb1bc0479d22da58da64d376a5cdb885730c90f6fc5b
+Copying config sha256:11c3fc29fb378f2b34bbf7921ad5e41b11f9631214b3369f21fc66619a1c7872
+Writing manifest to image destination
+Storing signatures
+[linux/amd64] [2/3] STEP 2/11: WORKDIR /opt/app-root
+--> Using cache d2dcbd246aa782fea70e6e29afa969f6a6c532493909b101bfcb6ac50252a220
+--> d2dcbd246aa7
+[linux/amd64] [2/3] STEP 3/11: COPY Makefile Makefile
+--> Using cache f9522f2caa88c856f0a5e846132c57704cb236ff153a0858b0afe1aedb5f2b75
+--> f9522f2caa88
+[linux/amd64] [2/3] STEP 4/11: COPY go.mod go.mod
+--> Using cache 99ff39c7e274d549462562e517a2b485c2f96f5971304e1e3b702149ae5f361c
+--> 99ff39c7e274
+[linux/amd64] [2/3] STEP 5/11: COPY go.sum go.sum
+--> Using cache bf65900014069aca131a2676ee4324fa62f1d3841121c196c56111ce05606fc8
+--> bf6590001406
+[linux/amd64] [2/3] STEP 6/11: RUN go mod download
+--> Using cache e2d82c0d448a78af44d70ac700633091727f6b2007e2963fa04ae0db11ff102a
+--> e2d82c0d448a
+[linux/amd64] [2/3] STEP 7/11: COPY cmd/ cmd/
+--> Using cache 0d515ebf56fe74525aa2729065f25fff88ff7102f08ee94e7d2b062ada7f32e8
+--> 0d515ebf56fe
+[linux/amd64] [2/3] STEP 8/11: COPY pkg/ pkg/
+--> Using cache 525b15665eabed0da4185695a5e3045d736ed9e21a2d5fbf4b28b03b5f4d5b05
+--> 525b15665eab
+[linux/amd64] [2/3] STEP 9/11: ENV GOEXPERIMENT=strictfipsruntime
+--> Using cache 40d803749771afa085ea6a319608d4ce03e5556d8a9fc41fa27b250150720520
+--> 40d803749771
+[linux/amd64] [2/3] STEP 10/11: ENV CGO_ENABLED=1
+--> Using cache 6349f447f35f1550262697fd9e30605742ce643e36442170fbd7ad0cc40b44cd
+--> 6349f447f35f
+[linux/amd64] [2/3] STEP 11/11: RUN make build-backend BUILD_OPTS="-tags strictfipsruntime"
+--> Using cache 33b1f09724cd61c0f590580569f56745512f0bc1f67538ebcc75751daf9b297f
+--> 33b1f09724cd
+[linux/amd64] [3/3] STEP 1/4: FROM registry.access.redhat.com/ubi9/ubi-minimal
+Trying to pull registry.access.redhat.com/ubi9/ubi-minimal:latest...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:2943616793071e9fa96e298a7454ac45b7a498df6ca5c681004955a177cdf999
+Copying config sha256:e3e6fe3b9c265802d2526c15071f59bd20f2d634fc82b7c633387d2cf2ec1056
+Writing manifest to image destination
+Storing signatures
+[linux/amd64] [3/3] STEP 2/4: COPY --from=web-builder /opt/app-root/web/dist /opt/app-root/web/dist
+--> Using cache 6d8e044211d568195073411dd4e048d1800d6bc4710c1f05d5c299936ab5a8b6
+--> 6d8e044211d5
+[linux/amd64] [3/3] STEP 3/4: COPY --from=go-builder /opt/app-root/plugin-backend /opt/app-root
+--> Using cache ff246bbfa2f2d23bc4f04f59b8257b0128da62696a018a1762da772e5fc37641
+--> ff246bbfa2f2
+[linux/amd64] [3/3] STEP 4/4: ENTRYPOINT ["/opt/app-root/plugin-backend", "-static-path", "/opt/app-root/web/dist", "-config-path", "/opt/app-root/web/dist"]
+--> Using cache 789ec5da2a4c15469d7c9c41c3826c32990d818045f374c007db2037eed1a672
+--> 789ec5da2a4c
+789ec5da2a4c15469d7c9c41c3826c32990d818045f374c007db2037eed1a672
+podman manifest push quay.io/openshift-observability-ui/distributed-tracing-console-plugin:v0.4.3
+Getting image list signatures
+Copying 2 images generated from 2 images in list
+Copying image sha256:253393607bf1779e30b722495821d1a83409dbee0aa6421f45c73ab380dc9c32 (1/2)
+Getting image source signatures
+Copying blob sha256:f89230fd1f261783537aa40b93d906d6e3aa5f9f5abdfba62f4d2a93063b5281
+Copying blob sha256:5e0c0516b794028658ae88ffcfcd76efa540e4fbc1cd5844aeafbcb20488674a
+Copying blob sha256:77ad5e103bd6943416414e23b816ecd642bda67adfcaa03a5cccc6bbbc30fd38
+Copying config sha256:1abca327b18dd8f871c160e9207e0df712f75ac3f46d6e562235710b379d42d2
+Writing manifest to image destination
+Copying image sha256:d66d4ab206af5348136854faeaa46632c229bb78eb9e4c1d334bcab1c77e5b88 (2/2)
+Getting image source signatures
+Copying blob sha256:84bbfadf0f49dbf86bc0d5c2ea272208e1d177c9aeac6dde44c9ba2d19c15c53
+Copying blob sha256:56550161697f795bc52c827a70fe1e427be4c6bdf4e3c9b2d560f51c2524b6f3
+Copying blob sha256:54e952cfe3d8cb23cb2096b69df4e54e92ec0156b4735fbcb4ec78df84c9b83f
+Copying config sha256:789ec5da2a4c15469d7c9c41c3826c32990d818045f374c007db2037eed1a672
+Writing manifest to image destination
+Writing manifest list to image destination
+Storing list signatures
+==========================================
+Building logging-view-plugin @ release-coo-1.5-ocp-4.15 with VERSION=v6.1.6 ORG=openshift-observability-ui
+==========================================
+Switched to a new branch 'release-coo-1.5-ocp-4.15'
+branch 'release-coo-1.5-ocp-4.15' set up to track 'origin/release-coo-1.5-ocp-4.15'.
+From https://github.com/openshift/logging-view-plugin
+ * branch            release-coo-1.5-ocp-4.15 -> FETCH_HEAD
+Already up to date.
+--- Attempt 1/3 ---
+podman manifest rm quay.io/openshift-observability-ui/logging-view-plugin:v6.1.6 || true
+Untagged: quay.io/openshift-observability-ui/logging-view-plugin:v6.1.6
+Deleted: a91a481a62270f2a3b7f0f60153e06a80d1226f467e6a1a3b1e9ba9eef074ee4
+podman manifest create quay.io/openshift-observability-ui/logging-view-plugin:v6.1.6
+22beb4518e858524ae8deb1b73cc9fa44bc1c9668c69484a2d388d06d3fabf2d
+podman build --platform=linux/arm64,linux/amd64 --manifest quay.io/openshift-observability-ui/logging-view-plugin:v6.1.6 -f Dockerfile
+[linux/arm64] [1/3] STEP 1/9: FROM registry.redhat.io/ubi9/nodejs-22:latest AS web-builder
+Trying to pull registry.redhat.io/ubi9/nodejs-22:latest...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:143df91a054c3d67ed690e7f87f430247e12263d24f8d216e794a40abed4caa8
+Copying blob sha256:96c26ef68d364bcbd8f901e4664d7531ebb74699c6d8a69825e5925d8c6696c2
+Copying blob sha256:3fa2c3ec93bd0d2914f8e021fa5b043ace5a704a440ecd2db626edd260f6a3c8
+Copying config sha256:21c0269160eae1f56763a0def0f20ffead061334731e5fd18ceb2c7eca36dca5
+Writing manifest to image destination
+Storing signatures
+[linux/arm64] [1/3] STEP 2/9: WORKDIR /opt/app-root
+--> Using cache e84408aa3a992453df135bb73955af451c593bb581357dcff71b6f679947b6f5
+--> e84408aa3a99
+[linux/arm64] [1/3] STEP 3/9: USER 0
+--> Using cache 8d7919f7dc1d68d26b1cc16411b589d081e67704f1f77096a57c926cd46fc1c9
+--> 8d7919f7dc1d
+[linux/arm64] [1/3] STEP 4/9: ENV HUSKY=0
+--> Using cache 1a99785e2488fbeb9de392ba0c809f0a33ce667cea76b4b66c7248ad7605674c
+--> 1a99785e2488
+[linux/arm64] [1/3] STEP 5/9: COPY web/package*.json web/
+--> ad11c34bf313
+[linux/arm64] [1/3] STEP 6/9: COPY Makefile Makefile
+--> 2315c7268e5f
+[linux/arm64] [1/3] STEP 7/9: RUN make install-frontend-ci-clean
+make: Warning: File 'Makefile' has modification time 245 s in the future
+cd web && npm ci --omit=optional --ignore-scripts
+npm warn deprecated popper.js@1.16.1: You can find the new Popper v2 at @popperjs/core, this package is dedicated to the legacy v1
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+
+added 1531 packages, and audited 1532 packages in 33s
+
+273 packages are looking for funding
+  run `npm fund` for details
+
+22 vulnerabilities (1 low, 11 moderate, 9 high, 1 critical)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+cd web && npm cache clean --force
+npm warn using --force Recommended protections disabled.
+make: warning:  Clock skew detected.  Your build may be incomplete.
+--> 63ea6f0dac55
+[linux/arm64] [1/3] STEP 8/9: COPY web/ web/
+--> 3a983cd452f0
+[linux/arm64] [1/3] STEP 9/9: RUN make build-frontend
+make: Warning: File 'Makefile' has modification time 184 s in the future
+cd web && npm run build
+
+> logging-view-plugin@6.1.0 build
+> npm run clean && NODE_ENV=production npm run ts-node node_modules/.bin/webpack
+
+
+> logging-view-plugin@6.1.0 clean
+> rm -rf dist
+
+
+> logging-view-plugin@6.1.0 ts-node
+> ts-node -O '{"module":"commonjs"}' node_modules/.bin/webpack
+
+assets by path *.js 4.84 MiB
+  assets by chunk 2.69 MiB (id hint: vendors)
+    assets by status 1.83 MiB [big]
+      asset 9012-chunk-c30d86991a43474bcd20.min.js 1.12 MiB [emitted] [immutable] [big] (id hint: vendors) 1 related asset
+      asset 573-chunk-6751882185f4ace03f14.min.js 462 KiB [emitted] [immutable] [big] (id hint: vendors) 1 related asset
+      asset 9123-chunk-7c59f766bf5aed38d7e4.min.js 266 KiB [emitted] [immutable] [big] (id hint: vendors) 1 related asset
+    + 9 assets
+  + 81 assets
+asset locales/en/plugin__logging-view-plugin.json 10.4 KiB [emitted] [from: ../locales/en/plugin__logging-view-plugin.json] [copied]
+asset plugin-manifest.json 1.92 KiB [emitted]
+orphan modules 2.72 MiB [orphan] 1566 modules
+runtime modules 37.2 KiB 14 modules
+built modules 2.96 MiB (javascript) 1.72 KiB (consume-shared) 1.56 KiB (share-init) [built]
+  modules by path ../node_modules/ 2.66 MiB 431 modules
+  modules by path ./ 308 KiB 48 modules
+  consume-shared-module modules 1.72 KiB
+    modules by path consume shared module (default) @patternfly/react-core/dist/dynamic/ 1.23 KiB 30 modules
+    modules by path consume shared module (default) @patternfly/react-icons/dist/dynamic/icons/ 294 bytes 7 modules
+    + 5 modules
+  provide-module modules 1.56 KiB
+    modules by path provide shared module (default) @patternfly/react-core/dist/dynamic/ 1.23 KiB 30 modules
+    modules by path provide shared module (default) @patternfly/react-icons/dist/dynamic/icons/ 294 bytes 7 modules
+    provide shared module (default) @patternfly/react-table/dist/dynamic/components/...(truncated) 42 bytes [built] [code generated]
+  container entry 42 bytes [built] [code generated]
+
+WARNING in asset size limit: The following asset(s) exceed the recommended size limit (244 KiB).
+This can impact web performance.
+Assets: 
+  9123-chunk-7c59f766bf5aed38d7e4.min.js (266 KiB)
+  9012-chunk-c30d86991a43474bcd20.min.js (1.12 MiB)
+  573-chunk-6751882185f4ace03f14.min.js (462 KiB)
+
+webpack 5.105.3 compiled with 1 warning in 285989 ms
+make: warning:  Clock skew detected.  Your build may be incomplete.
+--> 9dffc2b7271e
+[linux/arm64] [2/3] STEP 1/12: FROM registry.access.redhat.com/ubi9/go-toolset:1.26 AS go-builder
+Trying to pull registry.access.redhat.com/ubi9/go-toolset:1.26...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:3fa2c3ec93bd0d2914f8e021fa5b043ace5a704a440ecd2db626edd260f6a3c8
+Copying blob sha256:3b33bd74c459c543768665bc4406a7ec75fd6a2de94164c1ad9968e07c895aaf
+Copying blob sha256:96c26ef68d364bcbd8f901e4664d7531ebb74699c6d8a69825e5925d8c6696c2
+Copying blob sha256:852e434154bbab928ec83bdc7061dee5120584a0c35903abf2b024686bc65eb8
+Copying config sha256:c9e40cb14364af57c6c2c0ca7a8afc8b39349b65e751b3062bf52d82bdc297cb
+Writing manifest to image destination
+Storing signatures
+[linux/arm64] [2/3] STEP 2/12: WORKDIR /opt/app-root
+--> Using cache 275d6c9d2bc632d9387ada96ba9c1b8e0ab01f03805ae80cc557c424bcb6808f
+--> 275d6c9d2bc6
+[linux/arm64] [2/3] STEP 3/12: COPY Makefile Makefile
+--> 2414bd2cd4af
+[linux/arm64] [2/3] STEP 4/12: COPY go.mod go.mod
+--> 5830f7fc8cd6
+[linux/arm64] [2/3] STEP 5/12: COPY go.sum go.sum
+--> 86d207365838
+[linux/arm64] [2/3] STEP 6/12: RUN make install-backend
+go mod download
+--> a65490ea0e52
+[linux/arm64] [2/3] STEP 7/12: COPY config/ config/
+--> fda5b14106eb
+[linux/arm64] [2/3] STEP 8/12: COPY cmd/ cmd/
+--> 2dd6de971c25
+[linux/arm64] [2/3] STEP 9/12: COPY pkg/ pkg/
+--> cb553a5aec16
+[linux/arm64] [2/3] STEP 10/12: ENV GOEXPERIMENT=strictfipsruntime
+--> 727666be862f
+[linux/arm64] [2/3] STEP 11/12: ENV CGO_ENABLED=1
+--> f0d3fd22778c
+[linux/arm64] [2/3] STEP 12/12: RUN make build-backend BUILD_OPTS="-tags strictfipsruntime"
+go build -tags strictfipsruntime -mod=readonly -o plugin-backend cmd/plugin-backend.go
+[linux/amd64] [1/3] STEP 1/9: FROM registry.redhat.io/ubi9/nodejs-22:latest AS web-builder
+Trying to pull registry.redhat.io/ubi9/nodejs-22:latest...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:d74f03e958176d9f637ef3f0c60d433f7a81709a1fe56c62d203eef3a536739e
+Copying blob sha256:56649e4df8eddef4709849b46063574b7ddb22fc98fb75409885c838a4c9d381
+Copying blob sha256:5c9af8529e118dd5a8d55d669c48114bfef7c8f5d743e5e560639dfabca3a5f9
+Copying config sha256:0f7698e0407d0631a81bf20e78ec1d23de169a3b85762c7d4d6c629fe8f1d963
+Writing manifest to image destination
+Storing signatures
+[linux/amd64] [1/3] STEP 2/9: WORKDIR /opt/app-root
+--> Using cache 2774272335457dfc7fe26ecb1616297be89224c077f525a1185ff034b69ef4e8
+--> 277427233545
+[linux/amd64] [1/3] STEP 3/9: USER 0
+--> Using cache 31fb34073a536478d9524cd5c4163fc347415f0be57c50cddcb3a4c2b894f49f
+--> 31fb34073a53
+[linux/amd64] [1/3] STEP 4/9: ENV HUSKY=0
+--> Using cache 6d508f707eadb014889e8defa807348637f7cbaf5a765b5c918aaed4dbfc3b36
+--> 6d508f707ead
+[linux/amd64] [1/3] STEP 5/9: COPY web/package*.json web/
+--> 58511703fa42
+[linux/amd64] [1/3] STEP 6/9: COPY Makefile Makefile
+--> abedb4009729
+[linux/amd64] [1/3] STEP 7/9: RUN make install-frontend-ci-clean
+cd web && npm ci --omit=optional --ignore-scripts
+npm warn deprecated popper.js@1.16.1: You can find the new Popper v2 at @popperjs/core, this package is dedicated to the legacy v1
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+
+added 1531 packages, and audited 1532 packages in 43s
+
+273 packages are looking for funding
+  run `npm fund` for details
+
+22 vulnerabilities (1 low, 11 moderate, 9 high, 1 critical)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+cd web && npm cache clean --force
+npm warn using --force Recommended protections disabled.
+--> f647ba0d3e4b
+[linux/amd64] [1/3] STEP 8/9: COPY web/ web/
+--> 69fca331fb24
+[linux/amd64] [1/3] STEP 9/9: RUN make build-frontend
+cd web && npm run build
+
+> logging-view-plugin@6.1.0 build
+> npm run clean && NODE_ENV=production npm run ts-node node_modules/.bin/webpack
+
+
+> logging-view-plugin@6.1.0 clean
+> rm -rf dist
+
+
+> logging-view-plugin@6.1.0 ts-node
+> ts-node -O '{"module":"commonjs"}' node_modules/.bin/webpack
+
+assets by path *.js 4.84 MiB
+  assets by chunk 2.69 MiB (id hint: vendors)
+    assets by status 1.83 MiB [big]
+      asset 9012-chunk-c30d86991a43474bcd20.min.js 1.12 MiB [emitted] [immutable] [big] (id hint: vendors) 1 related asset
+      asset 573-chunk-6751882185f4ace03f14.min.js 462 KiB [emitted] [immutable] [big] (id hint: vendors) 1 related asset
+      asset 9123-chunk-7c59f766bf5aed38d7e4.min.js 266 KiB [emitted] [immutable] [big] (id hint: vendors) 1 related asset
+    + 9 assets
+  + 81 assets
+asset locales/en/plugin__logging-view-plugin.json 10.4 KiB [emitted] [from: ../locales/en/plugin__logging-view-plugin.json] [copied]
+asset plugin-manifest.json 1.92 KiB [emitted]
+orphan modules 2.72 MiB [orphan] 1566 modules
+runtime modules 37.2 KiB 14 modules
+built modules 2.96 MiB (javascript) 1.72 KiB (consume-shared) 1.56 KiB (share-init) [built]
+  modules by path ../node_modules/ 2.66 MiB 431 modules
+  modules by path ./ 308 KiB 48 modules
+  consume-shared-module modules 1.72 KiB
+    modules by path consume shared module (default) @patternfly/react-core/dist/dynamic/ 1.23 KiB 30 modules
+    modules by path consume shared module (default) @patternfly/react-icons/dist/dynamic/icons/ 294 bytes 7 modules
+    + 5 modules
+  provide-module modules 1.56 KiB
+    modules by path provide shared module (default) @patternfly/react-core/dist/dynamic/ 1.23 KiB 30 modules
+    modules by path provide shared module (default) @patternfly/react-icons/dist/dynamic/icons/ 294 bytes 7 modules
+    provide shared module (default) @patternfly/react-table/dist/dynamic/components/...(truncated) 42 bytes [built] [code generated]
+  container entry 42 bytes [built] [code generated]
+
+WARNING in asset size limit: The following asset(s) exceed the recommended size limit (244 KiB).
+This can impact web performance.
+Assets: 
+  9123-chunk-7c59f766bf5aed38d7e4.min.js (266 KiB)
+  9012-chunk-c30d86991a43474bcd20.min.js (1.12 MiB)
+  573-chunk-6751882185f4ace03f14.min.js (462 KiB)
+
+webpack 5.105.3 compiled with 1 warning in 53819 ms
+--> b72ea41c13df
+[linux/amd64] [2/3] STEP 1/12: FROM registry.access.redhat.com/ubi9/go-toolset:1.26 AS go-builder
+Trying to pull registry.access.redhat.com/ubi9/go-toolset:1.26...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:56649e4df8eddef4709849b46063574b7ddb22fc98fb75409885c838a4c9d381
+Copying blob sha256:9dd7a54704c5a666e57e3f6efc35e90fc6da8ad2923d77d60d1c573ef3315791
+Copying blob sha256:5c9af8529e118dd5a8d55d669c48114bfef7c8f5d743e5e560639dfabca3a5f9
+Copying blob sha256:d68194b0e4a172e16c5cbb1bc0479d22da58da64d376a5cdb885730c90f6fc5b
+Copying config sha256:11c3fc29fb378f2b34bbf7921ad5e41b11f9631214b3369f21fc66619a1c7872
+Writing manifest to image destination
+Storing signatures
+[linux/amd64] [2/3] STEP 2/12: WORKDIR /opt/app-root
+--> Using cache d2dcbd246aa782fea70e6e29afa969f6a6c532493909b101bfcb6ac50252a220
+--> d2dcbd246aa7
+[linux/amd64] [2/3] STEP 3/12: COPY Makefile Makefile
+--> b6d22805d3ec
+[linux/amd64] [2/3] STEP 4/12: COPY go.mod go.mod
+--> 01ad2b475363
+[linux/amd64] [2/3] STEP 5/12: COPY go.sum go.sum
+--> 40154b5f463a
+[linux/amd64] [2/3] STEP 6/12: RUN make install-backend
+go mod download
+--> cf126b43c46c
+[linux/amd64] [2/3] STEP 7/12: COPY config/ config/
+--> 4cd00cf6b295
+[linux/amd64] [2/3] STEP 8/12: COPY cmd/ cmd/
+--> 8b79028de8b4
+[linux/amd64] [2/3] STEP 9/12: COPY pkg/ pkg/
+--> 89b183a975d6
+[linux/amd64] [2/3] STEP 10/12: ENV GOEXPERIMENT=strictfipsruntime
+--> facdfb2f9f54
+[linux/amd64] [2/3] STEP 11/12: ENV CGO_ENABLED=1
+--> 25df03bdf57e
+[linux/amd64] [2/3] STEP 12/12: RUN make build-backend BUILD_OPTS="-tags strictfipsruntime"
+go build -tags strictfipsruntime -mod=readonly -o plugin-backend cmd/plugin-backend.go
+# k8s.io/client-go/kubernetes/typed/rbac/v1alpha1
+compile: writing output: write $WORK/b559/_pkg_.a: no space left on device
+k8s.io/client-go/applyconfigurations/resource/v1alpha3: mkdir /tmp/go-build545746618/b564/: no space left on device
+k8s.io/client-go/applyconfigurations/scheduling/v1: mkdir /tmp/go-build545746618/b566/: no space left on device
+k8s.io/client-go/applyconfigurations/scheduling/v1alpha1: mkdir /tmp/go-build545746618/b568/: no space left on device
+k8s.io/client-go/applyconfigurations/scheduling/v1beta1: mkdir /tmp/go-build545746618/b570/: no space left on device
+k8s.io/client-go/applyconfigurations/storage/v1: mkdir /tmp/go-build545746618/b572/: no space left on device
+# k8s.io/client-go/applyconfigurations/rbac/v1beta1
+compile: writing output: write $WORK/b562/_pkg_.a: no space left on device
+k8s.io/client-go/applyconfigurations/storage/v1alpha1: mkdir /tmp/go-build545746618/b574/: no space left on device
+k8s.io/client-go/applyconfigurations/storagemigration/v1alpha1: mkdir /tmp/go-build545746618/b578/: no space left on device
+k8s.io/client-go/applyconfigurations/storage/v1beta1: mkdir /tmp/go-build545746618/b576/: no space left on device
+k8s.io/apimachinery/pkg/util/cache: mkdir /tmp/go-build545746618/b580/: no space left on device
+k8s.io/client-go/tools/cache/synctrack: mkdir /tmp/go-build545746618/b583/: no space left on device
+text/tabwriter: mkdir /tmp/go-build545746618/b582/: no space left on device
+k8s.io/client-go/tools/pager: mkdir /tmp/go-build545746618/b584/: no space left on device
+k8s.io/utils/buffer: mkdir /tmp/go-build545746618/b585/: no space left on device
+k8s.io/utils/pointer: mkdir /tmp/go-build545746618/b586/: no space left on device
+k8s.io/apimachinery/pkg/util/mergepatch: mkdir /tmp/go-build545746618/b592/: no space left on device
+k8s.io/utils/trace: mkdir /tmp/go-build545746618/b587/: no space left on device
+k8s.io/apimachinery/third_party/forked/golang/json: mkdir /tmp/go-build545746618/b593/: no space left on device
+k8s.io/client-go/tools/internal/events: mkdir /tmp/go-build545746618/b594/: no space left on device
+k8s.io/client-go/tools/record/util: mkdir /tmp/go-build545746618/b597/: no space left on device
+github.com/golang/groupcache/lru: mkdir /tmp/go-build545746618/b596/: no space left on device
+encoding/csv: mkdir /tmp/go-build545746618/b601/: no space left on device
+text/template/parse: mkdir /tmp/go-build545746618/b603/: no space left on device
+make: *** [Makefile:45: build-backend] Error 1
+Error: 2 errors occurred:
+	* [linux/arm64]: committing container for step {Env:[container=oci STI_SCRIPTS_URL=image:///usr/libexec/s2i STI_SCRIPTS_PATH=/usr/libexec/s2i APP_ROOT=/opt/app-root HOME=/opt/app-root/src PATH=/opt/app-root/src/bin:/opt/app-root/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin PLATFORM=el9 NODEJS_VER=22 NAME=golang GO_MAJOR_VERSION=1 GO_MINOR_VERSION=26 GO_PATCH_VERSION=7 CONTAINER_NAME=rhel9/go-toolset VERSION=1.26.7 SUMMARY=Platform for building and running Go Applications DESCRIPTION=Go Toolset available as a container is a base platform for building and running various Go applications and frameworks. Go is an easy to learn, powerful, statically typed language in the C/C++ tradition with garbage collection, concurrent programming support, and memory safety features. GOEXPERIMENT=strictfipsruntime CGO_ENABLED=1] Command:run Args:[make build-backend BUILD_OPTS="-tags strictfipsruntime"] Flags:[] Attrs:map[] Message:RUN make build-backend BUILD_OPTS="-tags strictfipsruntime" Heredocs:[] Original:RUN make build-backend BUILD_OPTS="-tags strictfipsruntime"}: copying layers and metadata for container "39d89debdfea5aaa0ec3e2fed7645f50379c604d0b230a64452f4509ef8cab43": writing blob: adding layer with blob "sha256:53c8f8a90d932bb76c16e6f96c362d7236861c808b38964bcbe38bbad902a60b"/""/"sha256:53c8f8a90d932bb76c16e6f96c362d7236861c808b38964bcbe38bbad902a60b": unpacking failed (error: exit status 1; output: write /opt/app-root/src/.cache/go-build/5e/5e4da8e3c6e82411488dd0efa99461b15b287debbb17253e807b9080c77d4e58-d: no space left on device)
+	* [linux/amd64]: building at STEP "RUN make build-backend BUILD_OPTS="-tags strictfipsruntime"": while running runtime: exit status 2
+
+
+
+make: *** [podman-cross-build] Error 2
+WARNING: Attempt 1 failed for logging-view-plugin @ release-coo-1.5-ocp-4.15 (exit code 2)
+--- Attempt 2/3 ---
+podman manifest rm quay.io/openshift-observability-ui/logging-view-plugin:v6.1.6 || true
+Untagged: quay.io/openshift-observability-ui/logging-view-plugin:v6.1.6
+Deleted: 22beb4518e858524ae8deb1b73cc9fa44bc1c9668c69484a2d388d06d3fabf2d
+podman manifest create quay.io/openshift-observability-ui/logging-view-plugin:v6.1.6
+4660cdf443299286607b3ec0bd31936368b27a2b102aeefb0d0f92f9068e158f
+podman build --platform=linux/arm64,linux/amd64 --manifest quay.io/openshift-observability-ui/logging-view-plugin:v6.1.6 -f Dockerfile
+[linux/arm64] [1/3] STEP 1/9: FROM registry.redhat.io/ubi9/nodejs-22:latest AS web-builder
+Trying to pull registry.redhat.io/ubi9/nodejs-22:latest...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:143df91a054c3d67ed690e7f87f430247e12263d24f8d216e794a40abed4caa8
+Copying blob sha256:3fa2c3ec93bd0d2914f8e021fa5b043ace5a704a440ecd2db626edd260f6a3c8
+Copying blob sha256:96c26ef68d364bcbd8f901e4664d7531ebb74699c6d8a69825e5925d8c6696c2
+Copying config sha256:21c0269160eae1f56763a0def0f20ffead061334731e5fd18ceb2c7eca36dca5
+Writing manifest to image destination
+Storing signatures
+[linux/arm64] [1/3] STEP 2/9: WORKDIR /opt/app-root
+--> Using cache e84408aa3a992453df135bb73955af451c593bb581357dcff71b6f679947b6f5
+--> e84408aa3a99
+[linux/arm64] [1/3] STEP 3/9: USER 0
+--> Using cache 8d7919f7dc1d68d26b1cc16411b589d081e67704f1f77096a57c926cd46fc1c9
+--> 8d7919f7dc1d
+[linux/arm64] [1/3] STEP 4/9: ENV HUSKY=0
+--> Using cache 1a99785e2488fbeb9de392ba0c809f0a33ce667cea76b4b66c7248ad7605674c
+--> 1a99785e2488
+[linux/arm64] [1/3] STEP 5/9: COPY web/package*.json web/
+--> Using cache ad11c34bf313712fe31826dd88adf2798fddb38b0e793f5eb3a5e45b2817e571
+--> ad11c34bf313
+[linux/arm64] [1/3] STEP 6/9: COPY Makefile Makefile
+--> Using cache 2315c7268e5fae7f0f78864ed9986954f6cb8a8d36cb3221b118ae413433591e
+--> 2315c7268e5f
+[linux/arm64] [1/3] STEP 7/9: RUN make install-frontend-ci-clean
+--> Using cache 63ea6f0dac555ef684b91bd45aad992336c8d310b74daf0a1a0d7ba0221b96a5
+--> 63ea6f0dac55
+[linux/arm64] [1/3] STEP 8/9: COPY web/ web/
+--> Using cache 3a983cd452f036eb18fe69ff3116b09cc3b758f5e6fe4c539895c1fe63a3b746
+--> 3a983cd452f0
+[linux/arm64] [1/3] STEP 9/9: RUN make build-frontend
+--> Using cache 9dffc2b7271e533bafd3148a0b775589e29870ab4873559089dbaf7eecf77000
+--> 9dffc2b7271e
+[linux/amd64] [1/3] STEP 1/9: FROM registry.redhat.io/ubi9/nodejs-22:latest AS web-builder
+Trying to pull registry.redhat.io/ubi9/nodejs-22:latest...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:d74f03e958176d9f637ef3f0c60d433f7a81709a1fe56c62d203eef3a536739e
+Copying blob sha256:56649e4df8eddef4709849b46063574b7ddb22fc98fb75409885c838a4c9d381
+Copying blob sha256:5c9af8529e118dd5a8d55d669c48114bfef7c8f5d743e5e560639dfabca3a5f9
+Copying config sha256:0f7698e0407d0631a81bf20e78ec1d23de169a3b85762c7d4d6c629fe8f1d963
+Writing manifest to image destination
+Storing signatures
+[linux/amd64] [1/3] STEP 2/9: WORKDIR /opt/app-root
+--> Using cache 2774272335457dfc7fe26ecb1616297be89224c077f525a1185ff034b69ef4e8
+--> 277427233545
+[linux/amd64] [1/3] STEP 3/9: USER 0
+--> Using cache 31fb34073a536478d9524cd5c4163fc347415f0be57c50cddcb3a4c2b894f49f
+--> 31fb34073a53
+[linux/amd64] [1/3] STEP 4/9: ENV HUSKY=0
+--> Using cache 6d508f707eadb014889e8defa807348637f7cbaf5a765b5c918aaed4dbfc3b36
+--> 6d508f707ead
+[linux/amd64] [1/3] STEP 5/9: COPY web/package*.json web/
+--> Using cache 58511703fa42c8839e47649982dfe03e01f69d690d9d8bc1a26284bb80ef8463
+--> 58511703fa42
+[linux/amd64] [1/3] STEP 6/9: COPY Makefile Makefile
+--> Using cache abedb40097297fa5a0a250972742fdd79ecb03182350434850b8ae88c2895619
+--> abedb4009729
+[linux/amd64] [1/3] STEP 7/9: RUN make install-frontend-ci-clean
+--> Using cache f647ba0d3e4bd664eb4be385996c3717aeb4b5c64cad097aea9200dc203c7508
+--> f647ba0d3e4b
+[linux/amd64] [1/3] STEP 8/9: COPY web/ web/
+--> Using cache 69fca331fb24b5fa326a306e9dfa467b3289ecac3b36b0e7d90500462387fb3e
+--> 69fca331fb24
+[linux/amd64] [1/3] STEP 9/9: RUN make build-frontend
+--> Using cache b72ea41c13df8aadddf4d41d0d581807f5c2a42e02cd7e678754228ec9c7dfa7
+--> b72ea41c13df
+[linux/arm64] [2/3] STEP 1/12: FROM registry.access.redhat.com/ubi9/go-toolset:1.26 AS go-builder
+Trying to pull registry.access.redhat.com/ubi9/go-toolset:1.26...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:3b33bd74c459c543768665bc4406a7ec75fd6a2de94164c1ad9968e07c895aaf
+Copying blob sha256:96c26ef68d364bcbd8f901e4664d7531ebb74699c6d8a69825e5925d8c6696c2
+Copying blob sha256:852e434154bbab928ec83bdc7061dee5120584a0c35903abf2b024686bc65eb8
+Copying blob sha256:3fa2c3ec93bd0d2914f8e021fa5b043ace5a704a440ecd2db626edd260f6a3c8
+Copying config sha256:c9e40cb14364af57c6c2c0ca7a8afc8b39349b65e751b3062bf52d82bdc297cb
+Writing manifest to image destination
+Storing signatures
+[linux/arm64] [2/3] STEP 2/12: WORKDIR /opt/app-root
+--> Using cache 275d6c9d2bc632d9387ada96ba9c1b8e0ab01f03805ae80cc557c424bcb6808f
+--> 275d6c9d2bc6
+[linux/arm64] [2/3] STEP 3/12: COPY Makefile Makefile
+--> Using cache 2414bd2cd4af704a98de76c80b8b666a446bd9486d55f032987151def1a7343b
+--> 2414bd2cd4af
+[linux/arm64] [2/3] STEP 4/12: COPY go.mod go.mod
+--> Using cache 5830f7fc8cd67e3c6452e29084c750900f1e15363b1b1de9ee191bb40aa38a35
+--> 5830f7fc8cd6
+[linux/arm64] [2/3] STEP 5/12: COPY go.sum go.sum
+--> Using cache 86d207365838612c5dded540486664a5a6078cfac5ed29c2f299c2db24f47fea
+--> 86d207365838
+[linux/arm64] [2/3] STEP 6/12: RUN make install-backend
+--> Using cache a65490ea0e528eba069de7ad286237c2a6a9591efb8c6a7f6a14ba02dd32a165
+--> a65490ea0e52
+[linux/arm64] [2/3] STEP 7/12: COPY config/ config/
+--> Using cache fda5b14106ebd6aa9131f11c1bac17e0e0ffa6a96f0165ba258d090b5c26e7ef
+--> fda5b14106eb
+[linux/arm64] [2/3] STEP 8/12: COPY cmd/ cmd/
+--> Using cache 2dd6de971c25b12ba2b67995aab25ded741b49c092d0758485012c125e7cdfbb
+--> 2dd6de971c25
+[linux/arm64] [2/3] STEP 9/12: COPY pkg/ pkg/
+--> Using cache cb553a5aec16624fb542e469342f3bc34b851800d17bce48a447ee2aecc83532
+--> cb553a5aec16
+[linux/arm64] [2/3] STEP 10/12: ENV GOEXPERIMENT=strictfipsruntime
+--> Using cache 727666be862f3997890a03f288cc3ae1182674550f91fb8a88c72a67e99fc755
+--> 727666be862f
+[linux/arm64] [2/3] STEP 11/12: ENV CGO_ENABLED=1
+--> Using cache f0d3fd22778c15c057a588fcfdc33f5ca53b8b37b6d25ac239d10d4e877c9dee
+--> f0d3fd22778c
+[linux/arm64] [2/3] STEP 12/12: RUN make build-backend BUILD_OPTS="-tags strictfipsruntime"
+go build -tags strictfipsruntime -mod=readonly -o plugin-backend cmd/plugin-backend.go
+[linux/amd64] [2/3] STEP 1/12: FROM registry.access.redhat.com/ubi9/go-toolset:1.26 AS go-builder
+Trying to pull registry.access.redhat.com/ubi9/go-toolset:1.26...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:9dd7a54704c5a666e57e3f6efc35e90fc6da8ad2923d77d60d1c573ef3315791
+Copying blob sha256:56649e4df8eddef4709849b46063574b7ddb22fc98fb75409885c838a4c9d381
+Copying blob sha256:5c9af8529e118dd5a8d55d669c48114bfef7c8f5d743e5e560639dfabca3a5f9
+Copying blob sha256:d68194b0e4a172e16c5cbb1bc0479d22da58da64d376a5cdb885730c90f6fc5b
+Copying config sha256:11c3fc29fb378f2b34bbf7921ad5e41b11f9631214b3369f21fc66619a1c7872
+Writing manifest to image destination
+Storing signatures
+[linux/amd64] [2/3] STEP 2/12: WORKDIR /opt/app-root
+--> Using cache d2dcbd246aa782fea70e6e29afa969f6a6c532493909b101bfcb6ac50252a220
+--> d2dcbd246aa7
+[linux/amd64] [2/3] STEP 3/12: COPY Makefile Makefile
+--> Using cache b6d22805d3ecbf197a53aa4756ad46779defee11e9c27c711a2a96570032f30e
+--> b6d22805d3ec
+[linux/amd64] [2/3] STEP 4/12: COPY go.mod go.mod
+--> Using cache 01ad2b47536325b39877e18541f34f8e0736960ab0f4eb1350d388a478a09be5
+--> 01ad2b475363
+[linux/amd64] [2/3] STEP 5/12: COPY go.sum go.sum
+--> Using cache 40154b5f463a9e4a68f9b83aed7586bb1d2a0e053d705a32a21a11665974966b
+--> 40154b5f463a
+[linux/amd64] [2/3] STEP 6/12: RUN make install-backend
+--> Using cache cf126b43c46c9fe3d9071ea36ae01ec7f74c04b2449d26fa0220e82391177bd5
+--> cf126b43c46c
+[linux/amd64] [2/3] STEP 7/12: COPY config/ config/
+--> Using cache 4cd00cf6b295d391c7be70bbc200256f49352fbbfcdc1ccb0081d651a15d9ff5
+--> 4cd00cf6b295
+[linux/amd64] [2/3] STEP 8/12: COPY cmd/ cmd/
+--> Using cache 8b79028de8b41be14f06c99b20fefcc63c2375961e18b6247dd9399fc81ac67e
+--> 8b79028de8b4
+[linux/amd64] [2/3] STEP 9/12: COPY pkg/ pkg/
+--> Using cache 89b183a975d6d6a8dd1c0f7ddc017375bce3414a57476cbbf60f4bd733984a71
+--> 89b183a975d6
+[linux/amd64] [2/3] STEP 10/12: ENV GOEXPERIMENT=strictfipsruntime
+--> Using cache facdfb2f9f5400cc74d15cd50f5081bdef4f5eb07d8d1feb718aee195fa6f467
+--> facdfb2f9f54
+[linux/amd64] [2/3] STEP 11/12: ENV CGO_ENABLED=1
+--> Using cache 25df03bdf57e8f006be86f9e668129a212fea9b7e1ed456ff5ff8948d0a267b6
+--> 25df03bdf57e
+[linux/amd64] [2/3] STEP 12/12: RUN make build-backend BUILD_OPTS="-tags strictfipsruntime"
+go build -tags strictfipsruntime -mod=readonly -o plugin-backend cmd/plugin-backend.go
+make: *** [podman-cross-build] Interrupt: 2

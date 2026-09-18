@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: test-runbook-invalid-text
+  namespace: openshift-monitoring
+spec:
+  groups:
+  - name: test-runbook-sanitization
+    interval: 30s
+    rules:
+    - alert: TestAlertInvalidText
+      expr: vector(1)
+      for: 0m
+      labels:
+        severity: warning
+        test: runbook-sanitization
+        runbook_url: "not a valid URL at all"
+      annotations:
+        runbook_url: "not a valid URL at all"
+        summary: "Test alert with invalid text"
+        description: "This tests that non-URL strings are handled gracefully. Test text: not a valid URL at all"

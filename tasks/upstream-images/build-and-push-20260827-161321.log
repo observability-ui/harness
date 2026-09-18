@@ -1,0 +1,394 @@
+Logging to /Users/emurasak/workspace/harness-official/tasks/upstream-images/build-and-push-20260827-161321.log
+Fetching all branches for each repo...
+  Fetching distributed-tracing-plugin...
+  Fetching logging-view-plugin...
+  Fetching monitoring-plugin...
+  Fetching troubleshooting-panel-plugin...
+Fetch complete.
+==========================================
+SKIPPING distributed-tracing-plugin @ release-coo-ocp-4.12 with VERSION=v0.3.3 (already built successfully)
+==========================================
+==========================================
+Building logging-view-plugin @ release-coo-ocp-4.12 with VERSION=v6.0.5 ORG=openshift-observability-ui
+==========================================
+Already on 'release-coo-ocp-4.12'
+Your branch is up to date with 'origin/release-coo-ocp-4.12'.
+From https://github.com/openshift/logging-view-plugin
+ * branch            release-coo-ocp-4.12 -> FETCH_HEAD
+Already up to date.
+--- Attempt 1/3 ---
+podman manifest rm quay.io/openshift-observability-ui/logging-view-plugin:v6.0.5 || true
+Untagged: quay.io/openshift-observability-ui/logging-view-plugin:v6.0.5
+Deleted: e1edc6adfccc4dd9e8e2b76fc2a693d9cf72e020993211ef803116facd8360a9
+podman manifest create quay.io/openshift-observability-ui/logging-view-plugin:v6.0.5
+946c3e5b5937f16bfc5aeb90fcad4a59370cf843cee9663df2f55c1e38cb7562
+podman build --platform=linux/arm64,linux/amd64 --manifest quay.io/openshift-observability-ui/logging-view-plugin:v6.0.5 -f Dockerfile
+[linux/amd64] [1/3] STEP 1/9: FROM registry.redhat.io/ubi9/nodejs-22:latest AS web-builder
+[linux/amd64] [1/3] STEP 2/9: WORKDIR /opt/app-root
+--> Using cache 3beb105c4f4e871a3ee136993700f455e39e62c4de491339222bad87e02defdb
+--> 3beb105c4f4e
+[linux/amd64] [1/3] STEP 3/9: USER 0
+--> Using cache 2ac9e28b79d82d1f9246662a14c1a742d008f0107c6cef3a82f266d01ff4b2b0
+--> 2ac9e28b79d8
+[linux/amd64] [1/3] STEP 4/9: ENV HUSKY=0
+--> Using cache af7e0eaa421cafdbf0365059b13cef9f286e316fac39163b4a4c063dc5814327
+--> af7e0eaa421c
+[linux/amd64] [1/3] STEP 5/9: COPY web/package*.json web/
+--> 2954bdc3dcad
+[linux/amd64] [1/3] STEP 6/9: COPY Makefile Makefile
+--> 9fe72a94a97f
+[linux/amd64] [1/3] STEP 7/9: RUN make install-frontend-ci-clean
+cd web && npm ci --omit=optional --ignore-scripts
+npm warn deprecated whatwg-encoding@3.1.1: Use @exodus/bytes instead for a more spec-conformant and faster implementation
+npm warn deprecated i18next-parser@9.3.0: Project is deprecated, use i18next-cli instead
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+
+added 1483 packages, and audited 1484 packages in 40s
+
+285 packages are looking for funding
+  run `npm fund` for details
+
+15 vulnerabilities (1 low, 5 moderate, 8 high, 1 critical)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+cd web && npm cache clean --force
+npm warn using --force Recommended protections disabled.
+--> 623dfbb60e35
+[linux/amd64] [1/3] STEP 8/9: COPY web/ web/
+--> a8393418dce6
+[linux/amd64] [1/3] STEP 9/9: RUN make build-frontend
+cd web && npm run build
+
+> logging-view-plugin@6.0.0 build
+> npm run clean && NODE_ENV=production npm run ts-node node_modules/.bin/webpack
+
+
+> logging-view-plugin@6.0.0 clean
+> rm -rf dist
+
+
+> logging-view-plugin@6.0.0 ts-node
+> ts-node -O '{"module":"commonjs"}' node_modules/.bin/webpack
+
+assets by info 2.55 MiB [immutable]
+  assets by chunk 2.22 MiB (id hint: vendors)
+    asset 198-chunk-6b4b6e74f73724458366.min.js 1.45 MiB [emitted] [immutable] [big] (id hint: vendors) 1 related asset
+    asset 924-chunk-b61cc50348712154c403.min.js 621 KiB [emitted] [immutable] [big] (id hint: vendors) 1 related asset
+    asset 31-chunk-fa29db6230d9ee04494a.min.js 169 KiB [emitted] [immutable] (id hint: vendors) 1 related asset
+  + 9 assets
+asset plugin-entry.js 27.7 KiB [emitted] (name: logging-view-plugin) 1 related asset
+asset locales/en/plugin__logging-view-plugin.json 6.83 KiB [emitted] [from: ../locales/en/plugin__logging-view-plugin.json] [copied]
+asset plugin-manifest.json 2.63 KiB [emitted]
+orphan modules 3.29 MiB [orphan] 2525 modules
+runtime modules 17.5 KiB 14 modules
+built modules 2.31 MiB (javascript) 504 bytes (consume-shared) [built]
+  modules by path ../node_modules/ 2.08 MiB 375 modules
+  modules by path ./ 237 KiB 44 modules
+  consume-shared-module modules 504 bytes
+    modules by path *.0 (singleton) 210 bytes 5 modules
+    modules by path consume shared module (default) @patternfly/ 126 bytes
+      consume shared module (default) @patternfly/react-core@=4.239.0 (singleton) 42 bytes [built] [code generated]
+      + 2 modules
+    + 4 modules
+  container entry 42 bytes [built] [code generated]
+
+WARNING in asset size limit: The following asset(s) exceed the recommended size limit (244 KiB).
+This can impact web performance.
+Assets: 
+  198-chunk-6b4b6e74f73724458366.min.js (1.45 MiB)
+  924-chunk-b61cc50348712154c403.min.js (621 KiB)
+
+webpack 5.105.3 compiled with 1 warning in 14798 ms
+--> 4f02f0545830
+[linux/arm64] [1/3] STEP 1/9: FROM registry.redhat.io/ubi9/nodejs-22:latest AS web-builder
+Trying to pull registry.redhat.io/ubi9/nodejs-22:latest...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:a12b916013a11a554fa2875db18427c8168958df273060c727d6fa7013ec5dc3
+Copying blob sha256:3fa2c3ec93bd0d2914f8e021fa5b043ace5a704a440ecd2db626edd260f6a3c8
+Copying blob sha256:96c26ef68d364bcbd8f901e4664d7531ebb74699c6d8a69825e5925d8c6696c2
+Copying config sha256:674029faa03c09eddd258c6a0a8ac683d5f98f774c24293dcb8345585d7d87d0
+Writing manifest to image destination
+Storing signatures
+[linux/arm64] [1/3] STEP 2/9: WORKDIR /opt/app-root
+--> Using cache 24465958829783a6eebad07d9456c0d5485c5b9f17707c1cbb46bd8d4269f865
+--> 244659588297
+[linux/arm64] [1/3] STEP 3/9: USER 0
+--> Using cache 234e98e62d1166d3e7c9311c1bdb7c85dcbc9d98e6d39eeb2bc552a97b0354b3
+--> 234e98e62d11
+[linux/arm64] [1/3] STEP 4/9: ENV HUSKY=0
+--> Using cache d30cbd29acf2b89996eb3776fbc5ca6bdf732ff56d5c4162ba40f91abca48afc
+--> d30cbd29acf2
+[linux/arm64] [1/3] STEP 5/9: COPY web/package*.json web/
+--> 465a4c4775db
+[linux/arm64] [1/3] STEP 6/9: COPY Makefile Makefile
+--> c337cb06afe4
+[linux/arm64] [1/3] STEP 7/9: RUN make install-frontend-ci-clean
+cd web && npm ci --omit=optional --ignore-scripts
+npm warn deprecated whatwg-encoding@3.1.1: Use @exodus/bytes instead for a more spec-conformant and faster implementation
+npm warn deprecated i18next-parser@9.3.0: Project is deprecated, use i18next-cli instead
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+
+added 1483 packages, and audited 1484 packages in 25s
+
+285 packages are looking for funding
+  run `npm fund` for details
+
+15 vulnerabilities (1 low, 5 moderate, 8 high, 1 critical)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+cd web && npm cache clean --force
+npm warn using --force Recommended protections disabled.
+--> b54790cf962b
+[linux/arm64] [1/3] STEP 8/9: COPY web/ web/
+--> 38258dea251f
+[linux/arm64] [1/3] STEP 9/9: RUN make build-frontend
+cd web && npm run build
+
+> logging-view-plugin@6.0.0 build
+> npm run clean && NODE_ENV=production npm run ts-node node_modules/.bin/webpack
+
+
+> logging-view-plugin@6.0.0 clean
+> rm -rf dist
+
+
+> logging-view-plugin@6.0.0 ts-node
+> ts-node -O '{"module":"commonjs"}' node_modules/.bin/webpack
+
+assets by info 2.55 MiB [immutable]
+  assets by chunk 2.22 MiB (id hint: vendors)
+    asset 198-chunk-6b4b6e74f73724458366.min.js 1.45 MiB [emitted] [immutable] [big] (id hint: vendors) 1 related asset
+    asset 924-chunk-b61cc50348712154c403.min.js 621 KiB [emitted] [immutable] [big] (id hint: vendors) 1 related asset
+    asset 31-chunk-fa29db6230d9ee04494a.min.js 169 KiB [emitted] [immutable] (id hint: vendors) 1 related asset
+  + 9 assets
+asset plugin-entry.js 27.7 KiB [emitted] (name: logging-view-plugin) 1 related asset
+asset locales/en/plugin__logging-view-plugin.json 6.83 KiB [emitted] [from: ../locales/en/plugin__logging-view-plugin.json] [copied]
+asset plugin-manifest.json 2.63 KiB [emitted]
+orphan modules 3.29 MiB [orphan] 2525 modules
+runtime modules 17.5 KiB 14 modules
+built modules 2.31 MiB (javascript) 504 bytes (consume-shared) [built]
+  modules by path ../node_modules/ 2.08 MiB 375 modules
+  modules by path ./ 237 KiB 44 modules
+  consume-shared-module modules 504 bytes
+    modules by path *.0 (singleton) 210 bytes 5 modules
+    modules by path consume shared module (default) @patternfly/ 126 bytes
+      consume shared module (default) @patternfly/react-core@=4.239.0 (singleton) 42 bytes [built] [code generated]
+      + 2 modules
+    + 4 modules
+  container entry 42 bytes [built] [code generated]
+
+WARNING in asset size limit: The following asset(s) exceed the recommended size limit (244 KiB).
+This can impact web performance.
+Assets: 
+  198-chunk-6b4b6e74f73724458366.min.js (1.45 MiB)
+  924-chunk-b61cc50348712154c403.min.js (621 KiB)
+
+webpack 5.105.3 compiled with 1 warning in 9443 ms
+--> 70a522fb3e79
+[linux/amd64] [2/3] STEP 1/12: FROM registry.access.redhat.com/ubi9/go-toolset:1.26 AS go-builder
+[linux/amd64] [2/3] STEP 2/12: WORKDIR /opt/app-root
+--> Using cache ccc68483cf278ac42e6225f90f07bb7b6619cae338b109ee46e023a824fa1b74
+--> ccc68483cf27
+[linux/amd64] [2/3] STEP 3/12: COPY Makefile Makefile
+--> d86bbe000174
+[linux/amd64] [2/3] STEP 4/12: COPY go.mod go.mod
+--> 90f9468d9916
+[linux/amd64] [2/3] STEP 5/12: COPY go.sum go.sum
+--> bf86854aeb6c
+[linux/amd64] [2/3] STEP 6/12: RUN make install-backend
+go mod download
+--> 04a02f85b78c
+[linux/amd64] [2/3] STEP 7/12: COPY config/ config/
+--> d19c4f52ba4d
+[linux/amd64] [2/3] STEP 8/12: COPY cmd/ cmd/
+--> 88fd6e6828b3
+[linux/amd64] [2/3] STEP 9/12: COPY pkg/ pkg/
+--> 4a39541025fa
+[linux/amd64] [2/3] STEP 10/12: ENV GOEXPERIMENT=strictfipsruntime
+--> 7e1e712d9b12
+[linux/amd64] [2/3] STEP 11/12: ENV CGO_ENABLED=1
+--> a6dc3a6e2a32
+[linux/amd64] [2/3] STEP 12/12: RUN make build-backend BUILD_OPTS="-tags strictfipsruntime"
+go build -tags strictfipsruntime -mod=readonly -o plugin-backend -mod=readonly cmd/plugin-backend.go
+--> 900711a8af30
+[linux/arm64] [2/3] STEP 1/12: FROM registry.access.redhat.com/ubi9/go-toolset:1.26 AS go-builder
+Trying to pull registry.access.redhat.com/ubi9/go-toolset:1.26...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:6df866485d2a718f77e9fd249319b3985d508897e2316a96a1b810a0e7c4ada1
+Copying blob sha256:f105916fcb1cae5d7c77fe75d589103582751ad17e8bd0fb90775a8b5425877c
+Copying blob sha256:8a4bad2663e1ca93f2d6933937bdae915e0f75c18ed42af78485f3b49f04319b
+Copying blob sha256:07f974b1402cfec64bb70438889e86878358a9753e84072340706d55ea721c21
+Copying config sha256:6cad891c25f08e94fabcf75866c79c89ceac7bf3c8567e939674b9da5e552f56
+Writing manifest to image destination
+Storing signatures
+[linux/arm64] [2/3] STEP 2/12: WORKDIR /opt/app-root
+--> Using cache 41b7f8f0893fca0f58d12ac15160fcf71dc0b34273450c1e5e66ae3f59de1066
+--> 41b7f8f0893f
+[linux/arm64] [2/3] STEP 3/12: COPY Makefile Makefile
+--> 2b27261d1355
+[linux/arm64] [2/3] STEP 4/12: COPY go.mod go.mod
+--> 9ad86cd77195
+[linux/arm64] [2/3] STEP 5/12: COPY go.sum go.sum
+--> ba9da2d1b878
+[linux/arm64] [2/3] STEP 6/12: RUN make install-backend
+go mod download
+--> bf66b5cf8cd8
+[linux/arm64] [2/3] STEP 7/12: COPY config/ config/
+--> b9262a1203c1
+[linux/arm64] [2/3] STEP 8/12: COPY cmd/ cmd/
+--> f4c688b6a557
+[linux/arm64] [2/3] STEP 9/12: COPY pkg/ pkg/
+--> 1aa817c17d96
+[linux/arm64] [2/3] STEP 10/12: ENV GOEXPERIMENT=strictfipsruntime
+--> 5cee1b6cbe68
+[linux/arm64] [2/3] STEP 11/12: ENV CGO_ENABLED=1
+--> 75195492bf5e
+[linux/arm64] [2/3] STEP 12/12: RUN make build-backend BUILD_OPTS="-tags strictfipsruntime"
+go build -tags strictfipsruntime -mod=readonly -o plugin-backend -mod=readonly cmd/plugin-backend.go
+--> 30280c1c2a81
+[linux/amd64] [3/3] STEP 1/5: FROM registry.access.redhat.com/ubi9/ubi-minimal
+[linux/amd64] [3/3] STEP 2/5: COPY --from=web-builder /opt/app-root/web/dist /opt/app-root/web/dist
+--> 0efe941228b9
+[linux/amd64] [3/3] STEP 3/5: COPY --from=go-builder /opt/app-root/plugin-backend /opt/app-root
+--> 5d0e6b653dd9
+[linux/amd64] [3/3] STEP 4/5: COPY --from=go-builder /opt/app-root/config /opt/app-root/config
+--> 7a6f93139505
+[linux/amd64] [3/3] STEP 5/5: ENTRYPOINT ["/opt/app-root/plugin-backend", "-config-path", "/opt/app-root/config", "-static-path", "/opt/app-root/web/dist"]
+[linux/amd64] [3/3] COMMIT
+--> 9aa90d83a075
+[linux/arm64] [3/3] STEP 1/5: FROM registry.access.redhat.com/ubi9/ubi-minimal
+9aa90d83a0753343d4ec1eca2e26be2c7ca21a1529ec12aae4a4a810f90f3ccc
+Trying to pull registry.access.redhat.com/ubi9/ubi-minimal:latest...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:cfeec01a2bba583c2dcde9b457cc89d4b56583567390972f5501ce5ad4fa4ae8
+Copying config sha256:69ceb60955acc5ed990f1c3ddc1efe598030b35a137ce5c31cedea6c513f8666
+Writing manifest to image destination
+Storing signatures
+[linux/arm64] [3/3] STEP 2/5: COPY --from=web-builder /opt/app-root/web/dist /opt/app-root/web/dist
+--> 69a411ceada1
+[linux/arm64] [3/3] STEP 3/5: COPY --from=go-builder /opt/app-root/plugin-backend /opt/app-root
+--> 95e39ed7a200
+[linux/arm64] [3/3] STEP 4/5: COPY --from=go-builder /opt/app-root/config /opt/app-root/config
+--> 1c3ec8645ed1
+[linux/arm64] [3/3] STEP 5/5: ENTRYPOINT ["/opt/app-root/plugin-backend", "-config-path", "/opt/app-root/config", "-static-path", "/opt/app-root/web/dist"]
+[linux/arm64] [3/3] COMMIT
+--> 59ea4004d0b8
+59ea4004d0b8472458f90b65b5b79f975a08ac9cc14326d9a77e6b07ff9534e0
+podman manifest push quay.io/openshift-observability-ui/logging-view-plugin:v6.0.5
+Getting image list signatures
+Copying 2 images generated from 2 images in list
+Copying image sha256:929d6f1ae6c2579ab2640035cdbfeb335f4c146fc5092095b9ec2faa557e98a6 (1/2)
+Getting image source signatures
+Copying blob sha256:93e46af69e9974347afa222bcdd9f9e444cd1f7a49db5fc0689ab4e3057b068f
+Copying blob sha256:bca9dd96eca4ef9600dec142bc32c80380210b665b6453f54a32ea89e39bbf95
+Copying blob sha256:ffbe897ab3ae0e6216c8b6f93edabef669e7ba57d80303a894d37a3fad445cdd
+Copying blob sha256:c69fa301b89dbacaaf3ed872de982cc826b182c396688082bd54af7a4c443d10
+Copying config sha256:9aa90d83a0753343d4ec1eca2e26be2c7ca21a1529ec12aae4a4a810f90f3ccc
+Writing manifest to image destination
+Copying image sha256:c4816a47cb6b5282164bf7b6986f20b12935ee31ccd2df6bf8a68537c78fc2b7 (2/2)
+Getting image source signatures
+Copying blob sha256:51c8f3f1e6b38f26223784c1492e2992e015c77a592cd0bbdb63cd9d8461dd1c
+Copying blob sha256:c9ca1fa52181e3fc350fa56703ecc8b25422c83779f98e224ac74a2fc8b6dd2b
+Copying blob sha256:4c3421c08b04868d9d54bb2a15e72b87e42528d7957dbb2c6450ba0d1fd7c012
+Copying blob sha256:222e0fb497b271b4a38aea0e45419b2f7dfd6cb0256293218eb8bac9247f6ff7
+Copying config sha256:59ea4004d0b8472458f90b65b5b79f975a08ac9cc14326d9a77e6b07ff9534e0
+Writing manifest to image destination
+Writing manifest list to image destination
+Storing list signatures
+==========================================
+SKIPPING distributed-tracing-plugin @ release-coo-ocp-4.15 with VERSION=v0.4.3 (already built successfully)
+==========================================
+==========================================
+SKIPPING logging-view-plugin @ release-coo-ocp-4.15 with VERSION=v6.1.6 (already built successfully)
+==========================================
+==========================================
+SKIPPING monitoring-plugin @ release-coo-ocp-4.15 with VERSION=v0.4.5 (already built successfully)
+==========================================
+==========================================
+SKIPPING distributed-tracing-plugin @ release-coo-ocp-4.19 with VERSION=v1.0.3 (already built successfully)
+==========================================
+==========================================
+SKIPPING troubleshooting-panel-plugin @ release-coo-ocp-4.19 with VERSION=v0.4.5 (already built successfully)
+==========================================
+==========================================
+SKIPPING monitoring-plugin @ release-coo-ocp-4.19 with VERSION=v0.5.4 (already built successfully)
+==========================================
+==========================================
+SKIPPING distributed-tracing-plugin @ release-coo-ocp-4.22 with VERSION=v1.1.0 (already built successfully)
+==========================================
+==========================================
+SKIPPING troubleshooting-panel-plugin @ release-coo-ocp-4.22 with VERSION=v1.0.0 (already built successfully)
+==========================================
+==========================================
+SKIPPING monitoring-plugin @ release-coo-ocp-4.22 with VERSION=v1.0.0 (already built successfully)
+==========================================
+==========================================
+SKIPPING logging-view-plugin @ release-coo-ocp-4.22 with VERSION=v6.2.1 (already built successfully)
+==========================================
+
+==========================================
+  BUILD SUMMARY
+==========================================
+REPO                                          BRANCH                         VERSION    CHECKOUT   PULL       BRANCH     BUILD      ATTEMPTS
+----                                          ------                         -------    --------   ----       ------     -----      --------
+distributed-tracing-plugin                    release-coo-ocp-4.12           v0.3.3     SKIPPED    SKIPPED    SKIPPED    SKIPPED    0
+logging-view-plugin                           release-coo-ocp-4.12           v6.0.5     OK         OK         OK         SUCCESS    1
+distributed-tracing-plugin                    release-coo-ocp-4.15           v0.4.3     SKIPPED    SKIPPED    SKIPPED    SKIPPED    0
+logging-view-plugin                           release-coo-ocp-4.15           v6.1.6     SKIPPED    SKIPPED    SKIPPED    SKIPPED    0
+monitoring-plugin                             release-coo-ocp-4.15           v0.4.5     SKIPPED    SKIPPED    SKIPPED    SKIPPED    0
+distributed-tracing-plugin                    release-coo-ocp-4.19           v1.0.3     SKIPPED    SKIPPED    SKIPPED    SKIPPED    0
+troubleshooting-panel-plugin                  release-coo-ocp-4.19           v0.4.5     SKIPPED    SKIPPED    SKIPPED    SKIPPED    0
+monitoring-plugin                             release-coo-ocp-4.19           v0.5.4     SKIPPED    SKIPPED    SKIPPED    SKIPPED    0
+distributed-tracing-plugin                    release-coo-ocp-4.22           v1.1.0     SKIPPED    SKIPPED    SKIPPED    SKIPPED    0
+troubleshooting-panel-plugin                  release-coo-ocp-4.22           v1.0.0     SKIPPED    SKIPPED    SKIPPED    SKIPPED    0
+monitoring-plugin                             release-coo-ocp-4.22           v1.0.0     SKIPPED    SKIPPED    SKIPPED    SKIPPED    0
+logging-view-plugin                           release-coo-ocp-4.22           v6.2.1     SKIPPED    SKIPPED    SKIPPED    SKIPPED    0
+==========================================
+Total: 12  |  Succeeded: 1  |  Skipped: 11  |  Failed: 0
+==========================================
+
+==========================================
+  IMAGE SUMMARY
+==========================================
+
+✅ SUCCESSFULLY BUILT IMAGES:
+   quay.io/openshift-observability-ui/logging-view-plugin:v6.0.5
+
+⏭️  SKIPPED IMAGES (already built):
+   quay.io/openshift-observability-ui/distributed-tracing-console-plugin:v0.3.3
+   quay.io/openshift-observability-ui/distributed-tracing-console-plugin:v0.4.3
+   quay.io/openshift-observability-ui/logging-view-plugin:v6.1.6
+   quay.io/openshift-observability-ui/monitoring-console-plugin:v0.4.5
+   quay.io/openshift-observability-ui/distributed-tracing-console-plugin:v1.0.3
+   quay.io/openshift-observability-ui/troubleshooting-panel-console-plugin:v0.4.5
+   quay.io/openshift-observability-ui/monitoring-console-plugin:v0.5.4
+   quay.io/openshift-observability-ui/distributed-tracing-console-plugin:v1.1.0
+   quay.io/openshift-observability-ui/troubleshooting-panel-console-plugin:v1.0.0
+   quay.io/openshift-observability-ui/monitoring-console-plugin:v1.0.0
+   quay.io/openshift-observability-ui/logging-view-plugin:v6.2.1
+
+❌ FAILED IMAGES:
+   (none)
+
+==========================================

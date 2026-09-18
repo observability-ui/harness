@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: test-runbook-whitespace
+  namespace: openshift-monitoring
+spec:
+  groups:
+  - name: test-runbook-sanitization
+    interval: 30s
+    rules:
+    - alert: TestAlertWhitespace
+      expr: vector(1)
+      for: 0m
+      labels:
+        severity: warning
+        test: runbook-sanitization
+        runbook_url: "  javascript:alert(1)"
+      annotations:
+        runbook_url: "  javascript:alert(1)"
+        summary: "  javascript:alert(1)"
+        description: "  javascript:alert(1)"

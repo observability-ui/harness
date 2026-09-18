@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: test-runbook-valid-https
+  namespace: openshift-monitoring
+spec:
+  groups:
+  - name: test-runbook-sanitization
+    interval: 30s
+    rules:
+    - alert: TestAlertValidHTTPS
+      expr: vector(1)
+      for: 0m
+      labels:
+        severity: warning
+        test: runbook-sanitization
+        runbook_url: "https://runbooks.example.com/test-alert"
+      annotations:
+        runbook_url: "https://runbooks.example.com/test-alert"
+        summary: "https://runbooks.example.com/test-alert"
+        description: "https://runbooks.example.com/test-alert"

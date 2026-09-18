@@ -1,0 +1,21 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: test-runbook-javascript
+  namespace: openshift-monitoring
+spec:
+  groups:
+  - name: test-runbook-sanitization
+    interval: 30s
+    rules:
+    - alert: TestAlertJavaScript
+      expr: vector(1)
+      for: 0m
+      labels:
+        severity: warning
+        test: runbook-sanitization
+        runbook_url: "javascript:alert('XSS Attack!')"
+      annotations:
+        runbook_url: "javascript:alert('XSS Attack!')"
+        summary: "javascript:alert('XSS Attack!')"
+        description: "javascript:alert('XSS Attack!')"

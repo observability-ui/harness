@@ -1,0 +1,747 @@
+Logging to /Users/emurasak/workspace/harness/tasks/upstream-images/build-and-push-20260827-101645.log
+Fetching all branches for each repo...
+  Fetching distributed-tracing-console-plugin...
+Fetching origin
+Fetching upstream
+  Fetching logging-view-plugin...
+From https://github.com/openshift/logging-view-plugin
+   79326c0..ca999a5  main                 -> origin/main
+ * [new branch]      dependabot/npm_and_yarn/web/websocket-driver-0.7.5 -> origin/dependabot/npm_and_yarn/web/websocket-driver-0.7.5
+ * [new branch]      release-coo-1.5-ocp-4.12 -> origin/release-coo-1.5-ocp-4.12
+ * [new branch]      release-coo-1.5-ocp-4.15 -> origin/release-coo-1.5-ocp-4.15
+ * [new branch]      release-coo-1.5-ocp-4.22 -> origin/release-coo-1.5-ocp-4.22
+   5d3f32f..43d9d27  release-coo-ocp-4.12 -> origin/release-coo-ocp-4.12
+   65042b0..22a9ee0  release-coo-ocp-4.15 -> origin/release-coo-ocp-4.15
+   7edfaf8..860f23c  release-coo-ocp-4.22 -> origin/release-coo-ocp-4.22
+  Fetching monitoring-plugin...
+From https://github.com/openshift/monitoring-plugin
+   ac79f756..156005ee  main                 -> origin/main
+   78b2f356..05b9f601  main-alerts-management-api -> origin/main-alerts-management-api
+ * [new branch]        move-alerting-tests  -> origin/move-alerting-tests
+ * [new branch]        move-fixtures        -> origin/move-fixtures
+ * [new branch]        move-support         -> origin/move-support
+ * [new branch]        move-views           -> origin/move-views
+ * [new branch]        refactor-variables   -> origin/refactor-variables
+   5a2d9fc1..12dce511  release-4.16         -> origin/release-4.16
+   24144b93..ffd758f8  release-4.17         -> origin/release-4.17
+   01882e9e..2e534963  release-4.18         -> origin/release-4.18
+   12a19eaa..a79ce486  release-4.19         -> origin/release-4.19
+   7a87d245..34c1d042  release-4.20         -> origin/release-4.20
+   9f74739f..56348815  release-4.21         -> origin/release-4.21
+   3bd7c209..8416b67c  release-4.22         -> origin/release-4.22
+   4cdeb09a..f2a723e6  release-4.23         -> origin/release-4.23
+   4cdeb09a..f2a723e6  release-5.0          -> origin/release-5.0
+   4cdeb09a..156005ee  release-5.1          -> origin/release-5.1
+ * [new branch]        release-5.2          -> origin/release-5.2
+ * [new branch]        release-coo-1.5-ocp-4.15 -> origin/release-coo-1.5-ocp-4.15
+ * [new branch]        release-coo-1.5-ocp-4.19 -> origin/release-coo-1.5-ocp-4.19
+ * [new branch]        release-coo-1.5-ocp-4.22 -> origin/release-coo-1.5-ocp-4.22
+   524eb726..3eff6514  release-coo-ocp-4.15 -> origin/release-coo-ocp-4.15
+   b4c81a85..b7bad858  release-coo-ocp-4.19 -> origin/release-coo-ocp-4.19
+   c6e230f2..7ec1ff5f  release-coo-ocp-4.22 -> origin/release-coo-ocp-4.22
+ * [new branch]        remove-incidents     -> origin/remove-incidents
+ * [new branch]        run-changes          -> origin/run-changes
+ * [new branch]        swap-tags-to-backend-features -> origin/swap-tags-to-backend-features
+  Fetching troubleshooting-panel-console-plugin...
+Fetching origin
+Fetching upstream
+Fetch complete.
+==========================================
+Building console-dashboards-plugin @ release-coo-ocp-4.12 with VERSION=v0.4.3 ORG=openshift-observability-ui
+==========================================
+error: pathspec 'release-coo-ocp-4.12' did not match any file(s) known to git
+ERROR: checkout failed for console-dashboards-plugin @ release-coo-ocp-4.12
+==========================================
+Building distributed-tracing-console-plugin @ release-coo-ocp-4.12 with VERSION=v0.3.3 ORG=openshift-observability-ui
+==========================================
+error: pathspec 'release-coo-ocp-4.12' did not match any file(s) known to git
+ERROR: checkout failed for distributed-tracing-console-plugin @ release-coo-ocp-4.12
+==========================================
+Building logging-view-plugin @ release-coo-ocp-4.12 with VERSION=v6.0.5 ORG=openshift-observability-ui
+==========================================
+Switched to branch 'release-coo-ocp-4.12'
+Your branch is behind 'origin/release-coo-ocp-4.12' by 10 commits, and can be fast-forwarded.
+  (use "git pull" to update your local branch)
+From https://github.com/openshift/logging-view-plugin
+ * branch            release-coo-ocp-4.12 -> FETCH_HEAD
+Updating 5d3f32f..43d9d27
+Fast-forward
+ Dockerfile.art                                  |  57 ++++++++++
+ web/cypress/e2e/integration/logs-dev-page.cy.ts |   6 +-
+ web/cypress/e2e/integration/logs-page.cy.ts     |   2 +
+ web/jest.config.js                              |   3 +
+ web/mockModules/dummy.tsx                       |  68 ++++++++++++
+ web/src/__mocks__/styleMock.js                  |   2 +
+ web/src/__tests__/attribute-filters.spec.ts     |   5 +
+ web/src/__tests__/cancellable-fetch.spec.ts     | 133 ++++++++++++++++++++++++
+ web/src/__tests__/download-csv.spec.ts          |  69 ++++++++++++
+ web/src/__tests__/loki-client.spec.ts           |  15 ++-
+ web/src/cancellable-fetch.ts                    |  98 +++++++++--------
+ web/src/download-csv.ts                         |  17 +--
+ web/src/loki-client.ts                          |  30 +++---
+ 13 files changed, 439 insertions(+), 66 deletions(-)
+ create mode 100644 Dockerfile.art
+ create mode 100644 web/src/__mocks__/styleMock.js
+ create mode 100644 web/src/__tests__/cancellable-fetch.spec.ts
+--- Attempt 1/3 ---
+podman manifest rm quay.io/openshift-observability-ui/logging-view-plugin:v6.0.5 || true
+Error: quay.io/openshift-observability-ui/logging-view-plugin:v6.0.5: image not known
+podman manifest create quay.io/openshift-observability-ui/logging-view-plugin:v6.0.5
+0ebd94c8474ea80017918eae8946e5df1e7b77c76fa9a82336d3ed61b267ad70
+podman build --platform=linux/arm64,linux/amd64 --manifest quay.io/openshift-observability-ui/logging-view-plugin:v6.0.5 -f Dockerfile
+[linux/arm64] [1/3] STEP 1/9: FROM registry.redhat.io/ubi9/nodejs-18:latest AS web-builder
+Trying to pull registry.redhat.io/ubi9/nodejs-18:latest...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:d2d4277551d19aaf448f46617629ba5ce8decceacdd7a9e3f6d43a7763294f84
+Copying blob sha256:c0c6f119f250bcd571815218a238bf91fcd968aa4bfe95c224309ec367df747e
+Copying blob sha256:d92b30fd88841f53962ad35d9c474465d043b096524bdc2ef18640daf2e51e82
+Copying config sha256:d561cbadf704f121dc19b5ca23115d808580ccff537c4def93fff467e1723872
+Writing manifest to image destination
+Storing signatures
+[linux/arm64] [1/3] STEP 2/9: WORKDIR /opt/app-root
+--> 9c05cb9f68bb
+[linux/arm64] [1/3] STEP 3/9: USER 0
+--> ded0150f2040
+[linux/arm64] [1/3] STEP 4/9: ENV HUSKY=0
+--> 3eae1e4d2111
+[linux/arm64] [1/3] STEP 5/9: COPY web/package*.json web/
+--> 3473c93bc62c
+[linux/arm64] [1/3] STEP 6/9: COPY Makefile Makefile
+--> 6055b14340e3
+[linux/arm64] [1/3] STEP 7/9: RUN make install-frontend-ci-clean
+cd web && npm ci --omit=optional --ignore-scripts
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@cypress/code-coverage@4.0.3',
+npm warn EBADENGINE   required: { node: '>=20' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@peculiar/x509@1.14.3',
+npm warn EBADENGINE   required: { node: '>=20.0.0' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'cheerio@1.2.0',
+npm warn EBADENGINE   required: { node: '>=20.18.1' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'cli-truncate@5.2.0',
+npm warn EBADENGINE   required: { node: '>=20' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'string-width@8.2.1',
+npm warn EBADENGINE   required: { node: '>=20' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'copy-webpack-plugin@14.0.0',
+npm warn EBADENGINE   required: { node: '>= 20.9.0' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'cypress@15.18.0',
+npm warn EBADENGINE   required: { node: '^20.1.0 || ^22.0.0 || >=24.0.0' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'istanbul-lib-processinfo@3.0.1',
+npm warn EBADENGINE   required: { node: '20 || >=22' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'lru-cache@11.5.1',
+npm warn EBADENGINE   required: { node: '20 || >=22' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'rimraf@6.1.3',
+npm warn EBADENGINE   required: { node: '20 || >=22' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'listr2@9.0.5',
+npm warn EBADENGINE   required: { node: '>=20.0.0' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'mktemp@2.0.3',
+npm warn EBADENGINE   required: { node: '20 || 22 || 24' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'nyc@18.0.0',
+npm warn EBADENGINE   required: { node: '20 || >=22' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'lru-cache@11.5.1',
+npm warn EBADENGINE   required: { node: '20 || >=22' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'rimraf@6.1.3',
+npm warn EBADENGINE   required: { node: '20 || >=22' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'test-exclude@8.0.0',
+npm warn EBADENGINE   required: { node: '20 || >=22' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'serialize-javascript@7.0.6',
+npm warn EBADENGINE   required: { node: '>=20.0.0' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'slice-ansi@8.0.0',
+npm warn EBADENGINE   required: { node: '>=20' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'lru-cache@11.5.1',
+npm warn EBADENGINE   required: { node: '20 || >=22' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'rimraf@6.1.3',
+npm warn EBADENGINE   required: { node: '20 || >=22' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'undici@7.28.0',
+npm warn EBADENGINE   required: { node: '>=20.18.1' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn deprecated whatwg-encoding@3.1.1: Use @exodus/bytes instead for a more spec-conformant and faster implementation
+npm warn deprecated i18next-parser@9.3.0: Project is deprecated, use i18next-cli instead
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+
+added 1483 packages, and audited 1484 packages in 38s
+
+285 packages are looking for funding
+  run `npm fund` for details
+
+15 vulnerabilities (1 low, 5 moderate, 8 high, 1 critical)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+cd web && npm cache clean --force
+npm warn using --force Recommended protections disabled.
+--> 547d30bd77f5
+[linux/arm64] [1/3] STEP 8/9: COPY web/ web/
+--> b7f3587a3d14
+[linux/arm64] [1/3] STEP 9/9: RUN make build-frontend
+cd web && npm run build
+
+> logging-view-plugin@6.0.0 build
+> npm run clean && NODE_ENV=production npm run ts-node node_modules/.bin/webpack
+
+
+> logging-view-plugin@6.0.0 clean
+> rm -rf dist
+
+
+> logging-view-plugin@6.0.0 ts-node
+> ts-node -O '{"module":"commonjs"}' node_modules/.bin/webpack
+
+TypeError: [(...copiedResultMap.entries(...))].toSorted is not a function
+    at /opt/app-root/web/node_modules/copy-webpack-plugin/dist/index.js:747:61
+make: *** [Makefile:41: build-frontend] Error 1
+[linux/amd64] [1/3] STEP 1/9: FROM registry.redhat.io/ubi9/nodejs-18:latest AS web-builder
+Trying to pull registry.redhat.io/ubi9/nodejs-18:latest...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:bd74b94f9d783929640d82362c5b1af55b0b7bea9405c379251f405c9c94f690
+Copying blob sha256:97971704aef24e8b1129c4f1b2e2241c7800b8bb89a14e77a7efebccd4193661
+Copying blob sha256:ce1770dcb97c2c062c80efe0edf0d512923b8ac34444b4f56733f446ea06ca95
+Copying config sha256:dc791d1b00fc164bb81bc99a7ddadc9eef02d0042878fe62c5fd468df91b2140
+Writing manifest to image destination
+Storing signatures
+[linux/amd64] [1/3] STEP 2/9: WORKDIR /opt/app-root
+--> d04013e89ace
+[linux/amd64] [1/3] STEP 3/9: USER 0
+--> ccf9929899ba
+[linux/amd64] [1/3] STEP 4/9: ENV HUSKY=0
+--> 412f49c0852e
+[linux/amd64] [1/3] STEP 5/9: COPY web/package*.json web/
+--> 4d4ff72f49d4
+[linux/amd64] [1/3] STEP 6/9: COPY Makefile Makefile
+--> 814a947434d7
+[linux/amd64] [1/3] STEP 7/9: RUN make install-frontend-ci-clean
+cd web && npm ci --omit=optional --ignore-scripts
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@cypress/code-coverage@4.0.3',
+npm warn EBADENGINE   required: { node: '>=20' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@peculiar/x509@1.14.3',
+npm warn EBADENGINE   required: { node: '>=20.0.0' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'cheerio@1.2.0',
+npm warn EBADENGINE   required: { node: '>=20.18.1' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'cli-truncate@5.2.0',
+npm warn EBADENGINE   required: { node: '>=20' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'string-width@8.2.1',
+npm warn EBADENGINE   required: { node: '>=20' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'copy-webpack-plugin@14.0.0',
+npm warn EBADENGINE   required: { node: '>= 20.9.0' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'cypress@15.18.0',
+npm warn EBADENGINE   required: { node: '^20.1.0 || ^22.0.0 || >=24.0.0' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'istanbul-lib-processinfo@3.0.1',
+npm warn EBADENGINE   required: { node: '20 || >=22' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'lru-cache@11.5.1',
+npm warn EBADENGINE   required: { node: '20 || >=22' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'rimraf@6.1.3',
+npm warn EBADENGINE   required: { node: '20 || >=22' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'listr2@9.0.5',
+npm warn EBADENGINE   required: { node: '>=20.0.0' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'mktemp@2.0.3',
+npm warn EBADENGINE   required: { node: '20 || 22 || 24' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'nyc@18.0.0',
+npm warn EBADENGINE   required: { node: '20 || >=22' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'lru-cache@11.5.1',
+npm warn EBADENGINE   required: { node: '20 || >=22' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'rimraf@6.1.3',
+npm warn EBADENGINE   required: { node: '20 || >=22' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'test-exclude@8.0.0',
+npm warn EBADENGINE   required: { node: '20 || >=22' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'serialize-javascript@7.0.6',
+npm warn EBADENGINE   required: { node: '>=20.0.0' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'slice-ansi@8.0.0',
+npm warn EBADENGINE   required: { node: '>=20' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'lru-cache@11.5.1',
+npm warn EBADENGINE   required: { node: '20 || >=22' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'rimraf@6.1.3',
+npm warn EBADENGINE   required: { node: '20 || >=22' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: 'undici@7.28.0',
+npm warn EBADENGINE   required: { node: '>=20.18.1' },
+npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+npm warn EBADENGINE }
+npm warn deprecated whatwg-encoding@3.1.1: Use @exodus/bytes instead for a more spec-conformant and faster implementation
+npm warn deprecated i18next-parser@9.3.0: Project is deprecated, use i18next-cli instead
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+
+added 1483 packages, and audited 1484 packages in 50s
+
+285 packages are looking for funding
+  run `npm fund` for details
+
+15 vulnerabilities (1 low, 5 moderate, 8 high, 1 critical)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+cd web && npm cache clean --force
+npm warn using --force Recommended protections disabled.
+--> 370d6ed10eae
+[linux/amd64] [1/3] STEP 8/9: COPY web/ web/
+--> 7144b9b1a383
+[linux/amd64] [1/3] STEP 9/9: RUN make build-frontend
+cd web && npm run build
+
+> logging-view-plugin@6.0.0 build
+> npm run clean && NODE_ENV=production npm run ts-node node_modules/.bin/webpack
+
+
+> logging-view-plugin@6.0.0 clean
+> rm -rf dist
+
+
+> logging-view-plugin@6.0.0 ts-node
+> ts-node -O '{"module":"commonjs"}' node_modules/.bin/webpack
+
+TypeError: [(...copiedResultMap.entries(...))].toSorted is not a function
+    at /opt/app-root/web/node_modules/copy-webpack-plugin/dist/index.js:747:61
+make: *** [Makefile:41: build-frontend] Error 1
+Error: 2 errors occurred:
+	* [linux/arm64]: building at STEP "RUN make build-frontend": while running runtime: exit status 2
+	* [linux/amd64]: building at STEP "RUN make build-frontend": while running runtime: exit status 2
+
+
+
+make: *** [podman-cross-build] Error 2
+WARNING: Attempt 1 failed for logging-view-plugin @ release-coo-ocp-4.12 (exit code 2)
+--- Attempt 2/3 ---
+podman manifest rm quay.io/openshift-observability-ui/logging-view-plugin:v6.0.5 || true
+Untagged: quay.io/openshift-observability-ui/logging-view-plugin:v6.0.5
+Deleted: 0ebd94c8474ea80017918eae8946e5df1e7b77c76fa9a82336d3ed61b267ad70
+podman manifest create quay.io/openshift-observability-ui/logging-view-plugin:v6.0.5
+d9453151cdcc0984dae6827f3625ae02baa676dce806979cf103e4859496292d
+podman build --platform=linux/arm64,linux/amd64 --manifest quay.io/openshift-observability-ui/logging-view-plugin:v6.0.5 -f Dockerfile
+[linux/amd64] [1/3] STEP 1/9: FROM registry.redhat.io/ubi9/nodejs-18:latest AS web-builder
+[linux/amd64] [1/3] STEP 2/9: WORKDIR /opt/app-root
+--> Using cache d04013e89ace136650524e952dc70f42451b02cfcace8ced6407bdfdc7d79639
+--> d04013e89ace
+[linux/amd64] [1/3] STEP 3/9: USER 0
+--> Using cache ccf9929899baf2dad491e6814dd4beb3532b2314f08750109bc3724671fdc6d0
+--> ccf9929899ba
+[linux/amd64] [1/3] STEP 4/9: ENV HUSKY=0
+--> Using cache 412f49c0852eff056c969202f2e0b45dbde03e2287059a51a8867bb867a899c1
+--> 412f49c0852e
+[linux/amd64] [1/3] STEP 5/9: COPY web/package*.json web/
+--> Using cache 4d4ff72f49d43aae450a3f68ccd6ae3c46bd2e4a0459b5843169cc1ed5ba5158
+--> 4d4ff72f49d4
+[linux/amd64] [1/3] STEP 6/9: COPY Makefile Makefile
+--> Using cache 814a947434d7864b13856f1948d91dbc660e27eff8016b36352a39736e8da8fd
+--> 814a947434d7
+[linux/amd64] [1/3] STEP 7/9: RUN make install-frontend-ci-clean
+--> Using cache 370d6ed10eae3ab2f46ea7c0c6026e087b4749c6cca8e972b14a10de5947e630
+--> 370d6ed10eae
+[linux/amd64] [1/3] STEP 8/9: COPY web/ web/
+--> Using cache 7144b9b1a38313b703e2e4842deac525d8ca9bf9eed4d91d547c1be1c9f11701
+--> 7144b9b1a383
+[linux/amd64] [1/3] STEP 9/9: RUN make build-frontend
+cd web && npm run build
+
+> logging-view-plugin@6.0.0 build
+> npm run clean && NODE_ENV=production npm run ts-node node_modules/.bin/webpack
+
+
+> logging-view-plugin@6.0.0 clean
+> rm -rf dist
+
+
+> logging-view-plugin@6.0.0 ts-node
+> ts-node -O '{"module":"commonjs"}' node_modules/.bin/webpack
+
+TypeError: [(...copiedResultMap.entries(...))].toSorted is not a function
+    at /opt/app-root/web/node_modules/copy-webpack-plugin/dist/index.js:747:61
+make: *** [Makefile:41: build-frontend] Error 1
+[linux/arm64] [1/3] STEP 1/9: FROM registry.redhat.io/ubi9/nodejs-18:latest AS web-builder
+Trying to pull registry.redhat.io/ubi9/nodejs-18:latest...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:d2d4277551d19aaf448f46617629ba5ce8decceacdd7a9e3f6d43a7763294f84
+Copying blob sha256:c0c6f119f250bcd571815218a238bf91fcd968aa4bfe95c224309ec367df747e
+Copying blob sha256:d92b30fd88841f53962ad35d9c474465d043b096524bdc2ef18640daf2e51e82
+Copying config sha256:d561cbadf704f121dc19b5ca23115d808580ccff537c4def93fff467e1723872
+Writing manifest to image destination
+Storing signatures
+[linux/arm64] [1/3] STEP 2/9: WORKDIR /opt/app-root
+--> Using cache 9c05cb9f68bbee237a6e2b975f0926a234cfb10a0ae7cb4789768f706fd6b6bc
+--> 9c05cb9f68bb
+[linux/arm64] [1/3] STEP 3/9: USER 0
+--> Using cache ded0150f2040e42b1cff342e4402338ac3f4d7dffad21d503928653bc894ccf6
+--> ded0150f2040
+[linux/arm64] [1/3] STEP 4/9: ENV HUSKY=0
+--> Using cache 3eae1e4d21113fca2071ffb7e52e34328a2a6a406d226cae1674ad56f92a7875
+--> 3eae1e4d2111
+[linux/arm64] [1/3] STEP 5/9: COPY web/package*.json web/
+--> Using cache 3473c93bc62c0d2b4c45cd5436d965235f41a5cf2c5a0dd286393af6488fe295
+--> 3473c93bc62c
+[linux/arm64] [1/3] STEP 6/9: COPY Makefile Makefile
+--> Using cache 6055b14340e38a3c18268edd3335c270b34b8e9b19d1da3881c1bcd695d6781f
+--> 6055b14340e3
+[linux/arm64] [1/3] STEP 7/9: RUN make install-frontend-ci-clean
+--> Using cache 547d30bd77f5d2588a1caa25666264550d681e0fa5120900bfe4f34c5ad2bc6a
+--> 547d30bd77f5
+[linux/arm64] [1/3] STEP 8/9: COPY web/ web/
+--> Using cache b7f3587a3d14cf6d3cb4c4245c27d260af2bb3315e987059d787e5a30cd713db
+--> b7f3587a3d14
+[linux/arm64] [1/3] STEP 9/9: RUN make build-frontend
+cd web && npm run build
+
+> logging-view-plugin@6.0.0 build
+> npm run clean && NODE_ENV=production npm run ts-node node_modules/.bin/webpack
+
+
+> logging-view-plugin@6.0.0 clean
+> rm -rf dist
+
+
+> logging-view-plugin@6.0.0 ts-node
+> ts-node -O '{"module":"commonjs"}' node_modules/.bin/webpack
+
+TypeError: [(...copiedResultMap.entries(...))].toSorted is not a function
+    at /opt/app-root/web/node_modules/copy-webpack-plugin/dist/index.js:747:61
+make: *** [Makefile:41: build-frontend] Error 1
+Error: 2 errors occurred:
+	* [linux/amd64]: building at STEP "RUN make build-frontend": while running runtime: exit status 2
+	* [linux/arm64]: building at STEP "RUN make build-frontend": while running runtime: exit status 2
+
+
+
+make: *** [podman-cross-build] Error 2
+WARNING: Attempt 2 failed for logging-view-plugin @ release-coo-ocp-4.12 (exit code 2)
+--- Attempt 3/3 ---
+podman manifest rm quay.io/openshift-observability-ui/logging-view-plugin:v6.0.5 || true
+Untagged: quay.io/openshift-observability-ui/logging-view-plugin:v6.0.5
+Deleted: d9453151cdcc0984dae6827f3625ae02baa676dce806979cf103e4859496292d
+podman manifest create quay.io/openshift-observability-ui/logging-view-plugin:v6.0.5
+ca437248461996611602576b783fe99244dd979ab47d3d081729a0f33d967798
+podman build --platform=linux/arm64,linux/amd64 --manifest quay.io/openshift-observability-ui/logging-view-plugin:v6.0.5 -f Dockerfile
+[linux/arm64] [1/3] STEP 1/9: FROM registry.redhat.io/ubi9/nodejs-18:latest AS web-builder
+[linux/arm64] [1/3] STEP 2/9: WORKDIR /opt/app-root
+--> Using cache 9c05cb9f68bbee237a6e2b975f0926a234cfb10a0ae7cb4789768f706fd6b6bc
+--> 9c05cb9f68bb
+[linux/arm64] [1/3] STEP 3/9: USER 0
+--> Using cache ded0150f2040e42b1cff342e4402338ac3f4d7dffad21d503928653bc894ccf6
+--> ded0150f2040
+[linux/arm64] [1/3] STEP 4/9: ENV HUSKY=0
+--> Using cache 3eae1e4d21113fca2071ffb7e52e34328a2a6a406d226cae1674ad56f92a7875
+--> 3eae1e4d2111
+[linux/arm64] [1/3] STEP 5/9: COPY web/package*.json web/
+--> Using cache 3473c93bc62c0d2b4c45cd5436d965235f41a5cf2c5a0dd286393af6488fe295
+--> 3473c93bc62c
+[linux/arm64] [1/3] STEP 6/9: COPY Makefile Makefile
+--> Using cache 6055b14340e38a3c18268edd3335c270b34b8e9b19d1da3881c1bcd695d6781f
+--> 6055b14340e3
+[linux/arm64] [1/3] STEP 7/9: RUN make install-frontend-ci-clean
+--> Using cache 547d30bd77f5d2588a1caa25666264550d681e0fa5120900bfe4f34c5ad2bc6a
+--> 547d30bd77f5
+[linux/arm64] [1/3] STEP 8/9: COPY web/ web/
+--> Using cache b7f3587a3d14cf6d3cb4c4245c27d260af2bb3315e987059d787e5a30cd713db
+--> b7f3587a3d14
+[linux/arm64] [1/3] STEP 9/9: RUN make build-frontend
+cd web && npm run build
+
+> logging-view-plugin@6.0.0 build
+> npm run clean && NODE_ENV=production npm run ts-node node_modules/.bin/webpack
+
+
+> logging-view-plugin@6.0.0 clean
+> rm -rf dist
+
+
+> logging-view-plugin@6.0.0 ts-node
+> ts-node -O '{"module":"commonjs"}' node_modules/.bin/webpack
+
+TypeError: [(...copiedResultMap.entries(...))].toSorted is not a function
+    at /opt/app-root/web/node_modules/copy-webpack-plugin/dist/index.js:747:61
+make: *** [Makefile:41: build-frontend] Error 1
+[linux/amd64] [1/3] STEP 1/9: FROM registry.redhat.io/ubi9/nodejs-18:latest AS web-builder
+Trying to pull registry.redhat.io/ubi9/nodejs-18:latest...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:bd74b94f9d783929640d82362c5b1af55b0b7bea9405c379251f405c9c94f690
+Copying blob sha256:97971704aef24e8b1129c4f1b2e2241c7800b8bb89a14e77a7efebccd4193661
+Copying blob sha256:ce1770dcb97c2c062c80efe0edf0d512923b8ac34444b4f56733f446ea06ca95
+Copying config sha256:dc791d1b00fc164bb81bc99a7ddadc9eef02d0042878fe62c5fd468df91b2140
+Writing manifest to image destination
+Storing signatures
+[linux/amd64] [1/3] STEP 2/9: WORKDIR /opt/app-root
+--> Using cache d04013e89ace136650524e952dc70f42451b02cfcace8ced6407bdfdc7d79639
+--> d04013e89ace
+[linux/amd64] [1/3] STEP 3/9: USER 0
+--> Using cache ccf9929899baf2dad491e6814dd4beb3532b2314f08750109bc3724671fdc6d0
+--> ccf9929899ba
+[linux/amd64] [1/3] STEP 4/9: ENV HUSKY=0
+--> Using cache 412f49c0852eff056c969202f2e0b45dbde03e2287059a51a8867bb867a899c1
+--> 412f49c0852e
+[linux/amd64] [1/3] STEP 5/9: COPY web/package*.json web/
+--> Using cache 4d4ff72f49d43aae450a3f68ccd6ae3c46bd2e4a0459b5843169cc1ed5ba5158
+--> 4d4ff72f49d4
+[linux/amd64] [1/3] STEP 6/9: COPY Makefile Makefile
+--> Using cache 814a947434d7864b13856f1948d91dbc660e27eff8016b36352a39736e8da8fd
+--> 814a947434d7
+[linux/amd64] [1/3] STEP 7/9: RUN make install-frontend-ci-clean
+--> Using cache 370d6ed10eae3ab2f46ea7c0c6026e087b4749c6cca8e972b14a10de5947e630
+--> 370d6ed10eae
+[linux/amd64] [1/3] STEP 8/9: COPY web/ web/
+--> Using cache 7144b9b1a38313b703e2e4842deac525d8ca9bf9eed4d91d547c1be1c9f11701
+--> 7144b9b1a383
+[linux/amd64] [1/3] STEP 9/9: RUN make build-frontend
+cd web && npm run build
+
+> logging-view-plugin@6.0.0 build
+> npm run clean && NODE_ENV=production npm run ts-node node_modules/.bin/webpack
+
+
+> logging-view-plugin@6.0.0 clean
+> rm -rf dist
+
+
+> logging-view-plugin@6.0.0 ts-node
+> ts-node -O '{"module":"commonjs"}' node_modules/.bin/webpack
+
+TypeError: [(...copiedResultMap.entries(...))].toSorted is not a function
+    at /opt/app-root/web/node_modules/copy-webpack-plugin/dist/index.js:747:61
+make: *** [Makefile:41: build-frontend] Error 1
+Error: 2 errors occurred:
+	* [linux/arm64]: building at STEP "RUN make build-frontend": while running runtime: exit status 2
+	* [linux/amd64]: building at STEP "RUN make build-frontend": while running runtime: exit status 2
+
+
+
+make: *** [podman-cross-build] Error 2
+WARNING: Attempt 3 failed for logging-view-plugin @ release-coo-ocp-4.12 (exit code 2)
+WARNING: Build failed for logging-view-plugin @ release-coo-ocp-4.12 after 3 attempts, continuing...
+==========================================
+Building distributed-tracing-console-plugin @ release-coo-ocp-4.15 with VERSION=v0.4.3 ORG=openshift-observability-ui
+==========================================
+error: pathspec 'release-coo-ocp-4.15' did not match any file(s) known to git
+ERROR: checkout failed for distributed-tracing-console-plugin @ release-coo-ocp-4.15
+==========================================
+Building logging-view-plugin @ release-coo-ocp-4.15 with VERSION=v6.1.6 ORG=openshift-observability-ui
+==========================================
+Switched to branch 'release-coo-ocp-4.15'
+Your branch is behind 'origin/release-coo-ocp-4.15' by 12 commits, and can be fast-forwarded.
+  (use "git pull" to update your local branch)
+From https://github.com/openshift/logging-view-plugin
+ * branch            release-coo-ocp-4.15 -> FETCH_HEAD
+Updating 65042b0..22a9ee0
+Fast-forward
+ Dockerfile.art                                  |  57 ++++++++++
+ web/cypress/e2e/integration/logs-dev-page.cy.ts |   6 +-
+ web/cypress/e2e/integration/logs-page.cy.ts     |   2 +
+ web/jest.config.js                              |   3 +
+ web/mockModules/dummy.tsx                       |  67 ++++++++++++
+ web/src/__mocks__/styleMock.js                  |   2 +
+ web/src/__tests__/attribute-filters.spec.ts     |  51 +++++----
+ web/src/__tests__/cancellable-fetch.spec.ts     | 133 ++++++++++++++++++++++++
+ web/src/__tests__/download-csv.spec.ts          |  69 ++++++++++++
+ web/src/__tests__/logql-query.spec.ts           |  24 +++--
+ web/src/__tests__/loki-client.spec.ts           |  15 ++-
+ web/src/attribute-filters.tsx                   |   6 +-
+ web/src/cancellable-fetch.ts                    | 101 ++++++++++--------
+ web/src/download-csv.ts                         |  17 +--
+ web/src/hooks/useURLState.ts                    |   8 +-
+ web/src/logql-query.ts                          |  44 +++++++-
+ web/src/loki-client.ts                          |  33 +++---
+ web/src/pages/logs-detail-page.tsx              |   2 +-
+ 18 files changed, 531 insertions(+), 109 deletions(-)
+ create mode 100644 Dockerfile.art
+ create mode 100644 web/src/__mocks__/styleMock.js
+ create mode 100644 web/src/__tests__/cancellable-fetch.spec.ts
+--- Attempt 1/3 ---
+podman manifest rm quay.io/openshift-observability-ui/logging-view-plugin:v6.1.6 || true
+Error: quay.io/openshift-observability-ui/logging-view-plugin:v6.1.6: image not known
+podman manifest create quay.io/openshift-observability-ui/logging-view-plugin:v6.1.6
+ae7d8a160aef5c549af241bbaebf9717f5a71c35d2e5e2d2c36149a12dd6f49a
+podman build --platform=linux/arm64,linux/amd64 --manifest quay.io/openshift-observability-ui/logging-view-plugin:v6.1.6 -f Dockerfile
+[linux/amd64] [1/3] STEP 1/9: FROM registry.redhat.io/ubi9/nodejs-22:latest AS web-builder
+Trying to pull registry.redhat.io/ubi9/nodejs-22:latest...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob sha256:cce16868f40d22250566df69900c9be7bd75b128a7a60e08135d4d81415c38f5
+Copying blob sha256:56649e4df8eddef4709849b46063574b7ddb22fc98fb75409885c838a4c9d381
+Copying blob sha256:5c9af8529e118dd5a8d55d669c48114bfef7c8f5d743e5e560639dfabca3a5f9
+Copying config sha256:2a6664ca5f1fd59d9408e561389bece46a56d8700fab35490ce57d18dcbc7ec3
+Writing manifest to image destination
+Storing signatures
+[linux/amd64] [1/3] STEP 2/9: WORKDIR /opt/app-root
+--> 3beb105c4f4e
+[linux/amd64] [1/3] STEP 3/9: USER 0
+--> 2ac9e28b79d8
+[linux/amd64] [1/3] STEP 4/9: ENV HUSKY=0
+--> af7e0eaa421c
+[linux/amd64] [1/3] STEP 5/9: COPY web/package*.json web/
+--> 8475b422e9c3
+[linux/amd64] [1/3] STEP 6/9: COPY Makefile Makefile
+--> 65232b8d9d88
+[linux/amd64] [1/3] STEP 7/9: RUN make install-frontend-ci-clean
+cd web && npm ci --omit=optional --ignore-scripts
+npm warn deprecated popper.js@1.16.1: You can find the new Popper v2 at @popperjs/core, this package is dedicated to the legacy v1
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+
+added 1531 packages, and audited 1532 packages in 47s
+
+273 packages are looking for funding
+  run `npm fund` for details
+
+22 vulnerabilities (1 low, 11 moderate, 9 high, 1 critical)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+cd web && npm cache clean --force
+npm warn using --force Recommended protections disabled.
+--> 5d9874062929
+[linux/amd64] [1/3] STEP 8/9: COPY web/ web/
+--> 2c90580a4388
+[linux/amd64] [1/3] STEP 9/9: RUN make build-frontend
+cd web && npm run build
+
+> logging-view-plugin@6.1.0 build
+> npm run clean && NODE_ENV=production npm run ts-node node_modules/.bin/webpack
+
+
+> logging-view-plugin@6.1.0 clean
+> rm -rf dist
+
+
+> logging-view-plugin@6.1.0 ts-node
+> ts-node -O '{"module":"commonjs"}' node_modules/.bin/webpack
+

@@ -1,0 +1,4 @@
+Logging to /Users/emurasak/workspace/harness-official/tasks/upstream-images/build-and-push-20260827-135002.log
+./build-and-push.sh: line 25: declare: -A: invalid option
+declare: usage: declare [-afFirtx] [-p] [name[=value] ...]
+./build-and-push.sh: line 26: distributed: unbound variable
